@@ -1,6 +1,4 @@
-<?php header('Content-type: application/xml'); ?>
-
-<?php
+<?php header('Content-type: application/xml');
 // Get the environment settings from the env.ini file.
 $config = parse_ini_file('env.ini');
 
@@ -8,9 +6,12 @@ $config = parse_ini_file('env.ini');
 $py = $config['python_bin'];
 $int = $config['intent_path'];
 
+//Get a temporary output file...
+$t = tempnam('', 'out');
+
 // Now put the commands together
 // (And redirect stderr to stdout)
-$command = "$py $int text - 2>&1";
+$command = "$py $int text - $t 2>&1";
 
 $descriptorspec = array(
     0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
@@ -32,8 +33,19 @@ if (is_resource($pid)) {
 
 }
 
+$status = proc_get_status($pid);
+while ($status['running']) {
+    sleep(0.25);
+    $status = proc_get_status($pid);
+}
+$code = $status['exitcode'];
+
 ?><?php
+echo "<RESPONSE>\n<STATUS>$code</STATUS>\n<STDOUT>\n";
 echo stream_get_contents($pipes[1]);
+echo "</STDOUT>\n<CONTENT>\n";
+readfile($t);
+echo "</CONTENT></RESPONSE>";
 
 proc_close($pid);
 

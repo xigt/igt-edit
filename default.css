@@ -1,0 +1,100 @@
+body {
+    font-size: 9pt;
+    font-family: Tahoma;
+}
+
+.ui-tabs-panel {
+    min-width: 680px;
+}
+
+#title {
+    font-size: 18pt;
+    text-align: center;
+}
+
+/* Segments of the Tabs */
+
+.directions {
+    text-align: left;
+    float: left;
+    width: 10%;
+}
+
+.input-section {
+    float: left;
+    text-align: left;
+    margin-left: 20px;
+    width: 75%;
+    min-width: 550px;
+}
+
+.input-section h3 {
+    margin: 0 0 5px 0;
+}
+
+.submit-section {
+    float: left;
+    text-align: center;
+    margin-left: 20px;
+    width: 100%;
+}
+
+/* Sections at the page bottom */
+
+#stdout-section {
+    overflow-x:auto;
+}
+
+#stdout-section pre {
+    margin:0 10px;
+}
+
+
+#loader-panel {
+    text-align : center;
+    padding:10px;
+}
+
+
+.output-section {
+    float:left;
+    margin-left:10%;
+}
+
+#preout {
+    overflow-x:auto;
+}
+
+/* The checkboxes for the Options */
+.optcolumn {
+    float: left;
+    padding: 10px;
+    margin: 0 10px;
+    background-color:beige;
+    height: 80px;
+    min-width: 40px;
+    width: 25%;
+}
+
+#file-select {
+    margin-bottom: 10px;
+}
+
+/* Enrichment-specific Styles */
+
+#enrich-submit {
+    text-align:center;
+    margin:10px;
+}
+
+#enrich-msg, #text-msg {
+    background-color:pink;
+    padding:10px;
+}
+
+#preout {
+    text-align: left;
+}
+
+
+/* For the specific input forms... */
