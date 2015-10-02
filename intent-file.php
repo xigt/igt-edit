@@ -36,6 +36,8 @@ if ($aln_str) {
     $aln_arg = '--align '.$aln_str;
 }
 
+/* POS ARGUMENTS */
+
 $pos_arr = array();
 if ($_POST['pos-class'] == 'true') {
     $pos_arr[0] = "class";
@@ -48,9 +50,23 @@ if ($pos_str) {
     $pos_arg = '--pos '.$pos_str;
 }
 
+/* PS/DS ARGUMENTS */
+$parse_arr = array();
+if ($_POST['ps'] == 'trans')
+    $parse_arr[0] = "trans";
+if ($_POST['ps'] == 'proj') {
+    $parse_arr[0] = "trans";
+    $parse_arr[1] = 'proj';
+}
+
+$parse_str = implode(',', $parse_arr);
+if ($parse_str) {
+    $parse_arg = '--parse '.$parse_str;
+}
+
 // Now put the commands together
 // (And redirect stderr to stdout)
-$command = "$py $int enrich $infile $t $aln_arg $pos_arg 2>&1";
+$command = "$py $int enrich $infile $t $aln_arg $pos_arg $parse_arg 2>&1";
 
 $descriptorspec = array(
     0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
