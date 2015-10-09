@@ -94,6 +94,8 @@ function clickEnrich() {
         data.append("aln-giza", ischecked(alnGiza));
         data.append("aln-heur", ischecked(alnHeur));
 
+        data.append("verbose", ischecked($('#verbose')));
+
         out.show();
         showLoader();
 

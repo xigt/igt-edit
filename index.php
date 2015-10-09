@@ -140,7 +140,9 @@
 
                         <!-- SUBMIT BUTTON -->
                         <div class="ui-helper-clearfix"></div>
+
                         <div id="enrich-submit">
+                            <input name="verbose" type="checkbox" id="verbose"/> Verbose Mode
                             <input type="button" value="Enrich" onclick="clickEnrich()"/>
                         </div>
 

@@ -60,6 +60,12 @@ if (@$_POST['ps'] == 'proj') {
     $parse_arr[1] = 'proj';
 }
 
+/* VERBOSE MODE */
+$verb = null;
+if (@$_POST['verbose'] == 'true') {
+    $verb = '-vv';
+}
+
 $parse_str = implode(',', $parse_arr);
 if ($parse_str)
     $parse_arg = '--parse '.$parse_str;
@@ -68,7 +74,7 @@ else
 
 // Now put the commands together
 // (And redirect stderr to stdout)
-$command = "$py $int enrich $infile $t $aln_arg $pos_arg $parse_arg -vv 2>&1";
+$command = "$py $int enrich $infile $t $aln_arg $pos_arg $parse_arg $verb 2>&1";
 
 
 $descriptorspec = array(
@@ -77,9 +83,11 @@ $descriptorspec = array(
     2 => array("pipe", "w") // stderr is a file to write to
 );
 
+$new_env = $_ENV;
+$new_env['USER'] = 'www';
 
 // Open the script as a stream and output.
-$pid = proc_open( $command, $descriptorspec, $pipes);
+$pid = proc_open( $command, $descriptorspec, $pipes, null, $new_env);
 
 $status = proc_get_status($pid);
 while ($status['running']) {
