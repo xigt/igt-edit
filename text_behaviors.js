@@ -46,19 +46,24 @@ function clickConvert() {
     }
 }
 
-function converthandler(r, stat) {
+function converthandler(r, stat, jqXHR) {
     hideLoader();
 
     /* Start by getting the status of the response */
-    status = parseInt($(r).find('STATUS').text());
+    status = parseInt(jqXHR.getResponseHeader('Exit-Code'));
+
+    console.log(status);
 
     /* And getting the STDOUT, if any. */
-    stdout = $(r).find('STDOUT').text();
-    $('#stdout').text('Exit code: ' + status.toString() + '\n' + stdout);
+    stdout = getStdout(jqXHR);
+
+    $('#stdout').text(stdout);
+    $('#stdout').show();
 
     /* Finally, display the output if no error occured. */
     if (status == 0) {
-        $('#preout').text($(r).find('CONTENT').html());
+        $('#preout').text(r);
+        $('#xmlout').html(r);
     } else {
         $('#preout').text("There was an error processing the document. Please check the messages above for more information");
     }

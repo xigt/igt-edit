@@ -140,10 +140,5 @@ function filesuccess(r, stat, jqXHR) {
 
 function setupFileOptions() {
     $('#enrich-msg').hide();
-    //toggleEnabled('#pos-enable', '#pos-checkboxes');
-    //toggleEnabled('#ps-enable', '#ps-checkboxes');
-    //toggleEnabled('#aln-enable', '#aln-checkboxes');
-
-
 };
 

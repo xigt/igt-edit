@@ -11,7 +11,7 @@ $t = tempnam('', 'out');
 
 // Now put the commands together
 // (And redirect stderr to stdout)
-$command = "$py $int text - $t 2>&1";
+$command = "$py $int text - $t -vv 2>&1";
 
 $descriptorspec = array(
     0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
@@ -19,9 +19,11 @@ $descriptorspec = array(
     2 => array("file", "/dev/null", "a") // stderr is a file to write to
 );
 
-// Open the script as a stream and output.
-$pid = proc_open( $command, $descriptorspec, $pipes, $cwd, $env);
+$env = $_ENV;
+$env['USER'] = 'www';
 
+// Open the script as a stream and output.
+$pid = proc_open( $command, $descriptorspec, $pipes, null, $env);
 
 if (is_resource($pid)) {
     // $pipes now looks like this:
@@ -40,14 +42,17 @@ while ($status['running']) {
 }
 $code = $status['exitcode'];
 
-?><?php
-echo "<RESPONSE>\n<STATUS>$code</STATUS>\n<STDOUT>\n";
-echo stream_get_contents($pipes[1]);
-echo "</STDOUT>\n<CONTENT>\n";
-readfile($t);
-echo "</CONTENT></RESPONSE>";
+header('Content-Type: application/xml');
+header("Exit-Code: $code");
+header("Stdout: ".urlencode(stream_get_contents($pipes[1])));
+
+if ($code == 0) {
+    echo '<?xml version="1.0" encoding="UTF-8"?>'."\n";
+    readfile($t);
+}
 
 proc_close($pid);
+unlink($t);
 
 ?>
 

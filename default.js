@@ -23,7 +23,13 @@ function showDownload() {
 }
 
 function getStdout(jqXHR) {
-    return decodeURIComponent(jqXHR.getResponseHeader('Stdout').replace(/\+/g, '%20'));
+    var header = jqXHR.getResponseHeader('Stdout');
+    if (header) {
+        return decodeURIComponent(header.replace(/\+/g, '%20'));
+    } else {
+        return "";
+    }
+
 }
 
 /* -------------- */

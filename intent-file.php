@@ -100,11 +100,9 @@ $code = $status['exitcode'];
 header('Content-Type: application/xml');
 header("Exit-Code: $code");
 header("Stdout: ".urlencode(stream_get_contents($pipes[1])));
-//header("Stderr: ".urlencode(stream_get_contents($pipes[2])));
-//header("tempfile: ".$infile);
 
 if ($code == 0) {
-    echo '<?xml version="1.0" encoding="UTF-8"?>';
+    echo '<?xml version="1.0" encoding="UTF-8"?>'."\n";
     readfile($t);
 }
 unlink($t);
