@@ -22,6 +22,10 @@ function showDownload() {
     $('#actualdownload').css('display', '');
 }
 
+function getStdout(jqXHR) {
+    return decodeURIComponent(jqXHR.getResponseHeader('Stdout').replace(/\+/g, '%20'));
+}
+
 /* -------------- */
 
 $(function() {

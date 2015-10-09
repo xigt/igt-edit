@@ -109,24 +109,26 @@ function clickEnrich() {
     }
 }
 
-function filesuccess(r, stat) {
+
+
+function filesuccess(r, stat, jqXHR) {
+
     hideLoader();
 
-
     /* Get the status */
-    status = parseInt($(r).find("STATUS").text());
+    status = parseInt(jqXHR.getResponseHeader('Exit-Code'));
 
     /* Set the STDOUT field to contain the program output */
-    std = $(r).find("STDOUT");
-    $('#stdout').text(std.text());
+    std = getStdout(jqXHR);
+    $('#stdout').text(std);
     $('#stdout').show();
 
     /* If the program exits correctly... */
     if (status == 0) {
         /* Get the XIGT doc and put it in "storage" */
         xc = $(r).find("xigt-corpus");
-        $('#xmlout').html(xc[0].outerHTML);
-        $('#preout').text(xc[0].outerHTML);
+        $('#xmlout').html(r);
+        $('#preout').text(r);
         showDownload();
     } else {
         $('#preout').text("There was an error in processing your file. Please see the messages above.");
