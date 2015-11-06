@@ -57,8 +57,10 @@ $(function() {
 
     /* Bind the click function to the download link */
     dn.click(function() {
+        xml = localStorage.getItem('xml');
         this.download='export.xml';
-        this.href='data:text/plain;charset=UTF-8,' + encodeURIComponent($('#xmlout').html());
+        this.href='data:text/xml;charset=UTF-8,' +
+            encodeURIComponent(xml);
     });
 
     setupTextSection();

@@ -10,9 +10,15 @@ $int = $config['intent_path'];
 //Get a temporary output file...
 $temp = tempnam('', 'out');
 
+$temp_input = tempnam('', 'user');
+$temp_input_f = fopen($temp_input, 'wb');
+fwrite($temp_input_f, $_POST['text']);
+fclose($temp_input_f);
+
+
 // Now put the commands together
 // (And redirect stderr to stdout)
-$command = "$py $int text - $temp -vv 2>&1";
+$command = "$py $int text $temp_input $temp 2>&1";
 
 $descriptorspec = array(
     0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
@@ -26,15 +32,6 @@ $env['USER'] = 'www';
 // Open the script as a stream and output.
 $pid = proc_open( $command, $descriptorspec, $pipes, null, $env);
 
-if (is_resource($pid)) {
-    // $pipes now looks like this:
-    // 0 => writeable handle connected to child stdin
-    // 1 => readable handle connected to child stdout
-    // Any error output will be appended to /tmp/error-output.txt
-    fwrite($pipes[0], $_GET['text']);
-    fclose($pipes[0]);
-
-}
 
 $status = proc_get_status($pid);
 while ($status['running']) {
@@ -54,6 +51,7 @@ if ($code == 0) {
 
 proc_close($pid);
 unlink($temp);
+unlink($temp_input);
 
 ?>
 

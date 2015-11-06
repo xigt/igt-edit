@@ -54,7 +54,8 @@
 
                 <!-- TEXT AREA / INPUT SECTION -->
                 <div class="input-section">
-                        <textarea cols="80" rows="20" id="textbox" name="igt-text"></textarea> <BR/>
+                        <textarea cols="50" rows="20" id="textbox"
+                                  style="font-family: Courier" name="igt-text"></textarea> <BR/>
 
                     <!-- SUBMIT BUTTON -->
                     <div class="submit-section">
@@ -188,7 +189,7 @@
 
                 <PRE><div id="preout"></div></PRE>
                 <BR/>
-                <div id="xmlout"></div>
+<!--                <div id="xmlout"></div>-->
 
 
                 <div class="ui-helper-clearfix"></div>

@@ -17,7 +17,7 @@ body {
 .directions {
     text-align: left;
     float: left;
-    width: 10%;
+    width: 200px;
 }
 
 .input-section {
@@ -25,7 +25,7 @@ body {
     text-align: left;
     margin-left: 20px;
     width: 75%;
-    min-width: 550px;
+    min-width: 420px;
 }
 
 .input-section h3 {

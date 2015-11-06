@@ -129,7 +129,7 @@ function filesuccess(r, stat, jqXHR) {
     if (status == 0) {
         /* Get the XIGT doc and put it in "storage" */
         xc = $(r).find("xigt-corpus");
-        $('#xmlout').html(r);
+        localStorage.setItem('xml', r);
         $('#preout').text(r);
         showDownload();
     } else {

@@ -37,7 +37,7 @@ function clickConvert() {
 
         /* Now, send the ajax to the server... */
         $.ajax({
-            type: "GET",
+            type: "POST",
             dataType: "text",
             url: "intent-text.php",
             success: converthandler,
@@ -62,8 +62,9 @@ function converthandler(r, stat, jqXHR) {
 
     /* Finally, display the output if no error occured. */
     if (status == 0) {
+        localStorage.setItem('xml', r);
         $('#preout').text(r);
-        $('#xmlout').html(r);
+        showDownload();
     } else {
         $('#preout').text("There was an error processing the document. Please check the messages above for more information");
     }
