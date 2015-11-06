@@ -37,8 +37,8 @@
 
         <div id="tabs">
             <ul>
-                <li><a href="#tabs-2">Upload File</a></li>
                 <li><a href="#tabs-1">Enter Text</a></li>
+                <li><a href="#tabs-2">Upload File</a></li>
 
             </ul>
 
