@@ -22,6 +22,52 @@ function enrichwarn(em, str) {
 }
 
 
+function clickStats() {
+    var out = $('#output');
+    var pre = $('#preout');
+    var std = $('#stdout');
+
+    std.text('');
+    out.text('');
+    pre.text('');
+
+    hideDownload();
+
+    em = $('#enrich-msg');
+    em.hide();
+
+    var errors = false;
+
+    var infile = $('#statsfile').get(0).files[0];
+    //if (!infile) {
+    //    enricherr(em, "<B>ERROR:</B> Must specify a file to get stats on.");
+    //    errors = true;
+    //    em.show();
+    //}
+
+
+    if (!errors) {
+        showLoader();
+        /* Finally, send the file for enrichment... */
+        var data = new FormData();
+        data.append("userfile", infile);
+
+        $.ajax({
+            url: "intent-stats.php",
+            type: "POST",
+            dataType: "text",
+            data: data,
+            contentType: false,
+            processData: false,
+            success: statssuccess
+        });
+    }
+}
+
+function statssuccess(r, stat, jqXHR) {
+    var std = $('#stdout').text(r);
+    hideLoader();
+}
 
 function clickEnrich() {
 
@@ -83,24 +129,24 @@ function clickEnrich() {
         /* Finally, send the file for enrichment... */
 
         var data = new FormData();
-        data.append("userfile", infile);
+        data.append("infile", infile);
 
         /* Now, add the various settings. */
-        data.append("pos-class", ischecked(posClass));
-        data.append("pos-proj", ischecked(posProj));
+        if (ischecked(posClass)) data.append('pos_class', 1);
+        if (ischecked(posProj)) data.append('pos_proj', 1);
 
         data.append("ps", $('input[name=ps]:checked').val());
 
-        data.append("aln-giza", ischecked(alnGiza));
-        data.append("aln-heur", ischecked(alnHeur));
+        if (ischecked(alnGiza)) data.append('align_giza', 1);
+        if (ischecked(alnHeur)) data.append('align_heur', 1);
 
-        data.append("verbose", ischecked($('#verbose')));
+        if (ischecked($('#verbose'))) data.append('verbose', 1);
 
         out.show();
         showLoader();
 
         $.ajax({
-            url: "intent-file.php",
+            url: "enrich",
             type: "POST",
             data: data,
             dataType: "text",

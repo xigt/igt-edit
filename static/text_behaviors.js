@@ -39,7 +39,7 @@ function clickConvert() {
         $.ajax({
             type: "POST",
             dataType: "text",
-            url: "intent-text.php",
+            url: "text",
             success: converthandler,
             data: {text: text_content}
         })
