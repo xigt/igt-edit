@@ -4,7 +4,10 @@
 # -------------------------------------------
 # Set up flask basics...
 # -------------------------------------------
-from flask import Flask, render_template, url_for, request, Response
+from flask import Flask, render_template, url_for, request, Response, json
+
+
+
 app = Flask(__name__, template_folder='templates', static_folder='static')
 application = app
 
@@ -36,6 +39,7 @@ from werkzeug.utils import secure_filename
 
 from intent.igt.igtutils import rgp, rgencode
 from intent.igt.rgxigt import RGCorpus
+from xigt.codecs import xigtjson
 from intent.scripts.conversion.text_to_xigt import text_to_xigtxml
 from intent.subcommands import enrich
 from intent.utils.arg_consts import ALN_VAR, ALN_GIZA, ALN_HEUR, POS_VAR, POS_LANG_PROJ, POS_LANG_CLASS, PARSE_VAR, \
@@ -50,11 +54,35 @@ def hello():
 
 # -------------------------------------------
 # Browse to the
-@app.route('/browse/<path:filename>')
+@app.route('/browse/<path:filename>', methods=['GET'])
 def browse(filename):
-    path = os.path.join(app.config['XIGT_DIR'], filename)
-    xc = RGCorpus.load(path)
-    return render_template('element.html', igts=xc.igts)
+    realpath = os.path.join(app.config['XIGT_DIR'], filename)
+    xc = RGCorpus.load(realpath)
+
+    # -------------------------------------------
+    # Set up the page size...
+    page_size = 10
+
+    page = int(request.args.get('page', '0'))
+
+    num_pages = int(len(xc.igts)/page_size)
+    page_list = range(num_pages)
+
+    xc.igts = xc.igts[page*page_size:(page+1)*page_size]
+
+
+    # Do the conversion to json...
+    xigt_json = json.loads(xigtjson.dumps(xc))
+
+    # -------------------------------------------
+    # Build the return params
+    params = {'cur_page':page,
+              'filename':filename,
+              'num_pages':num_pages,
+              'page_list':page_list,
+              'xigt':xigt_json}
+
+    return render_template('element.html', **params)
 
 @app.route('/enrich', methods=['POST'])
 def process_file():

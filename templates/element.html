@@ -1,3 +1,44 @@
-{% for igt in igts %}
-    <ul>{{ igt }}</ul>
-{% endfor %}
+<HTML>
+    <BODY>
+        {# DO PAGINATION... #}
+        <div id="pagination">
+
+        {# CURRENT PAGE #}
+        Current Page: {{ cur_page }}
+
+        Select Page:
+            <select onchange="browseToPage('{{ filename }}',this.value)">
+                {% for pagenum in page_list %}
+                    <option value="{{ pagenum }}" {% if pagenum == cur_page %}selected="true"{% endif %}>{{ pagenum }}</option>
+                {% endfor %}
+            </select>
+
+
+
+        </div>
+        <div id="all-elements">
+        {% for igt in xigt['igts'] %}
+            <div id="{{ igt['id'] }}" class="igt-panel">
+            <ul>
+            {% for tier in igt['tiers'] %}
+
+                {# ODIN TIERS... #}
+                {% if tier.get('type') == 'odin' %}
+
+                    {# RAW TIERS #}
+                    {% if tier['attributes']['state'] == 'raw' %}
+
+                        <textarea cols="90" rows="4">
+{% for item in tier['items'] %}{{ item['text']+'\n' }}{% endfor %}
+                        </textarea>
+                    {% endif %}
+
+                {% endif %}
+                <li>{{ tier['type'] }}</li>
+            {% endfor %}
+            </ul>
+            </div>
+        {% endfor %}
+        </div>
+    </BODY>
+</HTML>

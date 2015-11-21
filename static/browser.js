@@ -1,16 +1,25 @@
 function browseSuccess(r, stat, jqXHR) {
-    $('#editor-panel').text(r);
+    $('#editor-panel').html(r);
+    $('.igt-panel').each(function(index, elem) {
+        $(elem).panel({
+            title: 'Instance '+$(elem).attr('id')
+        });
+    });
 }
 
 function browseError(r, stat, jqXHR) {
     $('#editor-panel').text("An error occurred.");
 }
 
-function browseTo(rowIndex, rowData) {
+function browseToPage(val, page) {
     $.ajax({
-        url: '/browse/'+rowData['value'],
+        url: '/browse/'+val+'?page='+page,
         success: browseSuccess,
         error: browseError,
         dataType: "text"
-    });
+    })
+}
+
+function browseTo(rowIndex, rowData) {
+    browseToPage(rowData['value'], 0);
 }
