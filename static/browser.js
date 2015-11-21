@@ -13,7 +13,7 @@ function browseError(r, stat, jqXHR) {
 
 function browseToPage(val, page) {
     $.ajax({
-        url: '/browse/'+val+'?page='+page,
+        url: 'browse/'+val+'?page='+page,
         success: browseSuccess,
         error: browseError,
         dataType: "text"
