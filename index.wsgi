@@ -64,7 +64,7 @@ def browse(filename):
 
     page = int(request.args.get('page', '0'))
 
-    num_pages = int(len(xc.igts)/page_size)
+    num_pages = int(len(xc.igts)/page_size)+1
     page_list = range(num_pages)
 
     xc.igts = xc.igts[page*page_size:(page+1)*page_size]
