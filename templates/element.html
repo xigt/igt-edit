@@ -29,7 +29,7 @@
                     {% if tier['attributes']['state'] == 'raw' %}
 
                         <textarea cols="90" rows="4">
-{% for item in tier['items'] %}{{ item['text']+'\n' }}{% endfor %}
+{% for item in tier['items'] %}{{ item.get('text')+'\n' }}{% endfor %}
                         </textarea>
                     {% endif %}
 
