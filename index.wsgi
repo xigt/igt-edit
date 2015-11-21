@@ -49,7 +49,7 @@ from intent.utils.argpasser import ArgPasser
 
 @app.route('/')
 def hello():
-    return render_template('browser.html', filelist=os.listdir(app.config.get('XIGT_DIR')))
+    return render_template('browser.html', filelist=sorted(os.listdir(app.config.get('XIGT_DIR'))))
 
 # -------------------------------------------
 # Browse to the
