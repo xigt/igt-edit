@@ -22,9 +22,8 @@ if app.config.get('DEBUG'):
 # -------------------------------------------
 
 import sys
-sys.path.append('/opt/local/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/site-packages/')
-sys.path.append('/Users/rgeorgi/Documents/code/dissertation')
-sys.path.append('/Users/rgeorgi/Documents/code/xigt')
+sys.path.append(app.config.get('INTENT_LIB'))
+sys.path.append(app.config.get('XIGT_LIB'))
 
 # -------------------------------------------
 
