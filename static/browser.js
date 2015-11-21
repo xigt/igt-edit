@@ -13,6 +13,7 @@ function browseError(r, stat, jqXHR) {
 }
 
 function browseToPage(val, page) {
+    $('#editor-panel').text("Loading...");
     $.ajax({
         url: 'browse/'+val+'?page='+page,
         success: browseSuccess,
