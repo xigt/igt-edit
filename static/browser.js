@@ -5,6 +5,7 @@ function browseSuccess(r, stat, jqXHR) {
             title: 'Instance '+$(elem).attr('id')
         });
     });
+    $('.button').button();
 }
 
 function browseError(r, stat, jqXHR) {
