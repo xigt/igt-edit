@@ -1,9 +1,29 @@
 #!/usr/bin/env python3.4
 
+
+# -------------------------------------------
+# Set up flask basics...
+# -------------------------------------------
+from flask import Flask, render_template, url_for, request, Response
+app = Flask(__name__, template_folder='templates', static_folder='static')
+application = app
+
+# -------------------------------------------
+# Read in the config file...
+# -------------------------------------------
+app.config.from_pyfile('config.py')
+
+if app.config.get('DEBUG'):
+    app.debug = True
+
+# -------------------------------------------
+
 import sys
 sys.path.append('/opt/local/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/site-packages/')
 sys.path.append('/Users/rgeorgi/Documents/code/dissertation')
 sys.path.append('/Users/rgeorgi/Documents/code/xigt')
+
+# -------------------------------------------
 
 import logging
 import os
@@ -11,7 +31,7 @@ import urllib
 from io import StringIO
 from tempfile import NamedTemporaryFile
 
-from flask import Flask, render_template, send_from_directory, send_file, url_for, request, Response
+
 from werkzeug.utils import secure_filename
 
 from intent.igt.igtutils import rgp, rgencode
@@ -22,14 +42,19 @@ from intent.utils.arg_consts import ALN_VAR, ALN_GIZA, ALN_HEUR, POS_VAR, POS_LA
     PARSE_LANG_PROJ, PARSE_TRANS
 from intent.utils.argpasser import ArgPasser
 
-app = Flask(__name__, template_folder='templates', static_folder='static')
 
-application = app
 
 @app.route('/')
 def hello():
-    return render_template('index.html')
+    return render_template('browser.html', filelist=os.listdir(app.config.get('XIGT_DIR')))
 
+# -------------------------------------------
+# Browse to the
+@app.route('/browse/<path:filename>')
+def browse(filename):
+    path = os.path.join(app.config['XIGT_DIR'], filename)
+    xc = RGCorpus.load(path)
+    return render_template('element.html', igts=xc.igts)
 
 @app.route('/enrich', methods=['POST'])
 def process_file():
@@ -132,11 +157,6 @@ def convert_text():
 @app.route('/static/<path:path>', methods=['GET'])
 def default(path):
     return url_for('static', filename=path)
-
-
-
-
-
 
 
 if __name__ == '__main__':
