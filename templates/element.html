@@ -1,0 +1,56 @@
+<HTML>
+    <BODY>
+        {# DO PAGINATION... #}
+        <div id="pagination">
+
+        {# CURRENT PAGE #}
+        Current Page: {{ cur_page }}
+
+        Select Page:
+            <select onchange="browseToPage('{{ filename }}',this.value)">
+                {% for pagenum in page_list %}
+                    <option value="{{ pagenum }}" {% if pagenum == cur_page %}selected="true"{% endif %}>{{ pagenum }}</option>
+                {% endfor %}
+            </select>
+
+
+
+        </div>
+        <div id="all-elements">
+        {% for igt in xigt['igts'] %}
+            <div id="{{ igt['id'] }}" class="igt-panel">
+            <ul>
+            {% for tier in igt['tiers'] %}
+
+                {# ODIN TIERS... #}
+                {% if tier.get('type') == 'odin' %}
+
+                    {# RAW TIERS #}
+                    {% if tier['attributes']['state'] == 'raw' %}
+                        <div class="raw-tier">
+                            <TABLE style="width:100%">
+                                {% for item in tier['items'] %}
+                                    <TR style="width:100%">
+                                        <TD style="width:50px">{{item['attributes']['tag']}}</TD>
+                                        <TD><input style="font-family:Courier; width:100%;" type="text" value="{{ item.get('text','')+'\n' }}"/></TD>
+                                    </TR>
+                                {% endfor %}
+                            </TABLE>
+                        </div>
+                    {% endif %}
+
+                {% endif %}
+{#                <li>{{ tier['type'] }}</li>#}
+            {% endfor %}
+            </ul>
+            <input style="float:left;left:90px;position:relative" value="Submit Edits"
+                   class="button" type="button"
+                   onclick="$('\#{{ igt['id']+'msg' }}').text('unimplemented!')"
+            />
+            <span style="float:left;position:relative;left:90px;margin:1px 10px;color:red" id="{{ igt['id']+'msg' }}"/>
+            </div>
+        {% endfor %}
+
+        </div>
+    </BODY>
+</HTML>
