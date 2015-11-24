@@ -6,7 +6,6 @@ from werkzeug.wsgi import DispatcherMiddleware
 
 from browser.browser import app as browser
 from sleipnir.sleipnir import app as sleipnir
-from interfaces.lister import app as lister
 
 my_dir        = os.path.abspath(os.path.dirname(__file__))
 
