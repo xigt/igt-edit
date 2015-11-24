@@ -5,15 +5,10 @@
 # Set up flask basics...
 # -------------------------------------------
 from flask import Flask, render_template, url_for, request, Response, json
+
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
-
-# -------------------------------------------
-# Read in the config file...
-# -------------------------------------------
+app.debug = True
 app.config.from_pyfile('../config.py')
-
-if app.config.get('DEBUG'):
-    app.debug = True
 
 # -------------------------------------------
 
@@ -35,7 +30,7 @@ from werkzeug.utils import secure_filename
 from intent.igt.igtutils import rgp, rgencode
 from intent.igt.rgxigt import RGCorpus
 from xigt.codecs import xigtjson
-from intent.scripts.conversion.text_to_xigt import text_to_xigtxml
+
 from intent.subcommands import enrich
 from intent.utils.arg_consts import ALN_VAR, ALN_GIZA, ALN_HEUR, POS_VAR, POS_LANG_PROJ, POS_LANG_CLASS, PARSE_VAR, \
     PARSE_LANG_PROJ, PARSE_TRANS

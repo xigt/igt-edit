@@ -4,16 +4,11 @@ import os, sys
 # -------------------------------------------
 # Set up the basic flask stuff...
 # -------------------------------------------
-from flask import Flask, request, Response, render_template
+from flask import Flask, request, render_template
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
-
-# -------------------------------------------
-# Read in the config file...
-# -------------------------------------------
+app.debug = True
 app.config.from_pyfile('../config.py')
-if app.config.get('DEBUG'):
-    app.debug = True
 
 # -------------------------------------------
 # Do the imports of XIGT and INTENT
