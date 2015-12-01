@@ -6,9 +6,9 @@
 # -------------------------------------------
 from flask import Flask, render_template, url_for, request, Response, json
 
-app = Flask(__name__, template_folder='../templates', static_folder='../static')
+app = Flask(__name__, template_folder='templates', static_folder='static')
 app.debug = True
-app.config.from_pyfile('../config.py')
+app.config.from_pyfile('config.py')
 
 # -------------------------------------------
 
@@ -24,8 +24,6 @@ import urllib
 from io import StringIO
 from tempfile import NamedTemporaryFile
 
-
-from werkzeug.utils import secure_filename
 
 from intent.igt.igtutils import rgp, rgencode
 from intent.igt.rgxigt import RGCorpus
