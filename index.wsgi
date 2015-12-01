@@ -70,7 +70,7 @@ def display(corp_id):
     # -------------------------------------------
     num_instances = len(xc.igts)
     num_pages = int(num_instances/10)
-    page_list = range(1,num_pages+1)
+    page_list = range(1,num_pages+2)
 
     # -------------------------------------------
     # C) Now, get the subset of igt instances.
