@@ -1,100 +1,40 @@
-body {
-    font-size: 9pt;
-    font-family: Tahoma;
+/* "Element" Display Elements */
+.texttable, .textrow {
+    width: 95%;
 }
 
-.ui-tabs-panel {
-    min-width: 680px;
+.short-col {
+    width:50px;
 }
 
-#title {
-    font-size: 18pt;
-    text-align: center;
+.textrow pre {
+    margin:0px;
 }
 
-/* Segments of the Tabs */
-
-.directions {
-    text-align: left;
-    float: left;
-    width: 200px;
+.short-col input {
+    width:50px;
+    font-family:Courier;
 }
 
-.input-section {
-    float: left;
-    text-align: left;
-    margin-left: 20px;
-    width: 75%;
-    min-width: 420px;
-}
-
-.input-section h3 {
-    margin: 0 0 5px 0;
-}
-
-.submit-section {
-    float: left;
-    text-align: center;
-    margin-left: 20px;
-    width: 100%;
-}
-
-/* Sections at the page bottom */
-
-#stdout-section {
-    overflow-x:auto;
-}
-
-#stdout-section pre {
-    margin:0 10px;
+.textinput input{
+    width:100%;
+    font-family: Courier;
 }
 
 
-#loader-panel {
-    text-align : center;
-    padding:10px;
+.hovericon {
+    width:16px;
 }
 
-
-.output-section {
-    float:left;
-    margin-left:10%;
+.hovericon:hover {
+    filter: brightness(50%);
 }
 
-#preout {
-    overflow-x:auto;
+.hovericon:active {
+    filter: invert(100%);
 }
 
-/* The checkboxes for the Options */
-.optcolumn {
-    float: left;
-    padding: 10px;
-    margin: 0 10px;
-    background-color:beige;
-    height: 80px;
-    min-width: 40px;
-    width: 25%;
+/* The contents of the browser... */
+#all-elements .panel-header:hover {
+    background-color: yellow;
 }
-
-#file-select {
-    margin-bottom: 10px;
-}
-
-/* Enrichment-specific Styles */
-
-#enrich-submit {
-    text-align:center;
-    margin:10px;
-}
-
-#enrich-msg, #text-msg {
-    background-color:pink;
-    padding:10px;
-}
-
-#preout {
-    text-align: left;
-}
-
-
-/* For the specific input forms... */

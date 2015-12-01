@@ -1,56 +1,65 @@
-<HTML>
-    <BODY>
-        {# DO PAGINATION... #}
-        <div id="pagination">
 
-        {# CURRENT PAGE #}
-        Current Page: {{ cur_page }}
+{# DO PAGINATION... #}
+<div id="pagination">
 
-        Select Page:
-            <select onchange="browseToPage('{{ filename }}',this.value)">
-                {% for pagenum in page_list %}
-                    <option value="{{ pagenum }}" {% if pagenum == cur_page %}selected="true"{% endif %}>{{ pagenum }}</option>
-                {% endfor %}
-            </select>
+{# CURRENT PAGE #}
+Current Page: {{ cur_page }}
 
-
-
-        </div>
-        <div id="all-elements">
-        {% for igt in xigt['igts'] %}
-            <div id="{{ igt['id'] }}" class="igt-panel">
-            <ul>
-            {% for tier in igt['tiers'] %}
-
-                {# ODIN TIERS... #}
-                {% if tier.get('type') == 'odin' %}
-
-                    {# RAW TIERS #}
-                    {% if tier['attributes']['state'] == 'raw' %}
-                        <div class="raw-tier">
-                            <TABLE style="width:100%">
-                                {% for item in tier['items'] %}
-                                    <TR style="width:100%">
-                                        <TD style="width:50px">{{item['attributes']['tag']}}</TD>
-                                        <TD><input style="font-family:Courier; width:100%;" type="text" value="{{ item.get('text','')+'\n' }}"/></TD>
-                                    </TR>
-                                {% endfor %}
-                            </TABLE>
-                        </div>
-                    {% endif %}
-
-                {% endif %}
-{#                <li>{{ tier['type'] }}</li>#}
-            {% endfor %}
-            </ul>
-            <input style="float:left;left:90px;position:relative" value="Submit Edits"
-                   class="button" type="button"
-                   onclick="$('\#{{ igt['id']+'msg' }}').text('unimplemented!')"
-            />
-            <span style="float:left;position:relative;left:90px;margin:1px 10px;color:red" id="{{ igt['id']+'msg' }}"/>
-            </div>
+Select Page:
+    <select onchange="browseToPage('{{ filename }}',this.value)">
+        {% for pagenum in page_list %}
+            <option value="{{ pagenum }}" {% if pagenum == cur_page %}selected="true"{% endif %}>{{ pagenum }}</option>
         {% endfor %}
+    </select>
 
-        </div>
-    </BODY>
-</HTML>
+
+
+</div>
+
+<div id="all-elements">
+{% for igt in xigt %}
+    <div id="{{ igt.id }}" class="igt-panel">
+    <ul>
+
+    {# RAW TIER... #}
+    <div class="raw-tier">
+    <H2>Raw Tier</H2>
+        <TABLE class="texttable">
+            {% for item in igt.raw_tier() %}
+                <TR class="textrow">
+                    <TD class="short-col"><pre></pre></TD>
+                    <TD class="short-col"><pre>{{item.attributes.get('tag')}}</pre></TD>
+                    <TD><pre>{{ item.text }}"</pre></TD>
+                </TR>
+            {% endfor %}
+        </TABLE>
+    </div>
+
+    {# AUTO-CLEANED TIER #}
+    <H2>Clean Tier</H2>
+    <TABLE class="texttable">
+    {% for item in igt.clean_tier() %}
+        <TR id="{{ item.igt.id }}-{{ item.id }}" class="textrow">
+            <TD class="short-col">
+                <img class="hovericon undo" src="static/images/undo.png" onclick="restoreItem('#{{ item.igt.id }}-{{ item.id }}')"/>
+                <img class="hovericon delete" src="static/images/delete.png" onclick="deleteItem('#{{ item.igt.id }}-{{ item.id}}')"/>
+            </TD>
+            <TD class="short-col">
+                <input type="text" value="{{ item.attributes.get('tag') }}"/>
+            </TD>
+            <TD class="textinput"><input type="text" value="{{ item.text }}"/></TD>
+        </TR>
+    {% endfor %}
+    </TABLE>
+    {# END AUTO-CLEANED TIER #}
+
+    </ul>
+    <input style="float:left;left:90px;position:relative" value="Submit Edits"
+           class="button" type="button"
+           onclick="$('\#{{ igt.id+'msg' }}').text('unimplemented!')"
+    />
+    <span style="float:left;position:relative;left:90px;margin:1px 10px;color:red" id="{{ igt.id+'msg' }}"/>
+    </div>
+{% endfor %}
+
+</div>

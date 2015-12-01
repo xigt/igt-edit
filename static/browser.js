@@ -5,9 +5,8 @@ function browseSuccess(r, stat, jqXHR) {
         $(elem).panel({
             title: 'Instance '+$(elem).attr('id'),
         });
-        $(elem).hover(function(){$(this).find('.panel-header').css('background-color:blue')})
     });
-    $('.button').button();
+
 }
 
 function browseError(r, stat, jqXHR) {
@@ -26,4 +25,17 @@ function browseToPage(val, page) {
 
 function browseTo(rowIndex, rowData) {
     browseToPage(rowData['value'], 0);
+}
+
+/* Edit/Delete Scripts */
+function deleteItem(itemId) {
+    $(itemId).find('input').prop('disabled',true);
+    $(itemId).css('background-color','pink');
+    //$(itemId+' textinput').css('opacity', '0.3');
+}
+
+function restoreItem(itemId) {
+    $(itemId).find('input').prop('disabled',false);
+    $(itemId).css('background-color', 'inherit');
+
 }
