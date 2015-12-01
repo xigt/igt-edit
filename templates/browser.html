@@ -16,16 +16,28 @@
 
 <BODY>
 
-    {# BEGIN LAYOUT ELEMENT #}
-
+    {# MAIN LAYOUT ELEMENT #}
     <div class="easyui-layout" style="width: 100%;height: 100%">
-        <!-- First, let's start off with the file browser window. -->
-        <div id="course-list" data-options="split:true,region:'west',title:'Elements'" style="width:20%">
-            <ul class="easyui-datalist" data-options="onSelect:function(index, data){browseTo(index, data)}" lines="true" style="width:100%">
-            {% for corpus in corpora %}
-                <li value="{{ corpus.get('id') }}" id="{{ corpus.get('name') }}">{{ corpus.get('name') }}</li>
-            {% endfor %}
-            </ul>
+
+        {# Left-Hand Side Elements #}
+        <div id="browser-panels" class="easyui-layout" data-options="split:true,region:'west'" style="width:20%">
+
+            <div id="course-list" data-options="split:true,region:'west',title:'Corpora'" style="width:50%">
+
+                {# BEGIN CORPUS LIST #}
+                <ul class="easyui-datalist" data-options="onSelect:function(index, data){populateIGTs(index, data)}" lines="true" style="width:100%">
+                {% for corpus in corpora %}
+                    <li value="{{ corpus.get('id') }}" id="{{ corpus.get('name') }}">{{ corpus.get('name') }}</li>
+                {% endfor %}
+                </ul>
+                {# END CORPUS LIST #}
+
+            </div>
+
+            <div id="fine-list" data-options="split:true,region:'center',title:'IGTs'">
+
+            </div>
+
         </div>
         <div id="editor-panel" class="easyui-panel" data-options="region:'center',split:'true',title:'Editor'" style="width:80%">
             <div style="font-size:large;margin:20px">

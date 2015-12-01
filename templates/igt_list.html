@@ -1,0 +1,6 @@
+<ul id="igtlist" class="easyui-datalist"
+    data-options="onSelect:function(index, data){displayIGT('{{ corp_id}}', data['value'])}">
+    {% for igt in igts %}
+        <li value="{{ igt.id }}">{{ igt.id }}</li>
+    {% endfor %}
+</ul>
