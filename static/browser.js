@@ -15,8 +15,10 @@ function browseError(r, stat, jqXHR) {
 
 function browseToPage(val, page) {
     $('#editor-panel').text("Loading...");
+    url = 'display/'+val+'?page='+page;
+    console.log(url);
     $.ajax({
-        url: 'display/'+val+'?page='+page,
+        url: url,
         success: browseSuccess,
         error: browseError,
         dataType: "text"
@@ -24,7 +26,7 @@ function browseToPage(val, page) {
 }
 
 function browseTo(rowIndex, rowData) {
-    browseToPage(rowData['value'], 0);
+    browseToPage(rowData['value'], 1);
 }
 
 /* Edit/Delete Scripts */

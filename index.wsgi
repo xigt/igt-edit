@@ -1,7 +1,7 @@
 import json
 import sys, logging
 
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template, url_for, request, Request
 import sleipnir
 
 
@@ -42,13 +42,43 @@ def main():
 
 # -------------------------------------------
 # For displaying the corpus...
-@app.route('/display/<corp_id>')
+@app.route('/display/<corp_id>', methods=['GET'])
 def display(corp_id):
+
+    # -------------------------------------------
+    # A) Get the current page.
+    # -------------------------------------------
+    cur_page = request.args.get('page')
+    YGG_LOG.critical(cur_page)
+    if not cur_page.strip():
+        cur_page = 1
+    else:
+        cur_page = int(cur_page)
+
+    # -------------------------------------------
+    # B) If we have a page, try to request a subset
+    #    of the available igt instances.
+    # -------------------------------------------
+
     xc = dbi.get_corpus(corp_id)
     xc.__class__ = RGCorpus
     xc._finish_load()
 
-    return render_template('element.html', xigt=xc)
+
+    # -------------------------------------------
+    # B) Get the number of pages.
+    # -------------------------------------------
+    num_instances = len(xc.igts)
+    num_pages = int(num_instances/10)
+    page_list = range(1,num_pages+1)
+
+    # -------------------------------------------
+    # C) Now, get the subset of igt instances.
+    # -------------------------------------------
+    xc.igts = xc.igts[(cur_page-1)*10:cur_page*10]
+
+
+    return render_template('element.html', xigt=xc, page_list=page_list, cur_page=cur_page, corp_id=corp_id)
 
 
 

@@ -6,7 +6,7 @@
 Current Page: {{ cur_page }}
 
 Select Page:
-    <select onchange="browseToPage('{{ filename }}',this.value)">
+    <select onchange="browseToPage('{{ corp_id }}',this.value)">
         {% for pagenum in page_list %}
             <option value="{{ pagenum }}" {% if pagenum == cur_page %}selected="true"{% endif %}>{{ pagenum }}</option>
         {% endfor %}
