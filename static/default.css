@@ -21,6 +21,10 @@
     font-family: Courier;
 }
 
+.normal-input {
+    width:100%;
+}
+
 
 .hovericon {
     width:16px;

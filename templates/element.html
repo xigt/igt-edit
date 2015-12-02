@@ -22,26 +22,41 @@
     <H2>Clean Tier</H2>
     <TABLE class="texttable">
     {% for item in igt.clean_tier(merge=True) %}
-        <TR id="{{ item.igt.id }}-{{ item.id }}" class="textrow">
+        <TR id="{{ item.igt.id }}-{{ item.id }}" class="textrow cleanrow">
             <TD class="short-col">
                 <img class="hovericon undo" src="static/images/undo.png" onclick="restoreItem('#{{ item.igt.id }}-{{ item.id }}')"/>
                 <img class="hovericon delete" src="static/images/delete.png" onclick="deleteItem('#{{ item.igt.id }}-{{ item.id}}')"/>
             </TD>
+
+            {# COLUMN WITH TAGS #}
             <TD class="short-col">
-                <input type="text" value="{{ item.attributes.get('tag') }}"/>
+                <input class="tag-input" type="text" value="{{ item.attributes.get('tag') }}"/>
             </TD>
-            <TD class="textinput"><input type="text" value="{{ item.text }}"/></TD>
+
+            {# COLUMN WITH CLEAN TEXT #}
+            <TD class="textinput">
+                <input id="{{ item.id }}" class="line-input" type="text" value="{{ item.text }}"/>
+            </TD>
+
         </TR>
     {% endfor %}
     </TABLE>
     {# END AUTO-CLEANED TIER #}
 
-    <input style="float:left;left:90px;position:relative" value="Submit Edits"
-           class="button" type="button"
-           onclick="$('\#{{ igt.id+'msg' }}').text('unimplemented!')"
+    <input style="float:left;left:90px;position:relative" value="Submit Clean Tier"
+           class="button" type="button" onclick="normalizeIGT('{{ corp_id }}','{{ igt.id }}')"
     />
-    <span style="float:left;position:relative;left:90px;margin:1px 10px;color:red" id="{{ igt.id+'msg' }}"/>
+
+    <div id="normalized-tier" style="display:none;">
+    <H2 style="clear:both">Normalized Tier</H2>
+        <div id="normalized-contents">
+
+        </div>
     </div>
+
+    </div>
+
+
 {% endfor %}
 
 </div>

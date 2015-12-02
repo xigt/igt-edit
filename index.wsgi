@@ -18,7 +18,7 @@ sys.path.append(app.config.get('XIGT_LIB'))
 # -------------------------------------------
 # Import intent stuff here.
 from intent.igt.rgxigt import RGCorpus
-from intent.igt.igtutils import rgp, rgencode
+from intent.igt.igtutils import rgp, rgencode, clean_lang_string, clean_gloss_string, clean_trans_string
 
 app.debug = True
 
@@ -36,7 +36,6 @@ from sleipnir.interfaces import filesystem as dbi
 @app.route('/')
 def main():
     corpora_json = json.loads(dbi.corpora().data.decode('utf-8'))
-    YGG_LOG.critical(corpora_json)
     corpora = sorted(corpora_json.get('corpora'), key=lambda x: x.get('name'))
 
     return render_template('browser.html', corpora=corpora)
@@ -62,9 +61,23 @@ def display(corp_id, igt_id):
 
 
 
-@app.route('/query')
-def query():
-    return render_template('query.html')
+@app.route('/normalize/<corp_id>/<igt_id>', methods=['POST'])
+def normalize(corp_id, igt_id):
+    ret_str = ''
+
+    data = json.loads(request.data.decode('utf-8'))
+
+    lines = data.get('lines')
+
+    for i, line in enumerate(lines):
+        if 'L' in line.get('tag'):
+            lines[i]['text'] = clean_lang_string(line.get('text'))
+        elif 'G' in line.get('tag'):
+            lines[i]['text'] = clean_gloss_string(line.get('text'))
+        elif 'T' in line.get('tag'):
+            lines[i]['text'] = clean_trans_string(line.get('text'))
+
+    return render_template('normalized_tier.html', lines=data.get('lines'))
 
 
 

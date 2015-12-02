@@ -22,7 +22,7 @@
         {# Left-Hand Side Elements #}
         <div id="browser-panels" class="easyui-layout" data-options="split:true,region:'west'" style="width:20%">
 
-            <div id="course-list" data-options="split:true,region:'west',title:'Corpora'" style="width:50%">
+            <div id="course-list" data-options="split:true,region:'center',title:'Corpora'" style="width:50%">
 
                 {# BEGIN CORPUS LIST #}
                 <ul class="easyui-datalist" data-options="onSelect:function(index, data){populateIGTs(index, data)}" lines="true" style="width:100%">
@@ -34,7 +34,7 @@
 
             </div>
 
-            <div id="fine-list" data-options="split:true,region:'center',title:'IGTs'">
+            <div id="fine-list" data-options="split:true,region:'south',title:'IGTs'" style="height:50%">
 
             </div>
 
