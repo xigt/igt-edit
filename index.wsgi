@@ -17,8 +17,9 @@ sys.path.append(app.config.get('XIGT_LIB'))
 
 # -------------------------------------------
 # Import intent stuff here.
-from intent.igt.rgxigt import RGCorpus
-from intent.igt.igtutils import rgp, rgencode, clean_lang_string, clean_gloss_string, clean_trans_string
+from intent.igt.rgxigt import RGCorpus, RGIgt
+from intent.igt.igtutils import clean_lang_string, clean_gloss_string, clean_trans_string, \
+    strip_leading_whitespace, rgencode
 
 app.debug = True
 
@@ -60,26 +61,49 @@ def display(corp_id, igt_id):
     return render_template('element.html', xigt=xc, corp_id=corp_id)
 
 
-
+# -------------------------------------------
+# For returning the normalized tier...
 @app.route('/normalize/<corp_id>/<igt_id>', methods=['POST'])
 def normalize(corp_id, igt_id):
-    ret_str = ''
 
+    # Get the data...
     data = json.loads(request.data.decode('utf-8'))
 
     lines = data.get('lines')
 
+
+
     for i, line in enumerate(lines):
         if 'L' in line.get('tag'):
-            lines[i]['text'] = clean_lang_string(line.get('text'))
+            lines[i]['text'] = clean_lang_string(lines[i]['text'])
         elif 'G' in line.get('tag'):
-            lines[i]['text'] = clean_gloss_string(line.get('text'))
+            lines[i]['text'] = clean_gloss_string(lines[i]['text'])
         elif 'T' in line.get('tag'):
-            lines[i]['text'] = clean_trans_string(line.get('text'))
+            lines[i]['text'] = clean_trans_string(lines[i]['text'])
 
-    return render_template('normalized_tier.html', lines=data.get('lines'))
+        lines[i]['num'] = i+1
+
+    textlines = strip_leading_whitespace([l.get('text') for l in lines])
+
+    for i, line in enumerate(lines):
+        lines[i]['text'] = textlines[i]
 
 
+    return render_template('normalized_tier.html', lines=lines)
+
+# -------------------------------------------
+# For returning the INTENT-generated additional tiers...
+@app.route('/intentify/<corp_id>/<igt_id>', methods=['POST'])
+def intentify(corp_id, igt_id):
+
+    normal_lines = json.loads(request.data.decode('utf-8'))
+
+    text = '\n'.join([l.get('text') for l in normal_lines.get('lines')])
+
+    inst = RGIgt.fromRawText(text)
+
+
+    return rgencode(inst)
 
 # -------------------------------------------
 # Static files

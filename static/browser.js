@@ -21,15 +21,6 @@ function populateError() {
 }
 
 /* display a single IGT instance */
-
-function browseSuccess(r, stat, jqXHR) {
-    $('#editor-panel').html(r);
-}
-
-function browseError(r, stat, jqXHR) {
-    $('#editor-panel').text("An error occurred.");
-}
-
 function displayIGT(corp_id, igt_id) {
     $('#editor-panel').text("Loading...");
     url = 'display/'+corp_id+'/'+igt_id
@@ -41,10 +32,16 @@ function displayIGT(corp_id, igt_id) {
     })
 }
 
-/* Normalization */
-function normalizeIGT(corp_id, igt_id) {
-    console.log('Normalizing '+igt_id);
-    $('#normalized-contents').text('Loading...');
+function browseSuccess(r, stat, jqXHR) {
+    $('#editor-panel').html(r);
+}
+
+function browseError(r, stat, jqXHR) {
+    $('#editor-panel').text("An error occurred.");
+}
+
+/* Retrieve Clean Tiers */
+function get_tier_data(rowSelector, igt_id, corp_id) {
 
     var lines = [];
     var data = {lines:lines,
@@ -52,15 +49,16 @@ function normalizeIGT(corp_id, igt_id) {
                 corp_id:corp_id};
 
     /* Iterate over all the clean items, and add them to the data */
-    $('.cleanrow').each(function(i, el) {
+    $(rowSelector).each(function(i, el) {
 
-        linedata = {}
+        linedata = {};
 
         linedata['tag'] = $(el).find('.tag-input').val();
 
         li = $(el).find('.line-input');
         linedata['text'] = li.val();
         linedata['id'] = li.attr('id');
+        linedata['num'] = i+1;
 
         /* Skip the line if it's disabled */
         if (!li.attr('disabled')) {
@@ -69,12 +67,22 @@ function normalizeIGT(corp_id, igt_id) {
 
     });
 
+    return data;
+}
+
+/* Normalization */
+function normalizeIGT(corp_id, igt_id) {
+    console.log('Normalizing '+igt_id);
+    $('#normalized-contents').text('Loading...');
+
+    cleanData = get_tier_data('.cleanrow', igt_id, corp_id);
+
     $.ajax({
         url: '/normalize/'+corp_id+'/'+igt_id,
         type: 'POST',
         dataType: 'text',
         contentType: 'text/plain',
-        data: JSON.stringify(data),
+        data: JSON.stringify(cleanData),
         success: normalizeSuccess,
         error: normalizeError
     })
@@ -87,6 +95,29 @@ function normalizeSuccess(r, stat, jqXHR) {
 
 function normalizeError() {
     $('#normalized-contents').text("An error occured while normalizing.");
+}
+
+/* INTENT-ification */
+function generateFromNormalized(corp_id, igt_id) {
+    normalData = get_tier_data('.normalrow', igt_id, corp_id);
+    cleanData  = get_tier_data('.clean', igt_id, corp_id)
+
+    $.ajax({
+        url: '/intentify/'+corp_id+'/'+igt_id,
+        contentType: 'text/plain',
+        type: 'POST',
+        data: JSON.stringify(normalData),
+        success: intentifySuccess,
+        error: intentifyError
+    });
+}
+
+function intentifySuccess(r, stat, jqXHR) {
+    console.log(r);
+}
+
+function intentifyError() {
+    $('#remaining-content').text("An error occurred producing the remaining tiers.")
 }
 
 /* Edit/Delete Scripts */

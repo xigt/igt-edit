@@ -12,7 +12,7 @@
                 <TR class="textrow">
                     <TD class="short-col"><pre></pre></TD>
                     <TD class="short-col"><pre>{{item.attributes.get('tag')}}</pre></TD>
-                    <TD><pre>{{ item.text }}"</pre></TD>
+                    <TD><pre>{{ item.text }}</pre></TD>
                 </TR>
             {% endfor %}
         </TABLE>
@@ -55,8 +55,18 @@
         <div id="normalized-contents">
 
         </div>
+        {# Calculate normalized #}
+    <input type="button"
+           value="Calculate New Tiers"
+           onclick="generateFromNormalized('{{ corp_id }}','{{ igt.id }}')" />
     </div>
 
+    </div>
+
+    <div id="remaining-tiers">
+        <div id="remaining-content">
+
+        </div>
     </div>
 
 

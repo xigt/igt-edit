@@ -1,11 +1,14 @@
 <TABLE class="texttable">
     {% for line in lines %}
-        <TR class="textrow">
+        <TR id="n{{ line.get('num') }}" class="textrow normalrow">
             <TD class="short-col"></TD>
-            <TD class="short-col"><pre>{{ line.get('tag') }}</pre></TD>
+            <TD class="short-col">
+                <input class="tag-input" value="{{ line.get('tag') }}" type="text"/>
+            </TD>
             <TD class="textinput">
-                <input class="normal-input" id="normal-{{ line.get('id') }}" type="text" value="{{ line.get('text') }}"/>
+                <input class="line-input" type="text" value="{{ line.get('text') }}"/>
             </TD>
         </TR>
     {% endfor %}
 </TABLE>
+
