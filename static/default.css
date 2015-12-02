@@ -1,10 +1,10 @@
 /* "Element" Display Elements */
-.texttable, .textrow {
+.rawtable, .cleantable, .textrow, .normtable {
     width: 95%;
 }
 
 .short-col {
-    width:50px;
+    width:60px;
 }
 
 .textrow pre {

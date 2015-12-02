@@ -151,3 +151,23 @@ function restoreItem(itemId) {
     $(itemId).find('input').prop('disabled',false);
     $(itemId).css('background-color', 'inherit');
 }
+
+function addItem(jqAfter) {
+    numitems = $('.cleantable tr').length;
+
+    id = 'c-'+(numitems+1).toString();
+
+    jqAfter.after('<TR class="textrow cleanrow" id="'+id+'">\
+        <TD class="short-col">\
+            <img class="hovericon undo" src="static/images/undo.png" onclick="restoreItem(\'#'+id+'\')"/>\
+            <img class="hovericon delete" src="static/images/delete.png" onclick="deleteItem(\'#'+id+'\')"/>\
+            <img class="hovericon add" src="static/images/add.png" onclick="addItem($(this).closest(\'tr\'))" />\
+        </TD>\
+        <TD class="short-col">\
+            <input class="tag-input" type="text" value=""/>\
+        </TD>\
+        <TD class="textinput">\
+            <input class="line-input" type="text" value=""/>\
+        </TD>\
+        </TR>');
+}
