@@ -83,7 +83,7 @@ function get_clean_lines() {
 }
 
 function get_normal_lines() {
-    return get_tier_lines('normalrow');
+    return get_tier_lines('.normalrow');
 }
 
 /* Normalization */
