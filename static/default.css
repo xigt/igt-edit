@@ -39,6 +39,6 @@
 }
 
 /* The contents of the browser... */
-#all-elements .panel-header:hover {
-    background-color: yellow;
+#all-elements {
+    margin: 10px;
 }

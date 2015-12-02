@@ -17,6 +17,7 @@
             {% endfor %}
         </TABLE>
     </div>
+    <HR/>
 
     {# AUTO-CLEANED TIER #}
     <H2>Clean Tier</H2>
@@ -47,8 +48,10 @@
            class="button" type="button" onclick="normalizeIGT('{{ corp_id }}','{{ igt.id }}')"
     />
 
-    <div id="normalized-tier" style="display:none;">
-    <H2 style="clear:both">Normalized Tier</H2>
+
+    <div id="normalized-tier" style="display:none;clear:both">
+    <HR/>
+    <H2>Normalized Tier</H2>
         <div id="normalized-contents">
 
         </div>

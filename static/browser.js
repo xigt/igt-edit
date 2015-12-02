@@ -44,6 +44,8 @@ function displayIGT(corp_id, igt_id) {
 /* Normalization */
 function normalizeIGT(corp_id, igt_id) {
     console.log('Normalizing '+igt_id);
+    $('#normalized-contents').text('Loading...');
+
     var lines = [];
     var data = {lines:lines,
                 igt_id:igt_id,
