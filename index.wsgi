@@ -2,6 +2,9 @@ import json
 import sys, logging
 
 from flask import Flask, render_template, url_for, request
+
+from xigt.codecs import xigtjson
+
 import sleipnir
 
 
@@ -17,7 +20,7 @@ sys.path.append(app.config.get('XIGT_LIB'))
 
 # -------------------------------------------
 # Import intent stuff here.
-from intent.igt.rgxigt import RGCorpus, RGIgt
+from intent.igt.rgxigt import RGCorpus, RGIgt, GlossLangAlignException
 from intent.igt.igtutils import clean_lang_string, clean_gloss_string, clean_trans_string, \
     strip_leading_whitespace, rgencode
 
@@ -67,9 +70,7 @@ def display(corp_id, igt_id):
 def normalize(corp_id, igt_id):
 
     # Get the data...
-    data = json.loads(request.data.decode('utf-8'))
-
-    lines = data.get('lines')
+    lines = json.loads(request.data.decode('utf-8'))
 
 
 
@@ -96,14 +97,22 @@ def normalize(corp_id, igt_id):
 @app.route('/intentify/<corp_id>/<igt_id>', methods=['POST'])
 def intentify(corp_id, igt_id):
 
-    normal_lines = json.loads(request.data.decode('utf-8'))
+    data = json.loads(request.data.decode('utf-8'))
 
-    text = '\n'.join([l.get('text') for l in normal_lines.get('lines')])
+    inst = RGIgt(id=igt_id)
+    inst.add_raw_tier(data.get('raw'))
+    inst.add_clean_tier(data.get('clean'))
+    inst.add_normal_tier(data.get('normal'))
 
-    inst = RGIgt.fromRawText(text)
-
-
-    return rgencode(inst)
+    try:
+        inst.basic_processing()
+    except GlossLangAlignException as glae:
+        return 'Gloss and language lines do not align 1-to-1'
+    else:
+        inst.classify_gloss_pos()
+        xc = RGCorpus(id='xc1')
+        xc.append(inst)
+        return xigtjson.dumps(xc)
 
 # -------------------------------------------
 # Static files

@@ -11,8 +11,8 @@
             {% for item in igt.raw_tier() %}
                 <TR class="textrow">
                     <TD class="short-col"><pre></pre></TD>
-                    <TD class="short-col"><pre>{{item.attributes.get('tag')}}</pre></TD>
-                    <TD><pre>{{ item.text }}</pre></TD>
+                    <TD class="short-col"><pre class="tags">{{item.attributes.get('tag')}}</pre></TD>
+                    <TD><pre class="text">{{ item.text }}</pre></TD>
                 </TR>
             {% endfor %}
         </TABLE>

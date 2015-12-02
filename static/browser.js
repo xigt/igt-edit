@@ -26,27 +26,35 @@ function displayIGT(corp_id, igt_id) {
     url = 'display/'+corp_id+'/'+igt_id
     $.ajax({
         url: url,
-        success: browseSuccess,
-        error: browseError,
+        success: displaySuccess,
+        error: displayError,
         dataType: "text"
-    })
+    });
 }
 
-function browseSuccess(r, stat, jqXHR) {
+function displaySuccess(r, stat, jqXHR) {
     $('#editor-panel').html(r);
 }
 
-function browseError(r, stat, jqXHR) {
+function displayError(r, stat, jqXHR) {
     $('#editor-panel').text("An error occurred.");
 }
 
+function get_raw_lines() {
+    lines = [];
+    $('.raw-tier .textrow').each(function(i, el){
+        linedata = {};
+        linedata['tag'] = $(el).find('.tags').text();
+        linedata['text'] = $(el).find('.text').text();
+        lines.push(linedata);
+    });
+    return lines;
+}
+
 /* Retrieve Clean Tiers */
-function get_tier_data(rowSelector, igt_id, corp_id) {
+function get_tier_lines(rowSelector) {
 
     var lines = [];
-    var data = {lines:lines,
-                igt_id:igt_id,
-                corp_id:corp_id};
 
     /* Iterate over all the clean items, and add them to the data */
     $(rowSelector).each(function(i, el) {
@@ -67,7 +75,15 @@ function get_tier_data(rowSelector, igt_id, corp_id) {
 
     });
 
-    return data;
+    return lines;
+}
+
+function get_clean_lines() {
+    return get_tier_lines('.cleanrow');
+}
+
+function get_normal_lines() {
+    return get_tier_lines('normalrow');
 }
 
 /* Normalization */
@@ -75,7 +91,7 @@ function normalizeIGT(corp_id, igt_id) {
     console.log('Normalizing '+igt_id);
     $('#normalized-contents').text('Loading...');
 
-    cleanData = get_tier_data('.cleanrow', igt_id, corp_id);
+    cleanData = get_clean_lines();
 
     $.ajax({
         url: '/normalize/'+corp_id+'/'+igt_id,
@@ -85,7 +101,7 @@ function normalizeIGT(corp_id, igt_id) {
         data: JSON.stringify(cleanData),
         success: normalizeSuccess,
         error: normalizeError
-    })
+    });
 }
 
 function normalizeSuccess(r, stat, jqXHR) {
@@ -99,14 +115,19 @@ function normalizeError() {
 
 /* INTENT-ification */
 function generateFromNormalized(corp_id, igt_id) {
-    normalData = get_tier_data('.normalrow', igt_id, corp_id);
-    cleanData  = get_tier_data('.clean', igt_id, corp_id)
+    normalData = get_normal_lines();
+    cleanData  = get_clean_lines();
+    rawData    = get_raw_lines();
+
+    data = {raw: rawData,
+            clean: cleanData,
+            normal: normalData}
 
     $.ajax({
         url: '/intentify/'+corp_id+'/'+igt_id,
         contentType: 'text/plain',
         type: 'POST',
-        data: JSON.stringify(normalData),
+        data: JSON.stringify(data),
         success: intentifySuccess,
         error: intentifyError
     });
