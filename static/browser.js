@@ -42,10 +42,13 @@ function displaySuccess(r, stat, jqXHR) {
     });
     $('#glw').tooltip({
         content: "Does the gloss line have the same number of whitespace-separated tokens as the language line?"
-    })
+    });
     $('#tag').tooltip({
         content: "Does the normalized tier have any lines other than L, G, T?"
-    })
+    });
+    $('#col').tooltip({
+       content: "Are the tokens of the Language and Gloss line arranged into columns properly?"
+    });
 }
 
 function displayError(r, stat, jqXHR) {
