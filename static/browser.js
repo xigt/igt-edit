@@ -1,7 +1,10 @@
+/* Constant Strings */
+var AJAX_LOADER_BIG = '<IMG src="static/images/ajax-loader.gif"/>'
+var AJAX_LOADER_SMALL = '<IMG src="static/images/ajax-loader-small.gif"/>'
+
 /* Populate the IGT pane */
 function populateIGTs(index, data) {
-    var fl = $('#fine-list')
-    fl.text('Loading...')
+    $('#fine-list').html('<div style="text-align:center;top:40px;position:relative;">'+AJAX_LOADER_SMALL+'</div>');
     $.ajax({
         url:'/populate/'+data['value'],
         error: populateError,
@@ -22,7 +25,7 @@ function populateError() {
 
 /* display a single IGT instance */
 function displayIGT(corp_id, igt_id) {
-    $('#editor-panel').text("Loading...");
+    $('#editor-panel').html(AJAX_LOADER_BIG);
     url = 'display/'+corp_id+'/'+igt_id
     $.ajax({
         url: url,
@@ -98,7 +101,7 @@ function get_normal_lines() {
 /* Normalization */
 function normalizeIGT(corp_id, igt_id) {
     console.log('Normalizing '+igt_id);
-    $('#normalized-contents').text('Loading...');
+    $('#normalized-contents').html('Loading...');
 
     cleanData = get_clean_lines();
 
