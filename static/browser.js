@@ -213,3 +213,8 @@ function addItem(prefix, jqAfter, rowtype) {
         </TD>\
         </TR>');
 }
+
+/* Save the edited tier! */
+function saveTier() {
+    $('#save-msg').text('Unimplemented.');
+}

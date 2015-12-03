@@ -59,3 +59,8 @@
 .feedback-ok {
     background-color:lightgreen;
 }
+
+/* Save Dialog */
+#save-msg {
+    color: red;
+}

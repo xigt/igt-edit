@@ -47,7 +47,7 @@
 
         {# END AUTO-CLEANED TIER #}
 
-        <input value="Submit Clean Tier"
+        <input value="Generate Normalized Tier"
                class="button" type="button" onclick="normalizeIGT('{{ corp_id }}','{{ igt.id }}')"
         />
 
@@ -60,8 +60,14 @@
             </div>
             {# Calculate normalized #}
             <input type="button"
-                   value="Analyze Alignment"
+                   value="Analyze Normalized Tier"
                    onclick="generateFromNormalized('{{ corp_id }}','{{ igt.id }}')" />
+
+            <input type="button"
+                   value="Save Edited Tiers"
+                   onclick="saveTier()"/>
+
+            <span id="save-msg"></span>
 
             <div id="analysis">
                 <span id="glw" class="feedback">GLW</span>
