@@ -179,8 +179,12 @@ function intentifyError() {
 
 /* Edit/Delete Scripts */
 function deleteItem(itemId) {
-    $(itemId).find('input').prop('disabled',true);
-    $(itemId).css('background-color','pink');
+    if ($(itemId).find('input').val().trim() == '') {
+        $(itemId).remove();
+    } else {
+        $(itemId).find('input').prop('disabled', true);
+        $(itemId).css('background-color', 'pink');
+    }
 }
 
 function restoreItem(itemId) {
@@ -188,12 +192,12 @@ function restoreItem(itemId) {
     $(itemId).css('background-color', 'inherit');
 }
 
-function addItem(jqAfter) {
+function addItem(prefix, jqAfter, rowtype) {
     numitems = $('.cleantable tr').length;
 
-    id = 'c-'+(numitems+1).toString();
+    id = prefix+(numitems+1).toString();
 
-    jqAfter.after('<TR class="textrow cleanrow" id="'+id+'">\
+    jqAfter.after('<TR class="textrow '+rowtype+'" id="'+id+'">\
         <TD class="short-col">\
             <img class="hovericon undo" src="static/images/undo.png" onclick="restoreItem(\'#'+id+'\')"/>\
             <img class="hovericon delete" src="static/images/delete.png" onclick="deleteItem(\'#'+id+'\')"/>\

@@ -27,7 +27,7 @@
                     <TD class="short-col">
                         <img class="hovericon undo" src="static/images/undo.png" onclick="restoreItem('#{{ item.igt.id }}-{{ item.id }}')"/>
                         <img class="hovericon delete" src="static/images/delete.png" onclick="deleteItem('#{{ item.igt.id }}-{{ item.id}}')"/>
-                        <img class="hovericon add" src="static/images/add.png" onclick="addItem($(this).closest('tr'))" />
+                        <img class="hovericon add" src="static/images/add.png" onclick="addItem('c', $(this).closest('tr'), 'cleanrow')" />
                     </TD>
 
                     {# COLUMN WITH TAGS #}
