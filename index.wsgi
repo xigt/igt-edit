@@ -30,9 +30,10 @@ app.register_blueprint(sleipnir.blueprint)
 
 
 from xigt.codecs import xigtjson
-from intent.igt.rgxigt import RGCorpus, RGIgt, GlossLangAlignException
+from intent.igt.rgxigt import RGCorpus, RGIgt, GlossLangAlignException, retrieve_normal_line
+from intent.igt.consts import ODIN_LANG_TAG, ODIN_GLOSS_TAG
 from intent.igt.igtutils import clean_lang_string, clean_gloss_string, clean_trans_string, \
-    strip_leading_whitespace
+    strip_leading_whitespace, is_strict_columnar_alignment
 
 app.debug = True
 
@@ -136,6 +137,14 @@ def intentify(corp_id, igt_id):
     # Check that the normalized tier has only L, G, T for tags.
     norm_tags = set([l.attributes.get('tag') for l in inst.normal_tier()])
     feedback['tag'] = 1 if set(['L','G','T']) == norm_tags else 0
+
+    # Check that the g/l lines are aligned in strict columns
+    lang_line  = retrieve_normal_line(inst, ODIN_LANG_TAG)
+    gloss_line = retrieve_normal_line(inst, ODIN_GLOSS_TAG)
+    if lang_line is None or gloss_line is None:
+        feedback['col'] = 0
+    else:
+        feedback['col'] = 1 if is_strict_columnar_alignment(lang_line.value(), gloss_line.value()) else 0
 
     return json.dumps(feedback)
 

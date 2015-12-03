@@ -47,7 +47,7 @@ function displaySuccess(r, stat, jqXHR) {
         content: "Does the normalized tier have any lines other than L, G, T?"
     });
     $('#col').tooltip({
-       content: "Are the tokens of the Language and Gloss line arranged into columns properly?"
+       content: "Are the tokens of the Language and Gloss line arranged using whitespace such that every token of one line is contained by another?"
     });
 }
 
@@ -141,6 +141,7 @@ function generateFromNormalized(corp_id, igt_id) {
     analyzeUnmark('glm');
     analyzeUnmark('glw');
     analyzeUnmark('tag');
+    analyzeUnmark('col');
 
     $.ajax({
         url: '/intentify/'+corp_id+'/'+igt_id,
@@ -179,6 +180,7 @@ function intentifySuccess(r, stat, jqXHR) {
     analysisNotifier(r, 'glw');
     analysisNotifier(r, 'glm');
     analysisNotifier(r, 'tag');
+    analysisNotifier(r, 'col');
 }
 
 function intentifyError() {
