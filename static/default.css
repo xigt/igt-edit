@@ -42,3 +42,20 @@
 #all-elements {
     margin: 10px;
 }
+
+/* The analysis fields after editing an instance */
+.feedback {
+    padding: 3px;
+    border: thin solid black;
+    border-radius: 3px;
+    float:right;
+    margin-right:5px;
+}
+
+.feedback-warn {
+    background-color:lightcoral;
+}
+
+.feedback-ok {
+    background-color:lightgreen;
+}

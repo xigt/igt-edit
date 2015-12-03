@@ -34,6 +34,15 @@ function displayIGT(corp_id, igt_id) {
 
 function displaySuccess(r, stat, jqXHR) {
     $('#editor-panel').html(r);
+    $('#glm').tooltip({
+        content: "Does the gloss line have the same number of morphs as the language line?"
+    });
+    $('#glw').tooltip({
+        content: "Does the gloss line have the same number of whitespace-separated tokens as the language line?"
+    })
+    $('#tag').tooltip({
+        content: "Does the normalized tier have any lines other than L, G, T?"
+    })
 }
 
 function displayError(r, stat, jqXHR) {
@@ -121,11 +130,15 @@ function generateFromNormalized(corp_id, igt_id) {
 
     data = {raw: rawData,
             clean: cleanData,
-            normal: normalData}
+            normal: normalData};
+
+    analyzeUnwarn('glm');
+    analyzeUnwarn('glw');
 
     $.ajax({
         url: '/intentify/'+corp_id+'/'+igt_id,
         contentType: 'text/plain',
+        dataType: 'json',
         type: 'POST',
         data: JSON.stringify(data),
         success: intentifySuccess,
@@ -133,8 +146,31 @@ function generateFromNormalized(corp_id, igt_id) {
     });
 }
 
+function analyzeUnwarn(id) {
+    $('#'+id).removeClass('feedback-warn');
+}
+
+function analyzeWarn(id) {
+    $('#'+id).addClass('feedback-warn');
+}
+
+function analyzeOK(id) {
+    $('#'+id).addClass('feedback-ok');
+}
+
+function analysisNotifier(r, id) {
+    if (r[id] == 0) {
+        analyzeWarn(id);
+    } else {
+        analyzeOK(id);
+    }
+}
+
 function intentifySuccess(r, stat, jqXHR) {
     console.log(r);
+    analysisNotifier(r, 'glw');
+    analysisNotifier(r, 'glm');
+    analysisNotifier(r, 'tag');
 }
 
 function intentifyError() {

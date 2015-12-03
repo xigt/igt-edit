@@ -21,57 +21,66 @@
 
     {# AUTO-CLEANED TIER #}
     <H2>Clean Tier</H2>
-    <TABLE class="cleantable">
-    {% for item in igt.clean_tier(merge=True) %}
-        <TR id="{{ item.igt.id }}-{{ item.id }}" class="textrow cleanrow">
-            <TD class="short-col">
-                <img class="hovericon undo" src="static/images/undo.png" onclick="restoreItem('#{{ item.igt.id }}-{{ item.id }}')"/>
-                <img class="hovericon delete" src="static/images/delete.png" onclick="deleteItem('#{{ item.igt.id }}-{{ item.id}}')"/>
-                <img class="hovericon add" src="static/images/add.png" onclick="addItem($(this).closest('tr'))" />
-            </TD>
+        <TABLE class="cleantable">
+            {% for item in igt.clean_tier(merge=True) %}
+                <TR id="{{ item.igt.id }}-{{ item.id }}" class="textrow cleanrow">
+                    <TD class="short-col">
+                        <img class="hovericon undo" src="static/images/undo.png" onclick="restoreItem('#{{ item.igt.id }}-{{ item.id }}')"/>
+                        <img class="hovericon delete" src="static/images/delete.png" onclick="deleteItem('#{{ item.igt.id }}-{{ item.id}}')"/>
+                        <img class="hovericon add" src="static/images/add.png" onclick="addItem($(this).closest('tr'))" />
+                    </TD>
 
-            {# COLUMN WITH TAGS #}
-            <TD class="short-col">
-                <input class="tag-input" type="text" value="{{ item.attributes.get('tag') }}"/>
-            </TD>
+                    {# COLUMN WITH TAGS #}
+                    <TD class="short-col">
+                        <input class="tag-input" type="text" value="{{ item.attributes.get('tag') }}"/>
+                    </TD>
 
-            {# COLUMN WITH CLEAN TEXT #}
-            <TD class="textinput">
-                <input id="{{ item.id }}" class="line-input" type="text" value="{{ item.text }}"/>
-            </TD>
+                    {# COLUMN WITH CLEAN TEXT #}
+                    <TD class="textinput">
+                        <input id="{{ item.id }}" class="line-input" type="text" value="{{ item.text }}"/>
+                    </TD>
 
-        </TR>
-    {% endfor %}
-    {# Include an "ADD" button #}
-    </TABLE> <BR/>
+                </TR>
+            {% endfor %}
+            {# Include an "ADD" button #}
+        </TABLE> <BR/>
 
-    {# END AUTO-CLEANED TIER #}
+        {# END AUTO-CLEANED TIER #}
 
-    <input value="Submit Clean Tier"
-           class="button" type="button" onclick="normalizeIGT('{{ corp_id }}','{{ igt.id }}')"
-    />
+        <input value="Submit Clean Tier"
+               class="button" type="button" onclick="normalizeIGT('{{ corp_id }}','{{ igt.id }}')"
+        />
 
 
-    <div id="normalized-tier" style="display:none;clear:both">
-    <HR/>
-    <H2>Normalized Tier</H2>
-        <div id="normalized-contents">
+        <div id="normalized-tier" style="display:none;clear:both">
+            <HR/>
+            <H2>Normalized Tier</H2>
+            <div id="normalized-contents">
 
+            </div>
+            {# Calculate normalized #}
+            <input type="button"
+                   value="Analyze Alignment"
+                   onclick="generateFromNormalized('{{ corp_id }}','{{ igt.id }}')" />
+
+            <div id="analysis">
+                <span id="glw" class="feedback">GLW</span>
+                <span id="glm" class="feedback">GLM</span>
+                <span id="tag" class="feedback">TAG</span>
+            </div>
+            <div style="clear:both"/>
         </div>
-        {# Calculate normalized #}
-    <input type="button"
-           value="Calculate New Tiers"
-           onclick="generateFromNormalized('{{ corp_id }}','{{ igt.id }}')" />
-    </div>
 
-    </div>
 
-    <div id="remaining-tiers">
-        <div id="remaining-content">
 
+
+        <div id="remaining-tiers">
+            <div id="remaining-content">
+
+            </div>
         </div>
-    </div>
 
+    </div>
 
 {% endfor %}
 

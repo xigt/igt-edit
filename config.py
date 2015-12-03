@@ -9,3 +9,6 @@ INTENT_LIB = '/Users/rgeorgi/Documents/code/intent'
 
 # XIGT
 XIGT_LIB = '/Users/rgeorgi/Documents/code/xigt'
+
+# SLEIPNIR
+SLEIPNIR_LIB = '/Users/rgeorgi/Documents/code/sleipnir'
