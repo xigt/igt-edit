@@ -132,8 +132,9 @@ function generateFromNormalized(corp_id, igt_id) {
             clean: cleanData,
             normal: normalData};
 
-    analyzeUnwarn('glm');
-    analyzeUnwarn('glw');
+    analyzeUnmark('glm');
+    analyzeUnmark('glw');
+    analyzeUnmark('tag');
 
     $.ajax({
         url: '/intentify/'+corp_id+'/'+igt_id,
@@ -146,8 +147,9 @@ function generateFromNormalized(corp_id, igt_id) {
     });
 }
 
-function analyzeUnwarn(id) {
+function analyzeUnmark(id) {
     $('#'+id).removeClass('feedback-warn');
+    $('#'+id).removeClass('feedback-ok');
 }
 
 function analyzeWarn(id) {
