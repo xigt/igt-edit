@@ -17,10 +17,14 @@
             {% endfor %}
         </TABLE>
     </div>
+
+    {# Show normalized tier button #}
+    <input type="button" value="Show Clean Tier" onclick="$('#clean-tier').show(); $(this).hide();"/>
     <HR/>
 
     {# AUTO-CLEANED TIER #}
-    <H2>Clean Tier</H2>
+    <div id="clean-tier" style="display:none;">
+        <H2>Clean Tier</H2>
         <TABLE class="cleantable">
             {% for item in igt.clean_tier(merge=True) %}
                 <TR id="{{ item.igt.id }}-{{ item.id }}" class="textrow cleanrow">
@@ -43,13 +47,16 @@
                 </TR>
             {% endfor %}
             {# Include an "ADD" button #}
-        </TABLE> <BR/>
-
-        {# END AUTO-CLEANED TIER #}
-
+        </TABLE>
+        <BR/>
         <input value="Generate Normalized Tier"
-               class="button" type="button" onclick="normalizeIGT('{{ corp_id }}','{{ igt.id }}')"
+               class="button" type="button" onclick="normalizeIGT('{{ corp_id }}','{{ igt.id }}');$(this).val('Regenerate Normalized Tier');"
         />
+    </div>
+    {# END AUTO-CLEANED TIER #}
+
+
+
 
 
         <div id="normalized-tier" style="display:none;clear:both">
