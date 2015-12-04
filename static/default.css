@@ -16,15 +16,22 @@
     font-family:Courier;
 }
 
+/* The input fields... */
+
 .textinput input{
     width:100%;
     font-family: Courier;
+}
+
+.for-deletion {
+    background-color: pink;
 }
 
 .normal-input {
     width:100%;
 }
 
+/* Various Buttons */
 
 .hovericon {
     width:16px;
@@ -38,6 +45,16 @@
 .hovericon:active, .rating-button:active {
     -webkit-filter: invert(100%);
     filter: invert(100%);
+}
+
+.iconclicked {
+    -webkit-filter: brightness(50%);
+    filter: brightness(50%);
+}
+
+.iconclicked:hover {
+    -webkit-filter: brightness(20%);
+    filter: brightness(20%);
 }
 
 /* The contents of the browser... */

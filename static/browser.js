@@ -37,7 +37,11 @@ function displayIGT(corp_id, igt_id) {
 
 function displaySuccess(r, stat, jqXHR) {
     $('#editor-panel').html(r);
+    // Assign the tooltips to the interface elements.
     assign_tooltips();
+
+    // Stash the current versions of the clean lines for undo-ing.
+    stashCleanLines();
 }
 
 function displayError(r, stat, jqXHR) {
@@ -112,6 +116,7 @@ function normalizeSuccess(r, stat, jqXHR) {
     $('#normalized-tier').show();
     $('#normalized-contents').html(r);
     assign_tooltips();
+    stashNormLines();
 }
 
 function normalizeError() {
@@ -166,7 +171,6 @@ function analysisNotifier(r, id) {
 }
 
 function intentifySuccess(r, stat, jqXHR) {
-    console.log(r);
     analysisNotifier(r, 'glw');
     analysisNotifier(r, 'glm');
     analysisNotifier(r, 'tag');
@@ -178,18 +182,43 @@ function intentifyError() {
 }
 
 /* Edit/Delete Scripts */
-function deleteItem(itemId) {
-    if ($(itemId).find('input').val().trim() == '') {
-        $(itemId).remove();
+function deleteItem(elt, itemId) {
+
+    var identifier = '#'+itemId;
+
+    /* If this button has been clicked already,
+     * restore (as a toggle) */
+    if ($(elt).hasClass('iconclicked')) {
+        $(elt).removeClass('iconclicked');
+
+        // Unmark the item for deletion.
+        $(identifier).find('input').prop('disabled',false);
+        $(identifier).removeClass('for-deletion');
+
     } else {
-        $(itemId).find('input').prop('disabled', true);
-        $(itemId).css('background-color', 'pink');
+
+    /* Otherwise, set it clicked, and delete it. */
+        $(elt).addClass('iconclicked');
+
+        // If neither of the boxes are filled out, delete the
+        // element.
+        if ($(identifier).find('.tag-input').val().trim() == '' &&
+            $(identifier).find('.line-input').val().trim() == '') {
+            $(identifier).remove();
+
+        // Otherwise, simply mark it for deletion.
+        } else {
+            $(identifier).find('input').prop('disabled', true);
+            $(identifier).addClass('for-deletion');
+        }
     }
 }
 
 function restoreItem(itemId) {
-    $(itemId).find('input').prop('disabled',false);
-    $(itemId).css('background-color', 'inherit');
+    var identifier = '#'+itemId;
+
+    /* Set the item to its initial value. */
+    $(identifier).find('.line-input').val(localStorage.getItem(itemId));
 }
 
 function addItem(prefix, jqAfter, rowtype) {
@@ -199,8 +228,8 @@ function addItem(prefix, jqAfter, rowtype) {
 
     jqAfter.after('<TR class="textrow '+rowtype+'" id="'+id+'">\
         <TD class="short-col">\
-            <img class="hovericon undo" src="static/images/undo.png" onclick="restoreItem(\'#'+id+'\')"/>\
-            <img class="hovericon delete" src="static/images/delete.png" onclick="deleteItem(\'#'+id+'\')"/>\
+            <img class="hovericon undo" src="static/images/undo.png" onclick="restoreItem(\''+id+'\')"/>\
+            <img class="hovericon delete" src="static/images/delete.png" onclick="deleteItem(this, \''+id+'\')"/>\
             <img class="hovericon add" src="static/images/add.png" onclick="addItem($(this).closest(\'tr\'))" />\
         </TD>\
         <TD class="short-col">\

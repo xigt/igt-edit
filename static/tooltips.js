@@ -30,6 +30,10 @@ function assign_tooltips() {
     });
 
     $('.undo').tooltip({
-        content: "Undelete the tier"
+        content: "Restore the tier to its initial state."
+    });
+
+    $('.delete').tooltip({
+       content: "Mark this tier for deletion, or remove if empty. Click again to undelete."
     });
 }

@@ -2,8 +2,8 @@
     {% for line in lines %}
         <TR id="n{{ line.get('num') }}" class="textrow normalrow">
             <TD class="short-col">
-                <img class="hovericon undo" src="static/images/undo.png" onclick="restoreItem('#n{{ line.get('num') }}')"/>
-                <img class="hovericon delete" src="static/images/delete.png" onclick="deleteItem('#n{{ line.get('num') }}')"/>
+                <img class="hovericon undo" src="static/images/undo.png" onclick="restoreItem('n{{ line.get('num') }}')"/>
+                <img class="hovericon delete" src="static/images/delete.png" onclick="deleteItem(this, 'n{{ line.get('num') }}')"/>
                 <img class="hovericon add" src="static/images/add.png" onclick="addItem('n', $(this).closest('tr'), 'normalrow')" />
             </TD>
             <TD class="short-col">
