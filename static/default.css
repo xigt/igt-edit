@@ -30,11 +30,13 @@
     width:16px;
 }
 
-.hovericon:hover {
+.hovericon:hover, .rating-button:hover  {
+    -webkit-filter: brightness(50%);
     filter: brightness(50%);
 }
 
-.hovericon:active {
+.hovericon:active, .rating-button:active {
+    -webkit-filter: invert(100%);
     filter: invert(100%);
 }
 
@@ -63,4 +65,27 @@
 /* Save Dialog */
 #save-msg {
     color: red;
+}
+
+/* Ratings */
+#rating-button-container {
+    text-align: center;
+}
+
+#rating-buttons {
+    display:inline-block;
+    border: thin solid black;
+    padding:10px;
+    border-radius:10px;
+    background-color: rgb(241, 255, 253);
+}
+
+.rating-button {
+    width:32px;
+}
+
+#rating-green, #rating-yellow {
+    -webkit-filter: grayscale(100%);
+    filter: grayscale(100%);
+    opacity: 0.3;
 }

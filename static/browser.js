@@ -37,18 +37,7 @@ function displayIGT(corp_id, igt_id) {
 
 function displaySuccess(r, stat, jqXHR) {
     $('#editor-panel').html(r);
-    $('#glm').tooltip({
-        content: "Does the gloss line have the same number of morphs as the language line?"
-    });
-    $('#glw').tooltip({
-        content: "Does the gloss line have the same number of whitespace-separated tokens as the language line?"
-    });
-    $('#tag').tooltip({
-        content: "Does the normalized tier have any lines other than L, G, T?"
-    });
-    $('#col').tooltip({
-       content: "Are the tokens of the Language and Gloss line arranged using whitespace such that every token of one line is contained by another?"
-    });
+    assign_tooltips();
 }
 
 function displayError(r, stat, jqXHR) {
@@ -122,6 +111,7 @@ function normalizeIGT(corp_id, igt_id) {
 function normalizeSuccess(r, stat, jqXHR) {
     $('#normalized-tier').show();
     $('#normalized-contents').html(r);
+    assign_tooltips();
 }
 
 function normalizeError() {
