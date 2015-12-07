@@ -29,11 +29,19 @@ function assign_tooltips() {
        content: "Are the tokens of the Language and Gloss line arranged using whitespace such that every token of one line is contained by another?"
     });
 
+    hoverIconTooltips();
+}
+
+function hoverIconTooltips() {
     $('.undo').tooltip({
         content: "Restore the tier to its initial state."
     });
 
     $('.delete').tooltip({
        content: "Mark this tier for deletion, or remove if empty. Click again to undelete."
+    });
+
+    $('.add').tooltip({
+        content: "Add a blank new line beneath this line."
     });
 }

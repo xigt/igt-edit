@@ -70,11 +70,6 @@
                    value="Analyze Normalized Tier"
                    onclick="generateFromNormalized('{{ corp_id }}','{{ igt.id }}')" />
 
-            <input type="button"
-                   value="Save Edited Tiers"
-                   onclick="saveTier()"/>
-
-            <span id="save-msg"></span>
 
             <div id="analysis">
                 <span id="glw" class="feedback">GLW</span>
@@ -88,9 +83,9 @@
         {# BEGIN RATING BUTTONS #}
         <div id="rating-button-container">
             <div id="rating-buttons">
-                <img id="rating-green"  class="rating-button" src="static/images/smiley-green.png" title="Good rating"/>
-                <img id="rating-yellow" class="rating-button " src="static/images/smiley-yellow.png"/>
-                <img id="rating-red"    class="rating-button" src="static/images/smiley-red.png"/>
+                <img id="rating-green"  class="rating-button rating-disabled" src="static/images/smiley-green.png" title="Good rating"/>
+                <img id="rating-yellow" class="rating-button rating-disabled" src="static/images/smiley-yellow.png"/>
+                <img id="rating-red"    class="rating-button"                 src="static/images/smiley-red.png"/>
             </div>
         </div>
 

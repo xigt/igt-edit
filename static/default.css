@@ -101,7 +101,7 @@
     width:32px;
 }
 
-#rating-green, #rating-yellow {
+.rating-disabled {
     -webkit-filter: grayscale(100%);
     filter: grayscale(100%);
     opacity: 0.3;

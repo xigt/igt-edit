@@ -117,6 +117,10 @@ function normalizeSuccess(r, stat, jqXHR) {
     $('#normalized-contents').html(r);
     assign_tooltips();
     stashNormLines();
+
+    // Once the normalized lines are shown, it's okay for
+    // the user to use the green/yellow buttons.
+    $('.rating-button').removeClass('rating-disabled');
 }
 
 function normalizeError() {
