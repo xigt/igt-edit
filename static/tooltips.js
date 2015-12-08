@@ -4,17 +4,17 @@
 
 function assign_tooltips() {
     /*  */
-    $('#rating-green').tooltip({
-        content:"I am confident that this IGT is clean."
-    });
-
-    $('#rating-yellow').tooltip({
-       content : "I am not confident that this IGT is clean."
-    });
-
-    $('#rating-red').tooltip({
-       content : "I am confident that this IGT is unclean."
-    });
+    //$('#rating-green').tooltip({
+    //    content:"I am confident that this IGT is clean.",
+    //});
+    //
+    //$('#rating-yellow').tooltip({
+    //    content : "I am not confident that this IGT is clean.",
+    //});
+    //
+    //$('#rating-red').tooltip({
+    //    content : "I am confident that this IGT is unclean.",
+    //});
 
     $('#glm').tooltip({
         content: "Does the gloss line have the same number of morphs as the language line?"
