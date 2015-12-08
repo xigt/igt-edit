@@ -3,7 +3,11 @@ import json
 import logging
 DB_LOG = logging.getLogger('DB')
 
-def get_rating(user_id, corp_id, igt_id):
+KEY_RATING = 'rating'
+KEY_PROGRESS = 'progress'
+KEY_STATE = 'state'
+
+def get(user_id, corp_id, igt_id, key):
     # Open the JSON file
     with open(USER_DB) as f:
         d = json.load(f)
@@ -11,9 +15,27 @@ def get_rating(user_id, corp_id, igt_id):
         if c is not None:
             i = c.get(igt_id)
             if i is not None:
-                return i.get(str(user_id))
+                pair = i.get(str(user_id))
+                if pair is not None:
+                    return pair.get(key)
+
+
+def get_rating(user_id, corp_id, igt_id):
+    return get(user_id, corp_id, igt_id, KEY_RATING)
+
+def get_progress(user_id, corp_id, igt_id):
+    return get(user_id, corp_id, igt_id, KEY_PROGRESS)
 
 def set_rating(user_id, corp_id, igt_id, rating):
+    set(user_id, corp_id, igt_id, KEY_RATING, rating)
+
+def get_state(user_id, corp_id, igt_id):
+    return get(user_id, corp_id, igt_id, KEY_STATE)
+
+def set_state(user_id, corp_id, igt_id, state):
+    set(user_id, corp_id, igt_id, KEY_STATE, state)
+
+def set(user_id, corp_id, igt_id, key, val):
 
     # Load the existing JSON file
     f = open(USER_DB, 'r')
@@ -25,7 +47,7 @@ def set_rating(user_id, corp_id, igt_id, rating):
 
     # If the entry doesn't exist, add it.
     if c is None:
-        d[corp_id] = {igt_id:{user_id:rating}}
+        d[corp_id] = {igt_id:{user_id:{key:val}}}
 
     # Otherwise, get the IGT entry.
     else:
@@ -33,11 +55,15 @@ def set_rating(user_id, corp_id, igt_id, rating):
 
         # If the igt entry doesn't exist, create it.
         if i is None:
-            c[igt_id] = {str(user_id):rating}
+            c[igt_id] = {str(user_id):{key:val}}
 
         # If it does, set the rating.
         else:
-            i[str(user_id)] = rating
+            pair = i.get(str(user_id))
+            if pair is None:
+                i[str(user_id)] = {key:val}
+            else:
+                pair[key] = val
 
     # Write it out.
     with open(USER_DB, 'w') as f:
