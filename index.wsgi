@@ -1,9 +1,12 @@
-import json, sys, logging
+import json, sys, logging, os
 
 # -------------------------------------------
 # Set up the Flask app
 # -------------------------------------------
-from flask import Flask, render_template, url_for, request
+import sqlite3
+from flask import Flask, render_template, url_for, request, g
+
+
 
 app = Flask(__name__)
 application = app
@@ -11,11 +14,14 @@ application = app
 # -------------------------------------------
 # Import the configuration.
 # -------------------------------------------
-app.config.from_pyfile('config.py')
+sys.path.append(os.path.dirname(__file__))
+from yggdrasil.config import USER_DB, INTENT_LIB, XIGT_LIB, SLEIPNIR_LIB
+from yggdrasil.users import get_rating, set_rating
 
-sys.path.append(app.config.get('INTENT_LIB'))
-sys.path.append(app.config.get('XIGT_LIB'))
-sys.path.append(app.config.get('SLEIPNIR_LIB'))
+
+sys.path.append(INTENT_LIB)
+sys.path.append(XIGT_LIB)
+sys.path.append(SLEIPNIR_LIB)
 
 # -------------------------------------------
 # Now that we've imported our dependencies,
@@ -27,6 +33,7 @@ app.register_blueprint(sleipnir.blueprint)
 # -------------------------------------------
 # Import other stuff here.
 # -------------------------------------------
+
 
 
 from xigt.codecs import xigtjson
@@ -61,7 +68,15 @@ def main():
 @app.route('/populate/<corp_id>')
 def populate(corp_id):
     xc = sleipnir.dbi.get_corpus(corp_id)
-    return render_template('igt_list.html', igts=xc, corp_id=corp_id)
+    ratings = {igt_id: get_rating(1, corp_id, igt_id) for igt_id in [inst.id for inst in xc]}
+    nexts = {}
+    for i, igt in enumerate(xc):
+        if i < len(xc)-1:
+            nexts[igt.id] = xc[i+1].id
+        else:
+            nexts[igt.id] = None
+
+    return render_template('igt_list.html', igts=xc, corp_id=corp_id, ratings=ratings, nexts=nexts)
 
 # -------------------------------------------
 # When a user clicks an IGT instance, display
@@ -75,7 +90,7 @@ def display(corp_id, igt_id):
     xc.__class__ = RGCorpus
     xc._finish_load()
 
-    return render_template('element.html', xigt=xc, corp_id=corp_id)
+    return render_template('element.html', xigt=xc, igt_id=igt_id, corp_id=corp_id)
 
 
 # -------------------------------------------
@@ -147,6 +162,19 @@ def intentify(corp_id, igt_id):
         feedback['col'] = 1 if is_strict_columnar_alignment(lang_line.value(), gloss_line.value()) else 0
 
     return json.dumps(feedback)
+
+
+# -------------------------------------------
+# Save a file after changes
+# -------------------------------------------
+@app.route('/save/<corp_id>/<igt_id>', methods=['PUT'])
+def save(corp_id, igt_id):
+    data = request.get_json()
+    rating = data.get('rating')
+
+    set_rating(1, corp_id, igt_id, rating)
+    return str(get_rating(1, corp_id, igt_id))
+
 
 
 # -------------------------------------------

@@ -1,3 +1,26 @@
+/* IGT Rows */
+.igtrow {
+    border-top: thin solid black;
+    padding:5px;
+}
+
+.igtrow:hover {
+    background-color: rgb(232, 241, 255);
+}
+
+/* Ratings */
+.rated-3 {
+    background-color: red;
+}
+
+.rated-2 {
+    background-color:rgb(255, 203, 0);
+}
+
+.rated-1 {
+    background-color: rgb(162, 210, 97);
+}
+
 /* "Element" Display Elements */
 .rawtable, .cleantable, .textrow, .normtable {
     width: 95%;
@@ -37,12 +60,12 @@
     width:16px;
 }
 
-.hovericon:hover, .rating-button:hover  {
+.hovericon:hover, .rating-enabled:hover  {
     -webkit-filter: brightness(50%);
     filter: brightness(50%);
 }
 
-.hovericon:active, .rating-button:active {
+.hovericon:active, .rating-enabled:active {
     -webkit-filter: invert(100%);
     filter: invert(100%);
 }
@@ -58,7 +81,7 @@
 }
 
 /* The contents of the browser... */
-#all-elements {
+#igt-instance {
     margin: 10px;
 }
 

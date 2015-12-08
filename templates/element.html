@@ -1,5 +1,5 @@
 
-<div id="all-elements">
+<div id="igt-instance" igtid="{{ igt_id }}" corpid="{{ corp_id }}">
     {# Iterate over every igt in the page... #}
     {% for igt in xigt %}
     <div id="{{ igt.id }}" class="igt-panel">
@@ -83,9 +83,9 @@
         {# BEGIN RATING BUTTONS #}
         <div id="rating-button-container">
             <div id="rating-buttons">
-                <img id="rating-green"  class="rating-button rating-disabled" src="static/images/smiley-green.png" title="Good rating"/>
-                <img id="rating-yellow" class="rating-button rating-disabled" src="static/images/smiley-yellow.png"/>
-                <img id="rating-red"    class="rating-button"                 src="static/images/smiley-red.png"/>
+                <img id="rating-green"  class="rating-button rating-disabled" src="static/images/smiley-green.png" onclick=""/>
+                <img id="rating-yellow" class="rating-button rating-disabled" src="static/images/smiley-yellow.png" onclick=""/>
+                <img id="rating-red"    class="rating-button rating-enabled"                 src="static/images/smiley-red.png" onclick="saveTier(BAD_QUALITY)"/>
             </div>
         </div>
 

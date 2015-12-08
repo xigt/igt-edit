@@ -2,11 +2,15 @@
 var AJAX_LOADER_BIG = '<IMG src="static/images/ajax-loader.gif"/>'
 var AJAX_LOADER_SMALL = '<IMG src="static/images/ajax-loader-small.gif"/>'
 
+var BAD_QUALITY = 3;
+var OK_QUALITY = 2;
+var GOOD_QUALITY = 1;
+
 /* Populate the IGT pane */
-function populateIGTs(index, data) {
+function populateIGTs(corpId) {
     $('#fine-list').html('<div style="text-align:center;top:40px;position:relative;">'+AJAX_LOADER_SMALL+'</div>');
     $.ajax({
-        url:'/populate/'+data['value'],
+        url:'/populate/'+corpId,
         error: populateError,
         success: populateSuccess
     })
@@ -14,13 +18,16 @@ function populateIGTs(index, data) {
 
 function populateSuccess(r, stat, jqXHR) {
     $('#fine-list').html(r);
-    $('#igtlist').datalist({
-        lines:true
+    nexts = {};
+    $('.igtrow').each(function(i, elt) {
+        igtid = $(elt).attr('igtid');
+        nexts[igtid] = $(elt).attr('next');
     });
+    localStorage.setItem('nexts', JSON.stringify(nexts));
 }
 
 function populateError() {
-    $('#fine-lists').text("An error occurred.");
+    $('#fine-list').text("An error occurred.");
 }
 
 /* display a single IGT instance */
@@ -121,6 +128,9 @@ function normalizeSuccess(r, stat, jqXHR) {
     // Once the normalized lines are shown, it's okay for
     // the user to use the green/yellow buttons.
     $('.rating-button').removeClass('rating-disabled');
+    $('.rating-button').addClass('rating-enabled');
+    $('#rating-green').click(function() {saveTier(GOOD_QUALITY)});
+    $('#rating-yellow').click(function() {saveTier(OK_QUALITY)});
 }
 
 function normalizeError() {
@@ -245,7 +255,39 @@ function addItem(prefix, jqAfter, rowtype) {
         </TR>');
 }
 
+/* Retrieve the IGT id and Corp ID */
+function igtId() {
+    return $('#igt-instance').attr('igtid');
+}
+
+function corpId() {
+    return $('#igt-instance').attr('corpid');
+}
+
 /* Save the edited tier! */
-function saveTier() {
-    $('#save-msg').text('Unimplemented.');
+function saveTier(rating) {
+
+    var data = {rating: rating};
+
+    console.log(igtId() + ' ' + corpId());
+    $.ajax({
+        url: '/save/'+corpId()+'/'+igtId(),
+        type: 'PUT',
+        data: JSON.stringify(data),
+        success: saveSuccess,
+        contentType: 'application/json',
+        error: saveError
+    });
+}
+
+function saveSuccess(r, stat, jqXHR) {
+    populateIGTs(corpId());
+    nexts = JSON.parse(localStorage.getItem('nexts'));
+    nextId = nexts[igtId()];
+    displayIGT(corpId(), nextId);
+}
+
+function saveError(r, stat, jqXHR) {
+    console.error("An error occurred saving the instance.");
+    console.error(jqXHR.toString());
 }

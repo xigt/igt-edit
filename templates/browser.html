@@ -27,7 +27,7 @@
             <div id="course-list" data-options="split:true,region:'center',title:'Corpora'" style="width:50%">
 
                 {# BEGIN CORPUS LIST #}
-                <ul class="easyui-datalist" data-options="onSelect:function(index, data){populateIGTs(index, data)}" lines="true" style="width:100%">
+                <ul class="easyui-datalist" data-options="onSelect:function(index, data){populateIGTs(data['value'])}" lines="true" style="width:100%">
                 {% for corpus in corpora %}
                     <li value="{{ corpus.get('id') }}" id="{{ corpus.get('name') }}">{{ corpus.get('name') }}</li>
                 {% endfor %}

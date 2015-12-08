@@ -12,3 +12,7 @@ XIGT_LIB = '/Users/rgeorgi/Documents/code/xigt'
 
 # SLEIPNIR
 SLEIPNIR_LIB = '/Users/rgeorgi/Documents/code/sleipnir'
+
+# -------------------------------------------
+# Users DB
+USER_DB = '/Users/rgeorgi/Documents/code/yggdrasil/users.js'

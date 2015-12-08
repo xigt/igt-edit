@@ -1,6 +1,5 @@
-<ul id="igtlist" class="easyui-datalist"
-    data-options="onSelect:function(index, data){displayIGT('{{ corp_id}}', data['value'])}">
-    {% for igt in igts %}
-        <li value="{{ igt.id }}">{{ igt.id }}</li>
-    {% endfor %}
-</ul>
+{% for igt in igts %}
+<div id="igtrow-{{ igt.id }}" igtid="{{ igt.id }}" next="{{ nexts.get(igt.id) }}" class="igtrow rated-{{ ratings.get(igt.id) if ratings.get(igt.id) else 0 }}"
+     onclick="displayIGT('{{ corp_id }}','{{ igt.id }}')">{{ igt.id }}</div>
+{% endfor %}
+
