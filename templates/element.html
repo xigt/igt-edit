@@ -19,11 +19,13 @@
     </div>
 
     {# Show normalized tier button #}
-    <input type="button" value="Show Clean Tier" onclick="$('#clean-tier').show(); $(this).hide();"/>
+    {% if state == 0 %}
+        <input type="button" value="Show Clean Tier" onclick="$('#clean-tier').show(); $(this).hide();"/>
+    {% endif %}
     <HR/>
 
     {# AUTO-CLEANED TIER #}
-    <div id="clean-tier" style="display:none;">
+    <div id="clean-tier" {% if state == 0 %}style="display:none;"{% endif %}>
         <H2>Clean Tier</H2>
         <TABLE class="cleantable">
             {% for item in igt.clean_tier(merge=True) %}
@@ -83,9 +85,9 @@
         {# BEGIN RATING BUTTONS #}
         <div id="rating-button-container">
             <div id="rating-buttons">
-                <img id="rating-green"  class="rating-button rating-disabled" src="static/images/smiley-green.png" onclick=""/>
+                <img id="rating-red"    class="rating-button rating-enabled"  src="static/images/smiley-red.png" onclick="saveIGT(BAD_QUALITY)"/>
                 <img id="rating-yellow" class="rating-button rating-disabled" src="static/images/smiley-yellow.png" onclick=""/>
-                <img id="rating-red"    class="rating-button rating-enabled"                 src="static/images/smiley-red.png" onclick="saveTier(BAD_QUALITY)"/>
+                <img id="rating-green"  class="rating-button rating-disabled" src="static/images/smiley-green.png" onclick=""/>
             </div>
         </div>
 

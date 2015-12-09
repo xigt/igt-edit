@@ -90,7 +90,13 @@ def display(corp_id, igt_id):
     xc.__class__ = RGCorpus
     xc._finish_load()
 
-    return render_template('element.html', xigt=xc, igt_id=igt_id, corp_id=corp_id)
+    # Type hinting
+    inst = xc[0]
+    assert isinstance(inst, RGIgt)
+
+    content = render_template('element.html', xigt=xc, igt_id=igt_id, corp_id=corp_id);
+
+    return json.dumps({"content":content})
 
 
 # -------------------------------------------
@@ -102,7 +108,8 @@ def display(corp_id, igt_id):
 def normalize(corp_id, igt_id):
 
     # Get the data...
-    lines = json.loads(request.data.decode('utf-8'))
+    data = request.get_json()
+    lines = data.get('lines')
 
     for i, line in enumerate(lines):
         if 'L' in line.get('tag'):
@@ -122,8 +129,12 @@ def normalize(corp_id, igt_id):
     for i, line in enumerate(lines):
         lines[i]['text'] = textlines[i]
 
+    set_state(1, corp_id, igt_id, NORM_STATE)
 
-    return render_template('normalized_tier.html', lines=lines)
+    retdata = {"content":render_template('normalized_tier.html', lines=lines)}
+
+    return json.dumps(retdata)
+
 
 # -------------------------------------------
 # After the user has corrected the normalized tiers,
@@ -132,7 +143,7 @@ def normalize(corp_id, igt_id):
 @app.route('/intentify/<corp_id>/<igt_id>', methods=['POST'])
 def intentify(corp_id, igt_id):
 
-    data = json.loads(request.data.decode('utf-8'))
+    data = request.get_json()
 
     inst = RGIgt(id=igt_id)
     inst.add_raw_tier(data.get('raw'))

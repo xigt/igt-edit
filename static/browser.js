@@ -38,12 +38,16 @@ function displayIGT(corp_id, igt_id) {
         url: url,
         success: displaySuccess,
         error: displayError,
-        dataType: "text"
+        contentType : "json"
     });
 }
 
 function displaySuccess(r, stat, jqXHR) {
-    $('#editor-panel').html(r);
+    // Get the data out of the response.
+    data = JSON.parse(r);
+    content = data['content'];
+    $('#editor-panel').html(content);
+
     // Assign the tooltips to the interface elements.
     assign_tooltips();
 
@@ -106,13 +110,13 @@ function normalizeIGT(corp_id, igt_id) {
     console.log('Normalizing '+igt_id);
     $('#normalized-contents').html('Loading...');
 
-    cleanData = get_clean_lines();
+    cleanData = {lines: get_clean_lines()};
 
     $.ajax({
         url: '/normalize/'+corp_id+'/'+igt_id,
         type: 'POST',
-        dataType: 'text',
-        contentType: 'text/plain',
+        dataType: 'json',
+        contentType: 'application/json',
         data: JSON.stringify(cleanData),
         success: normalizeSuccess,
         error: normalizeError
@@ -121,7 +125,9 @@ function normalizeIGT(corp_id, igt_id) {
 
 function normalizeSuccess(r, stat, jqXHR) {
     $('#normalized-tier').show();
-    $('#normalized-contents').html(r);
+
+    $('#normalized-contents').html(r['content']);
+
     assign_tooltips();
     stashNormLines();
 
@@ -129,12 +135,13 @@ function normalizeSuccess(r, stat, jqXHR) {
     // the user to use the green/yellow buttons.
     $('.rating-button').removeClass('rating-disabled');
     $('.rating-button').addClass('rating-enabled');
-    $('#rating-green').click(function() {saveTier(GOOD_QUALITY)});
-    $('#rating-yellow').click(function() {saveTier(OK_QUALITY)});
+    $('#rating-green').click(function() {saveIGT(GOOD_QUALITY)});
+    $('#rating-yellow').click(function() {saveIGT(OK_QUALITY)});
 }
 
-function normalizeError() {
+function normalizeError(r) {
     $('#normalized-contents').text("An error occured while normalizing.");
+    console.error(r);
 }
 
 /* INTENT-ification */
@@ -154,8 +161,8 @@ function generateFromNormalized(corp_id, igt_id) {
 
     $.ajax({
         url: '/intentify/'+corp_id+'/'+igt_id,
-        contentType: 'text/plain',
         dataType: 'json',
+        contentType: 'application/json',
         type: 'POST',
         data: JSON.stringify(data),
         success: intentifySuccess,
@@ -265,9 +272,14 @@ function corpId() {
 }
 
 /* Save the edited tier! */
-function saveTier(rating) {
+function saveIGT(rating) {
 
-    var data = {rating: rating};
+    var data = {rating: rating,
+                norm : get_normal_lines(),
+                clean: get_clean_lines(),
+                raw:   get_raw_lines()
+    };
+
 
     console.log(igtId() + ' ' + corpId());
     $.ajax({
