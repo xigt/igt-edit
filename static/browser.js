@@ -243,15 +243,17 @@ function restoreItem(itemId) {
 }
 
 function addItem(prefix, jqAfter, rowtype) {
-    numitems = $('.cleantable tr').length;
+    numitems = $('.'+rowtype).length;
 
     id = prefix+(numitems+1).toString();
+
+
 
     jqAfter.after('<TR class="textrow '+rowtype+'" id="'+id+'">\
         <TD class="short-col">\
             <img class="hovericon undo" src="static/images/undo.png" onclick="restoreItem(\''+id+'\')"/>\
             <img class="hovericon delete" src="static/images/delete.png" onclick="deleteItem(this, \''+id+'\')"/>\
-            <img class="hovericon add" src="static/images/add.png" onclick="addItem($(this).closest(\'tr\'))" />\
+            <img class="hovericon add" src="static/images/add.png" onclick="addItem(\''+prefix+'\',$(this).closest(\'tr\'))",\''+rowtype+'\' />\
         </TD>\
         <TD class="short-col">\
             <input class="tag-input" type="text" value=""/>\

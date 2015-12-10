@@ -22,7 +22,7 @@
 }
 
 /* "Element" Display Elements */
-.rawtable, .cleantable, .textrow, .normtable {
+.raw-table, .clean-table, .textrow, .normal-table {
     width: 95%;
 }
 

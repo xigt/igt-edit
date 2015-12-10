@@ -1,0 +1,40 @@
+{% macro tier_table(tier, table_type, id_prefix, editable) %}
+<TABLE class="{{ table_type }}-table">
+    {# Iterate over the lines... #}
+    {% for item in tier %}
+        <TR id="{{ item.id }}" class="textrow {{ table_type }}row">
+
+            {# COLUMN ONE #}
+            <TD class="short-col">
+                {# Add buttons if editable... #}
+                {% if editable %}
+                    <img class="hovericon undo" src="static/images/undo.png" onclick="restoreItem('{{ item.id }}')"/>
+                    <img class="hovericon delete" src="static/images/delete.png" onclick="deleteItem(this, '{{ item.id }}')"/>
+                    <img class="hovericon add" src="static/images/add.png" onclick="addItem('{{ id_prefix }}', $(this).closest('tr'), '{{ table_type }}row')" />
+                {% endif %}
+            </TD>
+
+            {# COLUMN TWO #}
+            <TD class="short-col">
+                {# Make the tags editable if editable... #}
+                {% if editable %}
+                    <input class="tag-input" value="{{ item.attributes.get('tag') }}" type="text"/>
+
+                {# Otherwise, tags are read-only. #}
+                {% else %}
+                    <pre class="tags">{{ item.attributes.get('tag') }}</pre>
+                {% endif %}
+            </TD>
+            <TD {% if editable %}class="textinput"{% endif %}>
+                {% if editable %}
+                    <input class="line-input" type="text" value="{{ item.text }}"/>
+                {% else %}
+                    <pre class="text">{{ item.text }}</pre>
+                {% endif %}
+            </TD>
+        </TR>
+    {% endfor %}
+</TABLE>
+{% endmacro %}
+
+{{ tier_table(tier, table_type, id_prefix, editable) }}

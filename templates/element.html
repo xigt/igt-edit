@@ -1,71 +1,42 @@
-
+{% import 'tier_table.html' as table %}
+{% from 'rating_button.html' import rating_button %}
 <div id="igt-instance" igtid="{{ igt_id }}" corpid="{{ corp_id }}">
     {# Iterate over every igt in the page... #}
-    {% for igt in xigt %}
-    <div id="{{ igt.id }}" class="igt-panel">
+    <div class="igt-panel">
 
     {# RAW TIER... #}
     <div class="raw-tier">
     <H2>Raw Tier</H2>
-        <TABLE class="rawtable">
-            {% for item in igt.raw_tier() %}
-                <TR class="textrow">
-                    <TD class="short-col"><pre></pre></TD>
-                    <TD class="short-col"><pre class="tags">{{item.attributes.get('tag')}}</pre></TD>
-                    <TD><pre class="text">{{ item.text }}</pre></TD>
-                </TR>
-            {% endfor %}
-        </TABLE>
+        {{ table.tier_table(rt, 'raw', 'r', False) }}
     </div>
 
-    {# Show normalized tier button #}
-    {% if state == 0 %}
-        <input type="button" value="Show Clean Tier" onclick="$('#clean-tier').show(); $(this).hide();"/>
-    {% endif %}
+    <input type="button" value="Show Clean Tier" onclick="$('#clean-tier').show(); $(this).hide();"/>
     <HR/>
 
     {# AUTO-CLEANED TIER #}
     <div id="clean-tier" {% if state == 0 %}style="display:none;"{% endif %}>
         <H2>Clean Tier</H2>
-        <TABLE class="cleantable">
-            {% for item in igt.clean_tier(merge=True) %}
-                <TR id="{{ item.igt.id }}-{{ item.id }}" class="textrow cleanrow">
-                    <TD class="short-col">
-                        <img class="hovericon undo" src="static/images/undo.png" onclick="restoreItem('{{ item.igt.id }}-{{ item.id }}')"/>
-                        <img class="hovericon delete" src="static/images/delete.png" onclick="deleteItem($(this), '{{ item.igt.id }}-{{ item.id}}')"/>
-                        <img class="hovericon add" src="static/images/add.png" onclick="addItem('c', $(this).closest('tr'), 'cleanrow')" />
-                    </TD>
-
-                    {# COLUMN WITH TAGS #}
-                    <TD class="short-col">
-                        <input class="tag-input" type="text" value="{{ item.attributes.get('tag') }}"/>
-                    </TD>
-
-                    {# COLUMN WITH CLEAN TEXT #}
-                    <TD class="textinput">
-                        <input id="{{ item.id }}" class="line-input" type="text" value="{{ item.text }}"/>
-                    </TD>
-
-                </TR>
-            {% endfor %}
-            {# Include an "ADD" button #}
-        </TABLE>
+        {{ table.tier_table(ct, 'clean', 'c', True) }}
         <BR/>
-        <input value="Generate Normalized Tier"
-               class="button" type="button" onclick="normalizeIGT('{{ corp_id }}','{{ igt.id }}');$(this).val('Regenerate Normalized Tier');"
+        <input
+                {% if nt_content is none %}
+                    value="Generate Normalized Tier"
+                {% else %}
+                    value="Regenerate Normalized Tier"
+                {% endif %}
+                class="button" type="button" onclick="normalizeIGT('{{ corp_id }}','{{ igt.id }}');$(this).val('Regenerate Normalized Tier');"
         />
     </div>
     {# END AUTO-CLEANED TIER #}
 
 
-
-
-
-        <div id="normalized-tier" style="display:none;clear:both">
+        <div id="normalized-tier" style="{% if nt_content is none %}display:none;{% endif %}clear:both">
             <HR/>
             <H2>Normalized Tier</H2>
             <div id="normalized-contents">
-
+                {% if nt_content is not none %}
+                    {{ nt_content | safe }}
+                {% endif %}
             </div>
             {# Calculate normalized #}
             <input type="button"
@@ -85,9 +56,12 @@
         {# BEGIN RATING BUTTONS #}
         <div id="rating-button-container">
             <div id="rating-buttons">
-                <img id="rating-red"    class="rating-button rating-enabled"  src="static/images/smiley-red.png" onclick="saveIGT(BAD_QUALITY)"/>
-                <img id="rating-yellow" class="rating-button rating-disabled" src="static/images/smiley-yellow.png" onclick=""/>
-                <img id="rating-green"  class="rating-button rating-disabled" src="static/images/smiley-green.png" onclick=""/>
+                {{ rating_button('red', True, 'BAD_QUALITY') }}
+                {{ rating_button('yellow', nt_content, 'OK_QUALITY') }}
+                {{ rating_button('green', nt_content, 'GOOD_QUALITY') }}
+{#                <img id="rating-red"    class="rating-button rating-enabled"  src="static/images/smiley-red.png" onclick="saveIGT(BAD_QUALITY)"/>#}
+{#                <img id="rating-yellow" class="rating-button rating-disabled" src="static/images/smiley-yellow.png" onclick=""/>#}
+{#                <img id="rating-green"  class="rating-button rating-disabled" src="static/images/smiley-green.png" onclick=""/>#}
             </div>
         </div>
 
@@ -101,6 +75,5 @@
 
     </div>
 
-{% endfor %}
 
 </div>

@@ -16,3 +16,9 @@ SLEIPNIR_LIB = '/Users/rgeorgi/Documents/code/sleipnir'
 # -------------------------------------------
 # Users DB
 USER_DB = '/Users/rgeorgi/Documents/code/yggdrasil/users.js'
+
+# -------------------------------------------
+# Values for line
+# -------------------------------------------
+LINE_TAGS = ['L','G','T']
+LINE_ATTRS = ['LN','AC']

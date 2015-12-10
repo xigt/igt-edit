@@ -6,7 +6,8 @@ import json, sys, logging, os
 import sqlite3
 from flask import Flask, render_template, url_for, request, g
 
-
+from xigt import Igt
+from xigt.codecs import xigtjson
 
 app = Flask(__name__)
 application = app
@@ -16,8 +17,8 @@ application = app
 # -------------------------------------------
 sys.path.append(os.path.dirname(__file__))
 from yggdrasil.config import USER_DB, INTENT_LIB, XIGT_LIB, SLEIPNIR_LIB
-from yggdrasil.users import get_rating, set_rating
-
+from yggdrasil.consts import NORM_STATE, CLEAN_STATE, RAW_STATE
+from yggdrasil.users import get_rating, set_rating, set_state
 
 sys.path.append(INTENT_LIB)
 sys.path.append(XIGT_LIB)
@@ -27,8 +28,7 @@ sys.path.append(SLEIPNIR_LIB)
 # Now that we've imported our dependencies,
 # we can register the blueprint.
 # -------------------------------------------
-import sleipnir
-app.register_blueprint(sleipnir.blueprint)
+from sleipnir import dbi
 
 # -------------------------------------------
 # Import other stuff here.
@@ -36,11 +36,12 @@ app.register_blueprint(sleipnir.blueprint)
 
 
 
-from xigt.codecs import xigtjson
-from intent.igt.rgxigt import RGCorpus, RGIgt, GlossLangAlignException, retrieve_normal_line
+from intent.igt.rgxigt import RGCorpus, RGIgt, retrieve_normal_line
+from intent.igt.xigt_manipulations import get_clean_tier, get_normal_tier, get_raw_tier, replace_lines
 from intent.igt.consts import ODIN_LANG_TAG, ODIN_GLOSS_TAG
-from intent.igt.igtutils import clean_lang_string, clean_gloss_string, clean_trans_string, \
-    strip_leading_whitespace, is_strict_columnar_alignment
+from intent.igt.consts import CLEAN_STATE as ODIN_CLEAN_STATE
+from intent.igt.igtutils import is_strict_columnar_alignment, rgencode
+from intent.igt.creation import add_text_tier_from_lines
 
 app.debug = True
 
@@ -56,9 +57,8 @@ YGG_LOG = logging.getLogger('YGG')
 # -------------------------------------------
 @app.route('/')
 def main():
-    corpora_json = json.loads(sleipnir.dbi.corpora().data.decode('utf-8'))
-    corpora = sorted(corpora_json.get('corpora'), key=lambda x: x.get('name'))
-
+    corpora_json = dbi.list_corpora()
+    corpora = sorted(corpora_json, key=lambda x: x.get('name'))
     return render_template('browser.html', corpora=corpora)
 
 # -------------------------------------------
@@ -67,7 +67,7 @@ def main():
 # -------------------------------------------
 @app.route('/populate/<corp_id>')
 def populate(corp_id):
-    xc = sleipnir.dbi.get_corpus(corp_id)
+    xc = dbi.get_corpus(corp_id)
     ratings = {igt_id: get_rating(1, corp_id, igt_id) for igt_id in [inst.id for inst in xc]}
     nexts = {}
     for i, igt in enumerate(xc):
@@ -86,15 +86,37 @@ def populate(corp_id):
 @app.route('/display/<corp_id>/<igt_id>', methods=['GET'])
 def display(corp_id, igt_id):
 
-    xc = sleipnir.dbi.get_igts(corp_id, igt_ids=[igt_id])
-    xc.__class__ = RGCorpus
-    xc._finish_load()
+    # -------------------------------------------
+    # Start by getting the IGT instance.
+    # -------------------------------------------
+    inst = dbi.get_igt(corp_id, igt_id)
 
-    # Type hinting
-    inst = xc[0]
-    assert isinstance(inst, RGIgt)
+    # -------------------------------------------
+    # Now, get the raw tier, and see if there's a clean tier.
+    # -------------------------------------------
+    rt = get_raw_tier(inst)
+    ct = get_clean_tier(inst, generate=False)
 
-    content = render_template('element.html', xigt=xc, igt_id=igt_id, corp_id=corp_id);
+    # -------------------------------------------
+    # Check to see if we already have a clean tier
+    # or normalized tier. If so, display them.
+    # -------------------------------------------
+    state = RAW_STATE
+    if ct is not None:
+        state = CLEAN_STATE
+    else:
+        ct = get_clean_tier(inst, merge=True)
+
+    nt = get_normal_tier(inst, generate=False)
+    nt_content = None
+    if nt is not None:
+        state = NORM_STATE
+        nt_content = render_template("tier_table.html", tier=nt, table_type="normal", id_prefix='n', editable=True)
+
+    # -------------------------------------------
+    # Render the element template.
+    # -------------------------------------------
+    content = render_template('element.html', state=state, rt=rt, ct=ct, nt_content=nt_content, igt=inst, igt_id=igt_id, corp_id=corp_id)
 
     return json.dumps({"content":content})
 
@@ -111,27 +133,36 @@ def normalize(corp_id, igt_id):
     data = request.get_json()
     lines = data.get('lines')
 
-    for i, line in enumerate(lines):
-        if 'L' in line.get('tag'):
-            lines[i]['text'] = clean_lang_string(lines[i]['text'])
-        elif 'G' in line.get('tag'):
-            lines[i]['text'] = clean_gloss_string(lines[i]['text'])
-        elif 'T' in line.get('tag'):
-            lines[i]['text'] = clean_trans_string(lines[i]['text'])
+    i = Igt(id=igt_id)
+    add_text_tier_from_lines(i, lines, 'c', ODIN_CLEAN_STATE)
+    nt = get_normal_tier(i)
+    YGG_LOG.critical(rgencode(nt))
+    #
+    #
+    # for i, line in enumerate(lines):
+    #     if 'L' in line.get('tag'):
+    #         lines[i]['text'] = clean_lang_string(lines[i]['text'])
+    #     elif 'G' in line.get('tag'):
+    #         lines[i]['text'] = clean_gloss_string(lines[i]['text'])
+    #     elif 'T' in line.get('tag'):
+    #         lines[i]['text'] = clean_trans_string(lines[i]['text'])
+    #
+    #     lines[i]['num'] = i+1
+    #
+    # # After the cleaning, proceed through the instances and smartly
+    # # remove whitespace (i.e. the smallest amount of leading whitespace
+    # # shared by all lines)
+    # textlines = strip_leading_whitespace([l.get('text') for l in lines])
+    #
+    #
+    # for i, line in enumerate(lines):
+    #     lines[i]['text'] = textlines[i]
+    #
+    # set_state(1, corp_id, igt_id, NORM_STATE)
 
-        lines[i]['num'] = i+1
+    content = render_template("tier_table.html", tier=nt, table_type="normal", id_prefix='n', editable=True)
 
-    # After the cleaning, proceed through the instances and smartly
-    # remove whitespace (i.e. the smallest amount of leading whitespace
-    # shared by all lines)
-    textlines = strip_leading_whitespace([l.get('text') for l in lines])
-
-    for i, line in enumerate(lines):
-        lines[i]['text'] = textlines[i]
-
-    set_state(1, corp_id, igt_id, NORM_STATE)
-
-    retdata = {"content":render_template('normalized_tier.html', lines=lines)}
+    retdata = {"content":content}
 
     return json.dumps(retdata)
 
@@ -181,12 +212,30 @@ def intentify(corp_id, igt_id):
 @app.route('/save/<corp_id>/<igt_id>', methods=['PUT'])
 def save(corp_id, igt_id):
     data = request.get_json()
+
     rating = data.get('rating')
 
+    # -------------------------------------------
+    # Get the lines
+    # -------------------------------------------
+    raw   = data.get('raw')
+    clean = data.get('clean')
+    norm  = data.get('norm')
+
+    YGG_LOG.critical(norm)
+
+    # Set the rating...
     set_rating(1, corp_id, igt_id, rating)
+
+    # Retrieve the IGT instance, and swap in the
+    # new cleaned and normalized tiers.
+    igt = dbi.get_igt(corp_id, igt_id)
+    igt = replace_lines(igt, clean, norm)
+
+    # Do the actually saving of the igt instance.
+    dbi.set_igt(corp_id, igt_id, igt)
+
     return str(get_rating(1, corp_id, igt_id))
-
-
 
 # -------------------------------------------
 # Static files
