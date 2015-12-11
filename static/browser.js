@@ -273,7 +273,7 @@ function analyzeUnmark(id) {
 }
 
 function analyzeWarn(id) {
-    $('#'+id).addClass(FEEDBACK_OK);
+    $('#'+id).addClass(FEEDBACK_WARN);
 }
 
 function analyzeOK(id) {
