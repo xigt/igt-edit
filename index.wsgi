@@ -17,7 +17,7 @@ application = app
 # -------------------------------------------
 sys.path.append(os.path.dirname(__file__))
 from yggdrasil.config import USER_DB, INTENT_LIB, XIGT_LIB, SLEIPNIR_LIB
-from yggdrasil.consts import NORM_STATE, CLEAN_STATE, RAW_STATE
+from yggdrasil.consts import NORM_STATE, CLEAN_STATE, RAW_STATE, NORMAL_TABLE_TYPE
 from yggdrasil.users import get_rating, set_rating, set_state
 
 sys.path.append(INTENT_LIB)
@@ -38,7 +38,7 @@ from sleipnir import dbi
 
 from intent.igt.rgxigt import RGCorpus, RGIgt, retrieve_normal_line
 from intent.igt.xigt_manipulations import get_clean_tier, get_normal_tier, get_raw_tier, replace_lines
-from intent.igt.consts import ODIN_LANG_TAG, ODIN_GLOSS_TAG
+from intent.igt.consts import ODIN_LANG_TAG, ODIN_GLOSS_TAG, CLEAN_ID, NORM_ID
 from intent.igt.consts import CLEAN_STATE as ODIN_CLEAN_STATE
 from intent.igt.igtutils import is_strict_columnar_alignment, rgencode
 from intent.igt.creation import add_text_tier_from_lines
@@ -111,7 +111,7 @@ def display(corp_id, igt_id):
     nt_content = None
     if nt is not None:
         state = NORM_STATE
-        nt_content = render_template("tier_table.html", tier=nt, table_type="normal", id_prefix='n', editable=True)
+        nt_content = render_template("tier_table.html", tier=nt, table_type=NORMAL_TABLE_TYPE, id_prefix=NORM_ID, editable=True)
 
     # -------------------------------------------
     # Render the element template.
@@ -133,38 +133,27 @@ def normalize(corp_id, igt_id):
     data = request.get_json()
     lines = data.get('lines')
 
-    i = Igt(id=igt_id)
-    add_text_tier_from_lines(i, lines, 'c', ODIN_CLEAN_STATE)
+    i = dbi.get_igt(corp_id, igt_id)
     nt = get_normal_tier(i)
-    YGG_LOG.critical(rgencode(nt))
-    #
-    #
-    # for i, line in enumerate(lines):
-    #     if 'L' in line.get('tag'):
-    #         lines[i]['text'] = clean_lang_string(lines[i]['text'])
-    #     elif 'G' in line.get('tag'):
-    #         lines[i]['text'] = clean_gloss_string(lines[i]['text'])
-    #     elif 'T' in line.get('tag'):
-    #         lines[i]['text'] = clean_trans_string(lines[i]['text'])
-    #
-    #     lines[i]['num'] = i+1
-    #
-    # # After the cleaning, proceed through the instances and smartly
-    # # remove whitespace (i.e. the smallest amount of leading whitespace
-    # # shared by all lines)
-    # textlines = strip_leading_whitespace([l.get('text') for l in lines])
-    #
-    #
-    # for i, line in enumerate(lines):
-    #     lines[i]['text'] = textlines[i]
-    #
-    # set_state(1, corp_id, igt_id, NORM_STATE)
 
-    content = render_template("tier_table.html", tier=nt, table_type="normal", id_prefix='n', editable=True)
+    content = render_template("tier_table.html", tier=nt, table_type=NORMAL_TABLE_TYPE, id_prefix=NORM_ID, editable=True)
 
     retdata = {"content":content}
 
     return json.dumps(retdata)
+
+# -------------------------------------------
+# Generate a cleaned tier
+# -------------------------------------------
+@app.route('/clean/<corp_id>/<igt_id>', methods=['GET'])
+def clean(corp_id, igt_id):
+
+    inst = dbi.get_igt(corp_id, igt_id)
+    return render_template("tier_table.html",
+                           table_type=NORMAL_TABLE_TYPE,
+                           tier=get_clean_tier(inst, force_generate=True),
+                           id_prefix=CLEAN_ID,
+                           editable=True)
 
 
 # -------------------------------------------
@@ -218,11 +207,9 @@ def save(corp_id, igt_id):
     # -------------------------------------------
     # Get the lines
     # -------------------------------------------
-    raw   = data.get('raw')
     clean = data.get('clean')
     norm  = data.get('norm')
 
-    YGG_LOG.critical(norm)
 
     # Set the rating...
     set_rating(1, corp_id, igt_id, rating)

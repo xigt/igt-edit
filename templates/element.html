@@ -4,30 +4,50 @@
     {# Iterate over every igt in the page... #}
     <div class="igt-panel">
 
-    {# RAW TIER... #}
-    <div class="raw-tier">
-    <H2>Raw Tier</H2>
-        {{ table.tier_table(rt, 'raw', 'r', False) }}
-    </div>
+        {# RAW TIER... #}
+        <div class="raw-tier">
+            <H2>Raw Tier</H2>
+            {{ table.tier_table(rt, 'raw', 'r', False) }}
+        </div>
 
-    <input type="button" value="Show Clean Tier" onclick="$('#clean-tier').show(); $(this).hide();"/>
-    <HR/>
+        <input type="button"
 
-    {# AUTO-CLEANED TIER #}
-    <div id="clean-tier" {% if state == 0 %}style="display:none;"{% endif %}>
-        <H2>Clean Tier</H2>
-        {{ table.tier_table(ct, 'clean', 'c', True) }}
-        <BR/>
-        <input
-                {% if nt_content is none %}
-                    value="Generate Normalized Tier"
-                {% else %}
-                    value="Regenerate Normalized Tier"
-                {% endif %}
-                class="button" type="button" onclick="normalizeIGT('{{ corp_id }}','{{ igt.id }}');$(this).val('Regenerate Normalized Tier');"
+               {# If we have not created a clean tier, do not alert about overwriting. #}
+               {% if state <= 1 %}
+                   value="Generate Clean Tier"   onclick="cleanIGT('{{ corp_id }}', '{{ igt.id }}', false)"
+
+               {# If we've already created a clean tier, alert about overwriting. #}
+               {% else %}
+                   value="Regenerate Clean Tier" onclick="cleanIGT('{{ corp_id }}', '{{ igt.id }}', true)"
+               {% endif %}
         />
-    </div>
-    {# END AUTO-CLEANED TIER #}
+        <HR/>
+
+        {# AUTO-CLEANED TIER #}
+        <div id="clean-tier"
+
+             {# If the state isn't cleaned, don't show #}
+             {% if state < 1 %}
+                 style="display:none;"
+             {% endif %}>
+
+            <H2>Clean Tier</H2>
+            <div id="clean-contents">
+                {% if state >= 1 %}
+                    {{ table.tier_table(ct, 'clean', 'c', True) }}
+                {% endif %}
+            </div>
+            <BR/>
+            <input
+                {% if nt_content is none %}
+                    value="Generate Normalized Tier"   onclick="normalizeIGT('{{ corp_id }}', '{{ igt.id }}', false)"
+                {% else %}
+                    value="Regenerate Normalized Tier" onclick="normalizeIGT('{{ corp_id }}', '{{ igt.id }}', true)"
+                {% endif %}
+                    class="button" type="button"
+            />
+        </div>
+        {# END AUTO-CLEANED TIER #}
 
 
         <div id="normalized-tier" style="{% if nt_content is none %}display:none;{% endif %}clear:both">

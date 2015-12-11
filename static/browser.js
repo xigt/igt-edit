@@ -105,25 +105,99 @@ function get_normal_lines() {
     return get_tier_lines('.normalrow');
 }
 
+/* Cleaning */
+function cleanIGT(corp_id, igt_id, alreadyGenerated) {
+
+    cleanExists = $('#clean-contents').html().trim();
+
+    var regenerate = true;
+    if (cleanExists) {
+        regenerate = confirm("This will replace the data on the clean tier. Is this ok?");
+    }
+
+    if (regenerate) {
+        $('#clean-contents').html('Loading...');
+        $('#normalized-contents').html('');
+        $('#normalized-tier').hide();
+        disableYellowGreen();
+
+
+        $.ajax({
+            url: '/clean/' + corp_id + '/' + igt_id,
+            type: 'GET',
+            dataType: 'html',
+            success: cleanSuccess,
+            error: cleanError
+        });
+    }
+}
+
+function cleanSuccess(r, stat, jqXHR) {
+
+    $('#clean-contents').html(r);
+    $('#clean-tier').show();
+
+    assign_tooltips();
+    stashCleanLines();
+}
+
+function cleanError(r) {
+    $('#clean-tier').show();
+    $('#clean-contents').text("An error occurred.");
+    console.error(r);
+}
+
 /* Normalization */
-function normalizeIGT(corp_id, igt_id) {
-    console.log('Normalizing '+igt_id);
-    $('#normalized-contents').html('Loading...');
+function normalizeIGT(corp_id, igt_id, alreadyGenerated) {
 
-    cleanData = {lines: get_clean_lines()};
+    normExists = $('#normalized-contents').html().trim();
 
-    $.ajax({
-        url: '/normalize/'+corp_id+'/'+igt_id,
-        type: 'POST',
-        dataType: 'json',
-        contentType: 'application/json',
-        data: JSON.stringify(cleanData),
-        success: normalizeSuccess,
-        error: normalizeError
-    });
+    var regenerate = true;
+
+    if (normExists) {
+        regenerate = confirm("This will replace the existing normalized tier. Are you sure? ");
+    }
+
+    if (regenerate) {
+
+        $('#normalized-contents').html('Loading...');
+
+        cleanData = {lines: get_clean_lines()};
+
+        $.ajax({
+            url: '/normalize/' + corp_id + '/' + igt_id,
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify(cleanData),
+            success: normalizeSuccess,
+            error: normalizeError
+        });
+    }
+}
+
+function disableYellowGreen() {
+    rg = $('#rating-green');
+    ry = $('#rating-yellow');
+
+    rg.removeClass('rating-enabled');
+    ry.removeClass('rating-enabled');
+    rg.addClass('rating-disabled');
+    ry.addClass('rating-disabled');
+
+    rg.click();
+    ry.click();
+}
+
+function enableYellowGreen() {
+    $('.rating-button').removeClass('rating-disabled');
+    $('.rating-button').addClass('rating-enabled');
+    $('#rating-green').click(function() {saveIGT(GOOD_QUALITY)});
+    $('#rating-yellow').click(function() {saveIGT(OK_QUALITY)});
 }
 
 function normalizeSuccess(r, stat, jqXHR) {
+
     $('#normalized-tier').show();
 
     $('#normalized-contents').html(r['content']);
@@ -133,10 +207,7 @@ function normalizeSuccess(r, stat, jqXHR) {
 
     // Once the normalized lines are shown, it's okay for
     // the user to use the green/yellow buttons.
-    $('.rating-button').removeClass('rating-disabled');
-    $('.rating-button').addClass('rating-enabled');
-    $('#rating-green').click(function() {saveIGT(GOOD_QUALITY)});
-    $('#rating-yellow').click(function() {saveIGT(OK_QUALITY)});
+    enableYellowGreen();
 }
 
 function normalizeError(r) {
