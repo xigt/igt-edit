@@ -21,6 +21,10 @@
     background-color: rgb(162, 210, 97);
 }
 
+.current-row {
+    background-color: rgb(197, 251, 251);
+}
+
 /* "Element" Display Elements */
 .raw-table, .clean-table, .textrow, .normal-table {
     width: 95%;

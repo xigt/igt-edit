@@ -13,6 +13,7 @@ var CLEAN_REGEN = "Regenerate Cleaned Tier";
 
 var NORM_GEN    = "Generate Normalized Tier";
 var NORM_REGEN  = "Regenerate Normalized Tier";
+const CURRENT_ROW     = "current-row"
 // -------------------------------------------
 
 /* Populate the IGT pane */
@@ -62,6 +63,8 @@ function displaySuccess(r, stat, jqXHR) {
 
     // Stash the current versions of the clean lines for undo-ing.
     stashCleanLines();
+    $('.igtrow').removeClass(CURRENT_ROW);
+    $('#igtrow-'+igtId()).addClass(CURRENT_ROW);
 }
 
 function displayError(r, stat, jqXHR) {
