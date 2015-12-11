@@ -38,7 +38,7 @@
                 {% endif %}
             </div>
             <BR/>
-            <input
+            <input id="generate-normalized"
                 {% if nt_content is none %}
                     value="Generate Normalized Tier"   onclick="normalizeIGT('{{ corp_id }}', '{{ igt.id }}', false)"
                 {% else %}
