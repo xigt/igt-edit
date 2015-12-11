@@ -145,7 +145,7 @@ def clean(corp_id, igt_id):
 
     inst = dbi.get_igt(corp_id, igt_id)
     return render_template("tier_table.html",
-                           table_type=NORMAL_TABLE_TYPE,
+                           table_type=CLEAN_TABLE_TYPE,
                            tier=get_clean_tier(inst, force_generate=True),
                            id_prefix=CLEAN_ID,
                            editable=True)

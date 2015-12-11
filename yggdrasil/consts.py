@@ -12,3 +12,4 @@ NORM_STATE = 2
 # Types of tables
 # -------------------------------------------
 NORMAL_TABLE_TYPE = 'normal'
+CLEAN_TABLE_TYPE  = 'clean'
