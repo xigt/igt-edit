@@ -1,8 +1,12 @@
 {% import 'tier_table.html' as table %}
 {% from 'rating_button.html' import rating_button %}
 <div id="igt-instance" igtid="{{ igt_id }}" corpid="{{ corp_id }}">
+
+
     {# Iterate over every igt in the page... #}
     <div class="igt-panel">
+    <H1>Instance {{ igt_id }}</H1>
+    <HR/>
 
         {# RAW TIER... #}
         <div class="raw-tier">
