@@ -147,6 +147,8 @@ function cleanSuccess(r, stat, jqXHR) {
     $('#clean-contents').html(r);
     $('#clean-tier').show();
 
+    $('#generate-clean').val(CLEAN_REGEN);
+
     assign_tooltips();
     stashCleanLines();
 }

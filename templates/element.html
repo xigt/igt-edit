@@ -10,7 +10,7 @@
             {{ table.tier_table(rt, 'raw', 'r', False) }}
         </div>
 
-        <input type="button"
+        <input type="button" id="generate-clean"
 
                {# If we have not created a clean tier, do not alert about overwriting. #}
                {% if state <= 1 %}
