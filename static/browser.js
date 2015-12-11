@@ -185,8 +185,8 @@ function disableYellowGreen() {
     rg.addClass('rating-disabled');
     ry.addClass('rating-disabled');
 
-    rg.click();
-    ry.click();
+    rg.attr('onclick', '');
+    ry.attr('onclick', '');
 }
 
 function enableYellowGreen() {
@@ -199,7 +199,7 @@ function enableYellowGreen() {
 function normalizeSuccess(r, stat, jqXHR) {
 
     $('#normalized-tier').show();
-
+    $('#generate-normalized').val("Regenerate Normalized Tier")
     $('#normalized-contents').html(r['content']);
 
     assign_tooltips();
