@@ -140,9 +140,9 @@ function cleanIGT(corp_id, igt_id, alreadyGenerated) {
 
     if (regenerate) {
         $('#clean-contents').html('Loading...');
-        $('#normalized-contents').html('');
         $('#generate-normalized').val(NORM_GEN);
         $('#normalized-tier').hide();
+        $('#normalized-contents').html('');
         disableYellowGreen();
 
 
@@ -397,7 +397,7 @@ function saveSuccess(r, stat, jqXHR) {
     nextId = nexts[igtId()];
 
     // scroll the igt list to the appropriate position
-    var scrollPos = $('#igtrow-'+igtId()).position().top + $('#fine-list').scrollTop();
+    var scrollPos = $('#igtrow-'+igtId()).position().top + $('#fine-list').scrollTop()-52;
     $('#fine-list').animate({scrollTop : scrollPos}, 0);
 
     // Now display the current IGT.
