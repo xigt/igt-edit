@@ -1,10 +1,19 @@
 /* Constant Strings */
-var AJAX_LOADER_BIG = '<IMG src="static/images/ajax-loader.gif"/>'
-var AJAX_LOADER_SMALL = '<IMG src="static/images/ajax-loader-small.gif"/>'
+var AJAX_LOADER_BIG = '<IMG src="static/images/ajax-loader.gif"/>';
+var AJAX_LOADER_SMALL = '<IMG src="static/images/ajax-loader-small.gif"/>';
 
+/* QUALITY CONSTANTS */
 var BAD_QUALITY = 3;
 var OK_QUALITY = 2;
 var GOOD_QUALITY = 1;
+
+/* CONSTANTS FOR BUTTON TITLES */
+var CLEAN_GEN   = "Generate Cleaned Tier";
+var CLEAN_REGEN = "Regenerate Cleaned Tier";
+
+var NORM_GEN    = "Generate Normalized Tier";
+var NORM_REGEN  = "Regenerate Normalized Tier";
+// -------------------------------------------
 
 /* Populate the IGT pane */
 function populateIGTs(corpId) {
@@ -118,6 +127,7 @@ function cleanIGT(corp_id, igt_id, alreadyGenerated) {
     if (regenerate) {
         $('#clean-contents').html('Loading...');
         $('#normalized-contents').html('');
+        $('#generate-normalized').val(NORM_GEN);
         $('#normalized-tier').hide();
         disableYellowGreen();
 
@@ -199,7 +209,7 @@ function enableYellowGreen() {
 function normalizeSuccess(r, stat, jqXHR) {
 
     $('#normalized-tier').show();
-    $('#generate-normalized').val("Regenerate Normalized Tier")
+    $('#generate-normalized').val(NORM_REGEN);
     $('#normalized-contents').html(r['content']);
 
     assign_tooltips();
