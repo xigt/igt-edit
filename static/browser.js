@@ -3,16 +3,26 @@ var AJAX_LOADER_BIG = '<IMG src="static/images/ajax-loader.gif"/>';
 var AJAX_LOADER_SMALL = '<IMG src="static/images/ajax-loader-small.gif"/>';
 
 /* QUALITY CONSTANTS */
-var BAD_QUALITY = 3;
-var OK_QUALITY = 2;
-var GOOD_QUALITY = 1;
+const BAD_QUALITY = 3;
+const OK_QUALITY = 2;
+const GOOD_QUALITY = 1;
 
 /* CONSTANTS FOR BUTTON TITLES */
-var CLEAN_GEN   = "Generate Cleaned Tier";
-var CLEAN_REGEN = "Regenerate Cleaned Tier";
+const CLEAN_GEN   = "Generate Cleaned Tier";
+const CLEAN_REGEN = "Regenerate Cleaned Tier";
 
-var NORM_GEN    = "Generate Normalized Tier";
-var NORM_REGEN  = "Regenerate Normalized Tier";
+const NORM_GEN    = "Generate Normalized Tier";
+const NORM_REGEN  = "Regenerate Normalized Tier";
+
+/* CLASS CONSTANTS */
+const RATING_DISABLED = "rating-disabled";
+const RATING_ENABLED  = "rating-enabled";
+
+const FEEDBACK_WARN   = "feedback-warn";
+const FEEDBACK_OK     = "feedback-ok";
+
+const ICON_CLICKED    = 'iconclicked'
+
 const CURRENT_ROW     = "current-row"
 // -------------------------------------------
 
@@ -195,18 +205,18 @@ function disableYellowGreen() {
     rg = $('#rating-green');
     ry = $('#rating-yellow');
 
-    rg.removeClass('rating-enabled');
-    ry.removeClass('rating-enabled');
-    rg.addClass('rating-disabled');
-    ry.addClass('rating-disabled');
+    rg.removeClass(RATING_ENABLED);
+    ry.removeClass(RATING_ENABLED);
+    rg.addClass(RATING_DISABLED);
+    ry.addClass(RATING_DISABLED);
 
     rg.attr('onclick', '');
     ry.attr('onclick', '');
 }
 
 function enableYellowGreen() {
-    $('.rating-button').removeClass('rating-disabled');
-    $('.rating-button').addClass('rating-enabled');
+    $('.rating-button').removeClass(RATING_DISABLED);
+    $('.rating-button').addClass(RATING_ENABLED);
     $('#rating-green').click(function() {saveIGT(GOOD_QUALITY)});
     $('#rating-yellow').click(function() {saveIGT(OK_QUALITY)});
 }
@@ -257,16 +267,16 @@ function generateFromNormalized(corp_id, igt_id) {
 }
 
 function analyzeUnmark(id) {
-    $('#'+id).removeClass('feedback-warn');
-    $('#'+id).removeClass('feedback-ok');
+    $('#'+id).removeClass(FEEDBACK_WARN);
+    $('#'+id).removeClass(FEEDBACK_OK);
 }
 
 function analyzeWarn(id) {
-    $('#'+id).addClass('feedback-warn');
+    $('#'+id).addClass(FEEDBACK_OK);
 }
 
 function analyzeOK(id) {
-    $('#'+id).addClass('feedback-ok');
+    $('#'+id).addClass(FEEDBACK_OK);
 }
 
 function analysisNotifier(r, id) {
@@ -295,8 +305,8 @@ function deleteItem(elt, itemId) {
 
     /* If this button has been clicked already,
      * restore (as a toggle) */
-    if ($(elt).hasClass('iconclicked')) {
-        $(elt).removeClass('iconclicked');
+    if ($(elt).hasClass(ICON_CLICKED)) {
+        $(elt).removeClass(ICON_CLICKED);
 
         // Unmark the item for deletion.
         $(identifier).find('input').prop('disabled',false);
@@ -305,7 +315,7 @@ function deleteItem(elt, itemId) {
     } else {
 
     /* Otherwise, set it clicked, and delete it. */
-        $(elt).addClass('iconclicked');
+        $(elt).addClass(ICON_CLICKED);
 
         // If neither of the boxes are filled out, delete the
         // element.
