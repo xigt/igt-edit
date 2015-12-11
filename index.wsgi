@@ -134,7 +134,7 @@ def normalize(corp_id, igt_id):
     lines = data.get('lines')
 
     i = dbi.get_igt(corp_id, igt_id)
-    nt = get_normal_tier(i)
+    nt = get_normal_tier(i, force_generate=True)
 
     content = render_template("tier_table.html", tier=nt, table_type=NORMAL_TABLE_TYPE, id_prefix=NORM_ID, editable=True)
 
