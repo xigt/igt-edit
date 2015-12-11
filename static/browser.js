@@ -27,12 +27,13 @@ const CURRENT_ROW     = "current-row"
 // -------------------------------------------
 
 /* Populate the IGT pane */
-function populateIGTs(corpId) {
+function populateIGTs(corpId, async = true) {
     $('#fine-list').html('<div style="text-align:center;top:40px;position:relative;">'+AJAX_LOADER_SMALL+'</div>');
     $.ajax({
         url:'/populate/'+corpId,
         error: populateError,
-        success: populateSuccess
+        success: populateSuccess,
+        async: async
     })
 }
 
@@ -391,9 +392,15 @@ function saveIGT(rating) {
 }
 
 function saveSuccess(r, stat, jqXHR) {
-    populateIGTs(corpId());
+    populateIGTs(corpId(), false);
     nexts = JSON.parse(localStorage.getItem('nexts'));
     nextId = nexts[igtId()];
+
+    // scroll the igt list to the appropriate position
+    var scrollPos = $('#igtrow-'+igtId()).position().top + $('#fine-list').scrollTop();
+    $('#fine-list').animate({scrollTop : scrollPos}, 0);
+
+    // Now display the current IGT.
     displayIGT(corpId(), nextId);
 }
 

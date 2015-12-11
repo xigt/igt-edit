@@ -1,5 +1,13 @@
 {% for igt in igts %}
-<div id="igtrow-{{ igt.id }}" igtid="{{ igt.id }}" next="{{ nexts.get(igt.id) }}" class="igtrow rated-{{ ratings.get(igt.id) if ratings.get(igt.id) else 0 }}"
-     onclick="displayIGT('{{ corp_id }}','{{ igt.id }}')">{{ igt.id }}</div>
-{% endfor %}
+<div id="igtrow-{{ igt.id }}" igtid="{{ igt.id }}" next="{{ nexts.get(igt.id) }}"
 
+     {# Set the class based on the rating. #}
+     class="igtrow rated-{{ ratings.get(igt.id) if ratings.get(igt.id) else 0 }}"
+
+     {# set the onclick behavior. #}
+     onclick="displayIGT('{{ corp_id }}','{{ igt.id }}')">
+     {# Add an anchor so that we can scroll to it. #}
+     <a name="igtitem-{{ igt.id }}"/>
+    {{ igt.id }}
+</div>
+{% endfor %}
