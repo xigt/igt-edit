@@ -3,11 +3,7 @@ import json, sys, logging, os
 # -------------------------------------------
 # Set up the Flask app
 # -------------------------------------------
-import sqlite3
 from flask import Flask, render_template, url_for, request, g
-
-from xigt import Igt
-from xigt.codecs import xigtjson
 
 app = Flask(__name__)
 application = app
@@ -17,7 +13,7 @@ application = app
 # -------------------------------------------
 sys.path.append(os.path.dirname(__file__))
 from yggdrasil.config import USER_DB, INTENT_LIB, XIGT_LIB, SLEIPNIR_LIB
-from yggdrasil.consts import NORM_STATE, CLEAN_STATE, RAW_STATE, NORMAL_TABLE_TYPE
+from yggdrasil.consts import NORM_STATE, CLEAN_STATE, RAW_STATE, NORMAL_TABLE_TYPE, CLEAN_TABLE_TYPE
 from yggdrasil.users import get_rating, set_rating, set_state
 
 sys.path.append(INTENT_LIB)
@@ -39,9 +35,8 @@ from sleipnir import dbi
 from intent.igt.rgxigt import RGCorpus, RGIgt, retrieve_normal_line
 from intent.igt.xigt_manipulations import get_clean_tier, get_normal_tier, get_raw_tier, replace_lines
 from intent.igt.consts import ODIN_LANG_TAG, ODIN_GLOSS_TAG, CLEAN_ID, NORM_ID
-from intent.igt.consts import CLEAN_STATE as ODIN_CLEAN_STATE
 from intent.igt.igtutils import is_strict_columnar_alignment, rgencode
-from intent.igt.creation import add_text_tier_from_lines
+from intent.igt.search import raw_tier, cleaned_tier, normalized_tier
 
 app.debug = True
 
@@ -94,8 +89,8 @@ def display(corp_id, igt_id):
     # -------------------------------------------
     # Now, get the raw tier, and see if there's a clean tier.
     # -------------------------------------------
-    rt = get_raw_tier(inst)
-    ct = get_clean_tier(inst, generate=False)
+    rt = raw_tier(inst)
+    ct = cleaned_tier(inst)
 
     # -------------------------------------------
     # Check to see if we already have a clean tier
@@ -107,7 +102,7 @@ def display(corp_id, igt_id):
     else:
         ct = get_clean_tier(inst, merge=True)
 
-    nt = get_normal_tier(inst, generate=False)
+    nt = normalized_tier(inst)
     nt_content = None
     if nt is not None:
         state = NORM_STATE
@@ -209,7 +204,6 @@ def save(corp_id, igt_id):
     # -------------------------------------------
     clean = data.get('clean')
     norm  = data.get('norm')
-
 
     # Set the rating...
     set_rating(1, corp_id, igt_id, rating)
