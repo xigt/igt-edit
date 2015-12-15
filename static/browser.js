@@ -26,6 +26,13 @@ const ICON_CLICKED    = 'iconclicked'
 const CURRENT_ROW     = "current-row"
 // -------------------------------------------
 
+/* Login the User */
+function login() {
+    var userid = $('#userid').val();
+    console.log(userid);
+    window.location.href = '/user/'+userid;
+}
+
 /* Populate the IGT pane */
 function populateIGTs(corpId, async) {
 

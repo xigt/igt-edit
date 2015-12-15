@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    {% from 'scripts.html' import scripts %}
+    {{ scripts() }}
+    <title>Login</title>
+
+</head>
+<body>
+    <div id="container" style="text-align:center">
+
+        <div id="login-box" class="easyui-panel"
+             style="width:300px;padding:10px;display:inline-block">
+
+            <span style="color:red">
+            {% if try_again %}
+                Invalid UserID. Please try again.
+            {% endif %}
+            </span>
+
+            <div>User ID:</div>
+
+            <input id="userid" class="easyui-textbox"
+                   data-options="prompt:'Enter User ID...'"/>
+            <input class="easyui-linkbutton" type="submit"
+                   value="Submit"
+                   onclick="login()"
+            />
+
+        </div>
+    </div>
+
+</body>
+</html>

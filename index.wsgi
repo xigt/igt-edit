@@ -58,9 +58,25 @@ YGG_LOG = logging.getLogger('YGG')
 # -------------------------------------------
 @app.route('/')
 def main():
-    corpora_json = dbi.list_corpora()
-    corpora = sorted(corpora_json, key=lambda x: x.get('name'))
-    return render_template('browser.html', corpora=corpora)
+    return render_template('login_screen.html', try_again=False)
+
+# -------------------------------------------
+# Retrieve the specific user.
+# -------------------------------------------
+@app.route('/user/<userid>')
+def get_user(userid):
+    user_corpora = get_user_corpora(userid)
+    if user_corpora is not None:
+        all_corpora  = dbi.list_corpora()
+
+        filtered_corpora = [c for c in all_corpora if c.get('id') in user_corpora]
+
+        sorted_corpora = sorted(filtered_corpora,
+                                key=lambda x: x.get('name'))
+        return render_template('browser.html', corpora=sorted_corpora)
+    else:
+        return render_template('login_screen.html', try_again=True)
+
 
 # -------------------------------------------
 # When a user clicks a "corpus", display the
