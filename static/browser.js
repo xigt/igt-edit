@@ -64,7 +64,7 @@ function populateError() {
 /* display a single IGT instance */
 function displayIGT(corp_id, igt_id) {
     $('#editor-panel').html(AJAX_LOADER_BIG);
-    url = 'display/'+corp_id+'/'+igt_id
+    url = '/display/'+corp_id+'/'+igt_id
     $.ajax({
         url: url,
         success: displaySuccess,
