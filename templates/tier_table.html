@@ -1,40 +1,86 @@
 {% macro tier_table(tier, table_type, id_prefix, editable) %}
 <TABLE class="{{ table_type }}-table">
+
+    {# Generate the header #}
+    <TR class="table-header">
+        <TD class="short-col buttons"></TD>
+        <TD class="short-col tags">Tag</TD>
+        <TD class="short-col labels">Labels</TD>
+        <TD>Line Text</TD>
+    </TR>
+
     {# Iterate over the lines... #}
     {% for item in tier %}
-        <TR id="{{ item.id }}" class="textrow {{ table_type }}row">
-
-            {# COLUMN ONE #}
-            <TD class="short-col">
-                {# Add buttons if editable... #}
-                {% if editable %}
-                    <img class="hovericon undo" src="static/images/undo.png" onclick="restoreItem('{{ item.id }}')"/>
-                    <img class="hovericon delete" src="static/images/delete.png" onclick="deleteItem(this, '{{ item.id }}')"/>
-                    <img class="hovericon add" src="static/images/add.png" onclick="addItem('{{ id_prefix }}', $(this).closest('tr'), '{{ table_type }}row')" />
-                {% endif %}
-            </TD>
-
-            {# COLUMN TWO #}
-            <TD class="short-col">
-                {# Make the tags editable if editable... #}
-                {% if editable %}
-                    <input class="tag-input" value="{{ item.attributes.get('tag') }}" type="text"/>
-
-                {# Otherwise, tags are read-only. #}
-                {% else %}
-                    <pre class="tags">{{ item.attributes.get('tag') }}</pre>
-                {% endif %}
-            </TD>
-            <TD {% if editable %}class="textinput"{% endif %}>
-                {% if editable %}
-                    <input class="line-input" type="text" value="{{ item.text }}"/>
-                {% else %}
-                    <pre class="text">{{ item.text }}</pre>
-                {% endif %}
-            </TD>
-        </TR>
+        {{ tier_line(item, table_type, editable, id_prefix) }}
     {% endfor %}
 </TABLE>
+{% endmacro %}
+
+{% macro tier_line(item, table_type, editable, id_prefix) %}
+    {% if item is none %}
+        {% set item_id = '' %}
+        {% set tagresult = ['M'] %}
+        {% set item_text = '' %}
+    {% else %}
+        {% set item_id = item.id %}
+        {% set tagresult = item.attributes.get('tag').split('+') %}
+        {% set item_text = item.text %}
+    {% endif %}
+    <TR id="{{ item_id }}" class="textrow {{ table_type }}row">
+
+        {# COLUMN ONE --- BUTTONS (OR NOTHING) #}
+        <TD class="short-col buttons">
+            {# Add buttons if editable... #}
+            {% if editable %}
+                <img class="hovericon undo" src="static/images/undo.png" onclick="restoreItem('{{ item_id }}')"/>
+                <img class="hovericon delete" src="static/images/delete.png" onclick="deleteItem(this, '{{ item_id }}')"/>
+                <img class="hovericon add" src="static/images/add.png" onclick="addItem('{{ id_prefix }}', $(this).closest('tr'), '{{ table_type }}row')" />
+            {% endif %}
+        </TD>
+
+        {# COLUMN TWO --- TAGS #}
+        <TD class="short-col tags">
+            {# Make the tags editable if editable... #}
+            {% if editable %}
+                <select name="tag">
+                    {% for tag in config.LINE_TAGS %}
+                        <option value="{{ tag }}" {{ 'selected="selected"' if tag in tagresult }}>{{ tag }}</option>
+                    {% endfor %}
+                </select>
+            {% else %}
+                <pre class="tags">{{ tagresult[0] }}</pre>
+            {% endif %}
+        </TD>
+
+        {# COLUMN 3 -- LABELS #}
+        <TD class="short-col labels">
+
+            {# 3A: EDITABLE #}
+            {% if editable %}
+            <div class="taglabel-combo"></div>
+            <div class="taglabels" id="taglabels-{{ item_id }}">
+                <div>
+                {% for attr in config.LINE_ATTRS %}
+                     <input type="checkbox" value="{{ attr }}" name="{{ attr }}" {{ 'checked="checked"' if attr in tagresult }}/>{{ attr }}<BR/>
+                {% endfor %}
+                </div>
+            </div>
+
+            {# 3B: DISPLAY ONLY #}
+            {% else %}
+                <pre class="tags">{{ '+'.join(tagresult[1:]) }}</pre>
+            {% endif %}
+        </TD>
+
+        {# COLUMN 4 - ACTUAL TEXT #}
+        <TD {% if editable %}class="textinput"{% endif %}>
+            {% if editable %}
+                <input class="line-input" type="text" value="{{ item_text }}"/>
+            {% else %}
+                <pre class="text">{{ item_text }}</pre>
+            {% endif %}
+        </TD>
+    </TR>
 {% endmacro %}
 
 {{ tier_table(tier, table_type, id_prefix, editable) }}

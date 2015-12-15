@@ -17,5 +17,5 @@ USER_DB = '/var/www/yggdrasil-users/users.js'
 # -------------------------------------------
 # Values for line
 # -------------------------------------------
-LINE_TAGS = ['L','G','T']
-LINE_ATTRS = ['LN','AC']
+LINE_TAGS = ['L','G','T','M']
+LINE_ATTRS = ['AC', 'CN', 'DB', 'LN', 'SY']

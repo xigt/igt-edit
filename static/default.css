@@ -32,6 +32,7 @@
 
 .short-col {
     width:60px;
+    text-align:center;
 }
 
 .textrow pre {
@@ -41,6 +42,28 @@
 .short-col input {
     width:50px;
     font-family:Courier;
+}
+
+
+.table-header {
+    font-variant: small-caps;
+}
+
+.table-header td {
+    border-bottom: thin solid #1EBCAB;
+    text-align: center;
+}
+
+td.buttons {
+    width:60px;
+}
+
+td.tags {
+    width:48px;
+}
+
+td.labels {
+    width:92px;
 }
 
 /* The input fields... */
