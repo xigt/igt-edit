@@ -1,5 +1,5 @@
 {% macro rating_button(color, enabled, quality) %}
-    <img id="rating-{{ color }}" src="static/images/smiley-{{ color }}.png" class="rating-button {{ 'rating-enabled' if enabled else 'rating-disabled' }}"
+    <img id="rating-{{ color }}" src="/static/images/smiley-{{ color }}.png" class="rating-button {{ 'rating-enabled' if enabled else 'rating-disabled' }}"
         {% if enabled %}
          onclick="saveIGT({{ quality }})"
         {% else %}
