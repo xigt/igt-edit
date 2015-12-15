@@ -27,7 +27,10 @@ const CURRENT_ROW     = "current-row"
 // -------------------------------------------
 
 /* Populate the IGT pane */
-function populateIGTs(corpId, async = true) {
+function populateIGTs(corpId, async) {
+
+    if (typeof async === 'undefined') {async = true;}
+
     $('#fine-list').html('<div style="text-align:center;top:40px;position:relative;">'+AJAX_LOADER_SMALL+'</div>');
     $.ajax({
         url:'/populate/'+corpId,
