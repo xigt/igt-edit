@@ -1,6 +1,6 @@
 /* Constant Strings */
-var AJAX_LOADER_BIG = '<IMG src="static/images/ajax-loader.gif"/>';
-var AJAX_LOADER_SMALL = '<IMG src="static/images/ajax-loader-small.gif"/>';
+var AJAX_LOADER_BIG = '<IMG src="/static/images/ajax-loader.gif"/>';
+var AJAX_LOADER_SMALL = '<IMG src="/static/images/ajax-loader-small.gif"/>';
 
 /* QUALITY CONSTANTS */
 const BAD_QUALITY = 3;
