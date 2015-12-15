@@ -7,6 +7,21 @@ KEY_RATING = 'rating'
 KEY_PROGRESS = 'progress'
 KEY_STATE = 'state'
 
+def get_user_corpora(user_id):
+    """
+    Get the corpora that are owned by this user.
+    """
+    with open(USER_DB) as f:
+        json_obj = json.load(f)
+        user_corpora = json_obj['users'].get(user_id)
+
+        if user_corpora is None:
+            return None
+        else:
+            return user_corpora.get('corpora')
+
+
+
 def get(user_id, corp_id, igt_id, key):
     # Open the JSON file
     with open(USER_DB) as f:
@@ -28,12 +43,6 @@ def get_progress(user_id, corp_id, igt_id):
 
 def set_rating(user_id, corp_id, igt_id, rating):
     set(user_id, corp_id, igt_id, KEY_RATING, rating)
-
-def get_state(user_id, corp_id, igt_id):
-    return get(user_id, corp_id, igt_id, KEY_STATE)
-
-def set_state(user_id, corp_id, igt_id, state):
-    set(user_id, corp_id, igt_id, KEY_STATE, state)
 
 def set(user_id, corp_id, igt_id, key, val):
 

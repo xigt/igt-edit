@@ -13,9 +13,9 @@ application = app
 # -------------------------------------------
 sys.path.append(os.path.dirname(__file__))
 from yggdrasil import config
-from yggdrasil.config import USER_DB, INTENT_LIB, XIGT_LIB, SLEIPNIR_LIB, LINE_TAGS, LINE_ATTRS
+from yggdrasil.config import INTENT_LIB, XIGT_LIB, SLEIPNIR_LIB, LINE_TAGS, LINE_ATTRS
 from yggdrasil.consts import NORM_STATE, CLEAN_STATE, RAW_STATE, NORMAL_TABLE_TYPE, CLEAN_TABLE_TYPE
-from yggdrasil.users import get_rating, set_rating, set_state
+from yggdrasil.users import get_rating, set_rating, get_user_corpora
 
 sys.path.append(INTENT_LIB)
 sys.path.append(XIGT_LIB)
@@ -58,9 +58,25 @@ YGG_LOG = logging.getLogger('YGG')
 # -------------------------------------------
 @app.route('/')
 def main():
-    corpora_json = dbi.list_corpora()
-    corpora = sorted(corpora_json, key=lambda x: x.get('name'))
-    return render_template('browser.html', corpora=corpora)
+    return render_template('login_screen.html', try_again=False)
+
+# -------------------------------------------
+# Retrieve the specific user.
+# -------------------------------------------
+@app.route('/user/<userid>')
+def get_user(userid):
+    user_corpora = get_user_corpora(userid)
+    if user_corpora is not None:
+        all_corpora  = dbi.list_corpora()
+
+        filtered_corpora = [c for c in all_corpora if c.get('id') in user_corpora]
+
+        sorted_corpora = sorted(filtered_corpora,
+                                key=lambda x: x.get('name'))
+        return render_template('browser.html', corpora=sorted_corpora)
+    else:
+        return render_template('login_screen.html', try_again=True)
+
 
 # -------------------------------------------
 # When a user clicks a "corpus", display the

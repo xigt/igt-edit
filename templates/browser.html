@@ -1,24 +1,15 @@
 <HTML xmlns="http://www.w3.org/1999/html">
 
 <HEAD>
-    {# Start off with the script imports... #}
-    <script type="text/javascript" src="static/libs/jquery.min.js"></script>
-    <script type="text/javascript" src="static/libs/easyui/jquery.easyui.min.js"></script>
+    <TITLE>XIGT Editor</TITLE>
 
-    {# And the stylesheet.. #}
-    <link rel="stylesheet" type="text/css" href="static/libs/easyui/themes/default/easyui.css">
-
-    {# And our own scripts... #}
-    <script type="text/javascript" src="static/tooltips.js"></script>
-    <script type="text/javascript" src="static/browser.js"></script>
-    <script type="text/javascript" src="static/tiers.js"></script>
-    <link rel="stylesheet" type="text/css" href="static/default.css"/>
-
+    {% from 'scripts.html' import scripts %}
+    {{ scripts() }}
     {% from 'tier_table.html' import tier_line %}
+
     <script id="row_template" type="text/plain">
         {{ tier_line(none, '', true, '') }}
     </script>
-
 </HEAD>
 
 <BODY>
