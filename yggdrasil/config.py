@@ -1,21 +1,18 @@
-# Configuration file for the web interface
-XIGT_DIR = '/Users/rgeorgi/Dropbox/riples/data/xigt_data/XAML'
-
 # Debug mode?
 DEBUG = True
 
 # INTENT
-INTENT_LIB = '/Users/rgeorgi/Documents/code/intent'
+INTENT_LIB = '/opt/intent'
 
 # XIGT
-XIGT_LIB = '/Users/rgeorgi/Documents/code/xigt'
+XIGT_LIB = '/opt/xigt'
 
 # SLEIPNIR
-SLEIPNIR_LIB = '/Users/rgeorgi/Documents/code/sleipnir'
+SLEIPNIR_LIB = '/opt/sleipnir'
 
 # -------------------------------------------
 # Users DB
-USER_DB = '/Users/rgeorgi/Documents/code/yggdrasil/users.js'
+USER_DB = '/var/www/yggdrasil-users/users.js'
 
 # -------------------------------------------
 # Values for line
