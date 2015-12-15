@@ -69,6 +69,9 @@ function displaySuccess(r, stat, jqXHR) {
     content = data['content'];
     $('#editor-panel').html(content);
 
+    // createCombos
+    createCombos();
+
     // Assign the tooltips to the interface elements.
     assign_tooltips();
 
@@ -76,6 +79,43 @@ function displaySuccess(r, stat, jqXHR) {
     stashCleanLines();
     $('.igtrow').removeClass(CURRENT_ROW);
     $('#igtrow-'+igtId()).addClass(CURRENT_ROW);
+}
+
+/* COMBO FUNCTIONS */
+function createCombos() {
+    $('.taglabel-combo').each(function(i, comboElt) {
+        if (!$(comboElt).hasClass('combo-f')) {
+            var labels = $(comboElt).next('.taglabels');
+            $(comboElt).combo({
+                multiple: true,
+                editable: false,
+                checkbox: true
+            });
+            var panel = $(comboElt).combo('panel');
+            labels.appendTo(panel);
+
+            labels.find('input').each(function (i, elt) {
+
+                $(elt).click(function () {
+                    updateCombo(comboElt, labels);
+                });
+            });
+
+            // Begin an array of the marked items
+            updateCombo(comboElt, labels);
+        }
+    });
+}
+
+function updateCombo(comboElt, labels) {
+    var labelArr = [];
+    $(labels).find('input').each(function(i, labelElt) {
+        var v = $(labelElt).val();
+        if ($(labelElt).is(':checked')) {
+            labelArr.push(v);
+        }
+    });
+    $(comboElt).combo('setText', labelArr.join('+'));
 }
 
 function displayError(r, stat, jqXHR) {
@@ -163,6 +203,7 @@ function cleanSuccess(r, stat, jqXHR) {
 
     $('#generate-clean').val(CLEAN_REGEN);
 
+    createCombos();
     assign_tooltips();
     stashCleanLines();
 }
@@ -230,6 +271,7 @@ function normalizeSuccess(r, stat, jqXHR) {
 
     assign_tooltips();
     stashNormLines();
+    createCombos();
 
     // Once the normalized lines are shown, it's okay for
     // the user to use the green/yellow buttons.
@@ -320,8 +362,7 @@ function deleteItem(elt, itemId) {
 
         // If neither of the boxes are filled out, delete the
         // element.
-        if ($(identifier).find('.tag-input').val().trim() == '' &&
-            $(identifier).find('.line-input').val().trim() == '') {
+        if ($(identifier).find('.line-input').val().trim() == '') {
             $(identifier).remove();
 
         // Otherwise, simply mark it for deletion.
@@ -344,21 +385,16 @@ function addItem(prefix, jqAfter, rowtype) {
 
     id = prefix+(numitems+1).toString();
 
+    var lineHTML = $($('#row_template').html());
+    lineHTML.attr('id', id);    // set the id to the new id
+    lineHTML.addClass(rowtype); // Add the row class
 
+    /* Change the functions */
+    lineHTML.find('.undo').attr("onclick", "restoreItem('"+id+'")');
+    lineHTML.find('.delete').attr("onclick", "deleteItem(this, '"+id+"')");
+    lineHTML.find('.add').attr("onclick", "addItem('"+prefix+"',$(this).closest('tr'),'"+rowtype+"')");
 
-    jqAfter.after('<TR class="textrow '+rowtype+'" id="'+id+'">\
-        <TD class="short-col">\
-            <img class="hovericon undo" src="static/images/undo.png" onclick="restoreItem(\''+id+'\')"/>\
-            <img class="hovericon delete" src="static/images/delete.png" onclick="deleteItem(this, \''+id+'\')"/>\
-            <img class="hovericon add" src="static/images/add.png" onclick="addItem(\''+prefix+'\',$(this).closest(\'tr\'))",\''+rowtype+'\' />\
-        </TD>\
-        <TD class="short-col">\
-            <input class="tag-input" type="text" value=""/>\
-        </TD>\
-        <TD class="textinput">\
-            <input class="line-input" type="text" value=""/>\
-        </TD>\
-        </TR>');
+    jqAfter.after(lineHTML.get(0));
 }
 
 /* Retrieve the IGT id and Corp ID */

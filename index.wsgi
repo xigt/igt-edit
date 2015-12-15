@@ -12,13 +12,19 @@ application = app
 # Import the configuration.
 # -------------------------------------------
 sys.path.append(os.path.dirname(__file__))
-from yggdrasil.config import USER_DB, INTENT_LIB, XIGT_LIB, SLEIPNIR_LIB
+from yggdrasil import config
+from yggdrasil.config import USER_DB, INTENT_LIB, XIGT_LIB, SLEIPNIR_LIB, LINE_TAGS, LINE_ATTRS
 from yggdrasil.consts import NORM_STATE, CLEAN_STATE, RAW_STATE, NORMAL_TABLE_TYPE, CLEAN_TABLE_TYPE
 from yggdrasil.users import get_rating, set_rating, set_state
 
 sys.path.append(INTENT_LIB)
 sys.path.append(XIGT_LIB)
 sys.path.append(SLEIPNIR_LIB)
+
+# -------------------------------------------
+# Add the configuration to the app config
+# -------------------------------------------
+app.config.from_object(config)
 
 # -------------------------------------------
 # Now that we've imported our dependencies,
@@ -137,6 +143,14 @@ def normalize(corp_id, igt_id):
 
     return json.dumps(retdata)
 
+def tagfunc(tagstr):
+    tags = tagstr.split('+')
+    maintag = tags[0]
+    r = {'maintag':maintag, 'attrs':[]}
+    for elt in tags[1:]:
+        r['attrs'].append(elt)
+    return r
+
 # -------------------------------------------
 # Generate a cleaned tier
 # -------------------------------------------
@@ -148,7 +162,10 @@ def clean(corp_id, igt_id):
                            table_type=CLEAN_TABLE_TYPE,
                            tier=get_clean_tier(inst, force_generate=True),
                            id_prefix=CLEAN_ID,
-                           editable=True)
+                           editable=True,
+                           tag_options=LINE_TAGS,
+                           label_options=LINE_ATTRS,
+                           tagfunc=tagfunc)
 
 
 # -------------------------------------------
