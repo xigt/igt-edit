@@ -21,9 +21,9 @@ const RATING_ENABLED  = "rating-enabled";
 const FEEDBACK_WARN   = "feedback-warn";
 const FEEDBACK_OK     = "feedback-ok";
 
-const ICON_CLICKED    = 'iconclicked'
+const ICON_CLICKED    = "iconclicked";
 
-const CURRENT_ROW     = "current-row"
+const CURRENT_ROW     = "current-row";
 // -------------------------------------------
 
 /* Login the User */

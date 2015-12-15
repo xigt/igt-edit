@@ -44,12 +44,6 @@ def get_progress(user_id, corp_id, igt_id):
 def set_rating(user_id, corp_id, igt_id, rating):
     set(user_id, corp_id, igt_id, KEY_RATING, rating)
 
-def get_state(user_id, corp_id, igt_id):
-    return get(user_id, corp_id, igt_id, KEY_STATE)
-
-def set_state(user_id, corp_id, igt_id, state):
-    set(user_id, corp_id, igt_id, KEY_STATE, state)
-
 def set(user_id, corp_id, igt_id, key, val):
 
     # Load the existing JSON file

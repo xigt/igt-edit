@@ -13,9 +13,9 @@ application = app
 # -------------------------------------------
 sys.path.append(os.path.dirname(__file__))
 from yggdrasil import config
-from yggdrasil.config import USER_DB, INTENT_LIB, XIGT_LIB, SLEIPNIR_LIB, LINE_TAGS, LINE_ATTRS
+from yggdrasil.config import INTENT_LIB, XIGT_LIB, SLEIPNIR_LIB, LINE_TAGS, LINE_ATTRS
 from yggdrasil.consts import NORM_STATE, CLEAN_STATE, RAW_STATE, NORMAL_TABLE_TYPE, CLEAN_TABLE_TYPE
-from yggdrasil.users import get_rating, set_rating, set_state
+from yggdrasil.users import get_rating, set_rating, get_user_corpora
 
 sys.path.append(INTENT_LIB)
 sys.path.append(XIGT_LIB)
