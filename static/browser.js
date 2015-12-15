@@ -153,7 +153,7 @@ function get_tier_lines(rowSelector) {
 
         linedata = {};
 
-        linedata['tag'] = $(el).find('.tag-input').val();
+        linedata['tag'] = $(el).find('.tags option:selected').val();
 
         li = $(el).find('.line-input');
         linedata['text'] = li.val();
