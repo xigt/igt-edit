@@ -5,6 +5,7 @@ import json, sys, logging, os
 # -------------------------------------------
 from flask import Flask, render_template, url_for, request, g
 
+
 app = Flask(__name__)
 application = app
 
@@ -39,6 +40,7 @@ from sleipnir import dbi
 
 
 from intent.igt.rgxigt import RGCorpus, RGIgt, retrieve_normal_line
+from intent.igt.creation import create_text_tier_from_lines
 from intent.igt.xigt_manipulations import get_clean_tier, get_normal_tier, get_raw_tier, replace_lines
 from intent.igt.consts import ODIN_LANG_TAG, ODIN_GLOSS_TAG, CLEAN_ID, NORM_ID
 from intent.igt.igtutils import is_strict_columnar_alignment, rgencode
@@ -148,9 +150,10 @@ def normalize(corp_id, igt_id):
 
     # Get the data...
     data = request.get_json()
-    lines = data.get('lines')
+    clean_lines = data.get('lines')
 
     i = dbi.get_igt(corp_id, igt_id)
+    replace_lines(i, clean_lines, None)
     nt = get_normal_tier(i, force_generate=True)
 
     content = render_template("tier_table.html", tier=nt, table_type=NORMAL_TABLE_TYPE, id_prefix=NORM_ID, editable=True)
