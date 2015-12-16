@@ -1,3 +1,7 @@
+from random import randint
+
+import sys
+
 from .config import USER_DB
 import json
 import logging
@@ -7,19 +11,70 @@ KEY_RATING = 'rating'
 KEY_PROGRESS = 'progress'
 KEY_STATE = 'state'
 
+def list_users():
+    json_obj = load_db()
+    users = json_obj.get('users')
+    return users.keys() if users else []
+
+def load_db():
+    """
+    :rtype: dict
+    """
+    with open(USER_DB) as f:
+        return json.load(f)
+
+def dump_db(json_obj):
+    if json_obj is not None:
+        try:
+            json_f = open(USER_DB, 'w')
+        except PermissionError as pe:
+            DB_LOG.critical('ERROR: Could not open database "{}" for writing.'.format(USER_DB))
+            sys.exit(2)
+        json.dump(json_obj, json_f)
+        json_f.close()
+    else:
+        raise Exception("JSON object is None")
+
+def gen_id(length=8):
+    alphabet = '0123456789abcdefghijklmnopqrstuvwzyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    ret_str = ''
+    for i in range(length):
+        r = randint(0,61)
+        ret_str += alphabet[r]
+    return ret_str
+
+def add_user(user_id=None):
+    json_obj = load_db()
+    if user_id is None:
+        user_id = gen_id()
+        assert user_id not in list_users()
+
+    json_obj['users'][user_id] = {'corpora':[]}
+    dump_db(json_obj)
+    return user_id
+
+def del_user(user_id):
+    json_obj = load_db()
+    try:
+        del json_obj['users'][user_id]
+    except KeyError:
+        DB_LOG.critical('No such userID "{}"'.format(user_id))
+        sys.exit(2)
+    dump_db(json_obj)
+
+
+
 def get_user_corpora(user_id):
     """
     Get the corpora that are owned by this user.
     """
-    with open(USER_DB) as f:
-        json_obj = json.load(f)
-        user_corpora = json_obj['users'].get(user_id)
+    json_obj = load_db()
+    user_corpora = json_obj['users'].get(user_id)
 
-        if user_corpora is None:
-            return None
-        else:
-            return user_corpora.get('corpora')
-
+    if user_corpora is None:
+        return None
+    else:
+        return user_corpora.get('corpora')
 
 
 def get(user_id, corp_id, igt_id, key):
