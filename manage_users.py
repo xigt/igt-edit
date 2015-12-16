@@ -1,10 +1,14 @@
 from yggdrasil.users import *
 
-def delete_prompt():
+def enum_users():
     userdict = {}
     for i, user_id in enumerate(list_users()):
         userdict[str(i)] = user_id
         print('\t({}) {}'.format(i, user_id))
+    return userdict
+
+def delete_prompt():
+    userdict = enum_users()
 
     while True:
         resp = input("Delete which user?\nOptions: {#} or {q} (cancel): ")
@@ -30,6 +34,72 @@ def add_prompt():
 def quit():
     sys.exit(0)
 
+def enum_corpora(all_corpora, user_corpora, i):
+    print("Available Corpora:")
+    corp_dict = {}
+    corpus_keys = sorted(all_corpora.keys())
+    for i, corp_id in enumerate([c for c in corpus_keys if c not in user_corpora], start=i):
+        print("\t({1}) {0}".format(all_corpora.get(corp_id).get('name'), i))
+        corp_dict[str(i)] = corp_id
+    return corp_dict
+
+def manage_user(user_id):
+    while True:
+
+
+        add_delete_exit = False
+        while not add_delete_exit:
+
+            from sleipnir import dbi
+            i = 0
+            all_corpora = {c.get('id'):c for c in dbi.list_corpora()}
+            user_corpora = get_user_corpora(user_id)
+
+            print("\nCurrent user corpora:")
+            deldict = {}
+            for corp_id in user_corpora:
+                print("\t({}) {}".format(i, all_corpora.get(corp_id).get('name')))
+                deldict[str(i)] = corp_id
+                i+=1
+
+            corpdict = enum_corpora(all_corpora, user_corpora, i=i)
+            resp = input("Add/delete corpus for user?\nOptions: {{#}} or {{q}}: ")
+
+            if resp.strip() in corpdict:
+                add_user_corpora(user_id, corpdict[resp.strip()])
+                print('Corpus "{}" added to user "{}"'.format(all_corpora[corpdict[resp.strip()]].get('name'), user_id), end='\n\n')
+                add_delete_exit = True
+                break
+            elif resp.strip() in deldict:
+                corp_name = all_corpora[deldict[resp.strip()]].get('name')
+                while True:
+                    yn = input('\nThis will remove corpus "{}" from user "{}". Continue?\nOptions {{y}} {{n}}'.format(corp_name, user_id))
+                    if yn.strip() == 'y':
+                        del_user_corpora(user_id, deldict[resp.strip()])
+                        print('Corpus "{}" was removed from user "{}".'.format(corp_name, user_id), end='\n\n')
+                        add_delete_exit = True
+                        break
+                    elif yn.strip() == 'n':
+                        print("Aborted.\n")
+                        add_delete_exit = True
+                        break
+            elif resp.strip() == 'q':
+                return
+
+
+def manage_users():
+    while True:
+        print("\nCurrent Users:")
+        userdict=enum_users()
+        resp = input("Manage which user?\nOptions: {{#}} or {{q}}: ")
+        if resp.strip() in userdict:
+            manage_user(userdict[resp.strip()])
+            return
+        elif resp.strip() == 'q':
+            return
+
+
+
 def main_prompt():
     while True:
         print("Current users are:")
@@ -38,8 +108,10 @@ def main_prompt():
         print()
         actions = {'d':delete_prompt,
                    'a':add_prompt,
-                   'q':quit}
-        resp = input("Action?\nOptions: {d}elete, {a}dd, {q}uit: ")
+                   'q':quit,
+                   'm':manage_users}
+
+        resp = input("Action?\nOptions: {d}elete, {a}dd, {m}anage, {q}uit: ")
         if resp.strip() in actions:
             actions[resp]()
 
