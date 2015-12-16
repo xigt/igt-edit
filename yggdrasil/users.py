@@ -62,7 +62,23 @@ def del_user(user_id):
         sys.exit(2)
     dump_db(json_obj)
 
+def add_user_corpora(user_id, corp_id):
+    json_obj = load_db()
+    if user_id not in json_obj["users"]:
+        DB_LOG.critical('UserID "{}" does not exist.'.format(user_id))
+        sys.exit(2)
+    else:
+        json_obj["users"][user_id]["corpora"].append(corp_id)
+        dump_db(json_obj)
 
+def del_user_corpora(user_id, corp_id):
+    json_obj = load_db()
+    if user_id not in json_obj["users"]:
+        DB_LOG.critical('UserID "{}" does not exist.'.format(user_id))
+        sys.exit(2)
+    else:
+        json_obj["users"][user_id]["corpora"].remove(corp_id)
+        dump_db(json_obj)
 
 def get_user_corpora(user_id):
     """
