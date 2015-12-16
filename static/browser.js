@@ -405,6 +405,7 @@ function addItem(prefix, jqAfter, rowtype) {
     lineHTML.find('.add').attr("onclick", "addItem('"+prefix+"',$(this).closest('tr'),'"+rowtype+"')");
 
     jqAfter.after(lineHTML.get(0));
+    createCombos();
 }
 
 /* Retrieve the IGT id and Corp ID */
