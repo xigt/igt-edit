@@ -1,3 +1,8 @@
+/* Some EasyUI Fixes */
+.tooltip {
+    z-index: 9900000 !important;
+}
+
 /* IGT Rows */
 .igtrow {
     border-top: thin solid black;

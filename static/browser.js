@@ -106,7 +106,6 @@ function createCombos() {
             labels.appendTo(panel);
 
             labels.find('input').each(function (i, elt) {
-
                 $(elt).click(function () {
                     updateCombo(comboElt, labels);
                 });
@@ -116,6 +115,8 @@ function createCombos() {
             updateCombo(comboElt, labels);
         }
     });
+
+    labelTooltips();
 }
 
 function updateCombo(comboElt, labels) {
