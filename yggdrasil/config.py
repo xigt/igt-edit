@@ -21,4 +21,4 @@ USER_DB = '/Users/rgeorgi/Documents/code/yggdrasil/users.js'
 # Values for line
 # -------------------------------------------
 LINE_TAGS = ['L','G','T','M']
-LINE_ATTRS = ['AC', 'CN', 'DB', 'LN', 'SY']
+LINE_ATTRS = ['AC', 'CN', 'CR', 'DB', 'LN', 'SY', 'LT', 'AL', 'EX']

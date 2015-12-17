@@ -34,8 +34,15 @@ function assign_tooltips() {
 }
 
 function labelTooltips() {
-    tt('.labelspan-AC', "Author Citation");
+    tt('.labelspan-AC', "Author Name or Citation");
     tt('.labelspan-DB', "Double Column");
+    tt('.labelspan-CN', "Linguistic Construction");
+    tt('.labelspan-CR', "Corruption");
+    tt('.labelspan-LN', "Language Name");
+    tt('.labelspan-SY', "Syntax Information");
+    tt('.labelspan-LT', "Literal Translation");
+    tt('.labelspan-AL', "Alternative L/G/T");
+    tt('.labelspan-EX', "Extra");
 }
 
 function hoverIconTooltips() {
