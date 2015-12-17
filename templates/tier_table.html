@@ -61,7 +61,9 @@
             <div class="taglabels" id="taglabels-{{ item_id }}">
                 <div>
                 {% for attr in config.LINE_ATTRS %}
-                     <input type="checkbox" value="{{ attr }}" name="{{ attr }}" {{ 'checked="checked"' if attr in tagresult }}/>{{ attr }}<BR/>
+                    <span class="labelspan-{{ attr }}">
+                        <input type="checkbox" value="{{ attr }}" name="{{ attr }}" {{ 'checked="checked"' if attr in tagresult }}/>{{ attr }}
+                    </span><BR/>
                 {% endfor %}
                 </div>
             </div>
