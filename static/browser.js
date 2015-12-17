@@ -99,7 +99,8 @@ function createCombos() {
             $(comboElt).combo({
                 multiple: true,
                 editable: false,
-                checkbox: true
+                checkbox: true,
+                panelHeight: 'auto'
             });
             var panel = $(comboElt).combo('panel');
             labels.appendTo(panel);
