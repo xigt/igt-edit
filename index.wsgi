@@ -152,6 +152,10 @@ def normalize(corp_id, igt_id):
     data = request.get_json()
     clean_lines = data.get('lines')
 
+    # Retrieve the original IGT from the database
+    # and swap out the new clean lines for the old
+    # clean lines, then generate a new normalized
+    # tier based on that.
     i = dbi.get_igt(corp_id, igt_id)
     replace_lines(i, clean_lines, None)
     nt = get_normal_tier(i, force_generate=True)
