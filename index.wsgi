@@ -3,7 +3,8 @@ import json, sys, logging, os
 # -------------------------------------------
 # Set up the Flask app
 # -------------------------------------------
-from flask import Flask, render_template, url_for, request, g
+from flask import Flask, render_template, url_for, request, g, make_response
+
 
 
 app = Flask(__name__)
@@ -15,12 +16,15 @@ application = app
 sys.path.append(os.path.dirname(__file__))
 from yggdrasil import config
 from yggdrasil.config import INTENT_LIB, XIGT_LIB, SLEIPNIR_LIB, LINE_TAGS, LINE_ATTRS
-from yggdrasil.consts import NORM_STATE, CLEAN_STATE, RAW_STATE, NORMAL_TABLE_TYPE, CLEAN_TABLE_TYPE
-from yggdrasil.users import get_rating, set_rating, get_user_corpora
+from yggdrasil.consts import NORM_STATE, CLEAN_STATE, RAW_STATE, NORMAL_TABLE_TYPE, CLEAN_TABLE_TYPE, EDITOR_DATA_SRC, \
+    EDITOR_METADATA_TYPE
 
 sys.path.append(INTENT_LIB)
 sys.path.append(XIGT_LIB)
 sys.path.append(SLEIPNIR_LIB)
+
+from yggdrasil.metadata import get_rating, set_rating
+from yggdrasil.users import get_user_corpora
 
 # -------------------------------------------
 # Add the configuration to the app config
@@ -38,11 +42,11 @@ from sleipnir import dbi
 # -------------------------------------------
 
 
-
+from intent.igt.metadata import set_meta_attr
 from intent.igt.rgxigt import RGCorpus, RGIgt, retrieve_normal_line
 from intent.igt.creation import create_text_tier_from_lines
 from intent.igt.xigt_manipulations import get_clean_tier, get_normal_tier, get_raw_tier, replace_lines
-from intent.igt.consts import ODIN_LANG_TAG, ODIN_GLOSS_TAG, CLEAN_ID, NORM_ID
+from intent.igt.consts import ODIN_LANG_TAG, ODIN_GLOSS_TAG, CLEAN_ID, NORM_ID, DATA_PROV, DATA_SRC
 from intent.igt.igtutils import is_strict_columnar_alignment, rgencode
 from intent.igt.search import raw_tier, cleaned_tier, normalized_tier
 
@@ -75,7 +79,7 @@ def get_user(userid):
 
         sorted_corpora = sorted(filtered_corpora,
                                 key=lambda x: x.get('name'))
-        return render_template('browser.html', corpora=sorted_corpora)
+        return render_template('browser.html', corpora=sorted_corpora, user_id=userid)
     else:
         return render_template('login_screen.html', try_again=True)
 
@@ -87,7 +91,7 @@ def get_user(userid):
 @app.route('/populate/<corp_id>')
 def populate(corp_id):
     xc = dbi.get_corpus(corp_id)
-    ratings = {igt_id: get_rating(1, corp_id, igt_id) for igt_id in [inst.id for inst in xc]}
+    ratings = {inst.id: get_rating(inst) for inst in xc}
     nexts = {}
     for i, igt in enumerate(xc):
         if i < len(xc)-1:
@@ -244,19 +248,27 @@ def save(corp_id, igt_id):
     # -------------------------------------------
     clean = data.get('clean')
     norm  = data.get('norm')
+    user_id = data.get('userID')
 
     # Set the rating...
-    set_rating(1, corp_id, igt_id, rating)
+
 
     # Retrieve the IGT instance, and swap in the
     # new cleaned and normalized tiers.
     igt = dbi.get_igt(corp_id, igt_id)
     igt = replace_lines(igt, clean, norm)
+    set_rating(igt, user_id, rating)
+
+    # Add the data provenance to the tier.
+    ct = cleaned_tier(igt)
+    nt = normalized_tier(igt)
+    for t in [ct, nt]:
+        set_meta_attr(t, DATA_PROV, DATA_SRC, EDITOR_DATA_SRC, metadata_type=EDITOR_METADATA_TYPE)
 
     # Do the actually saving of the igt instance.
     dbi.set_igt(corp_id, igt_id, igt)
 
-    return str(get_rating(1, corp_id, igt_id))
+    return make_response()
 
 # -------------------------------------------
 # Static files

@@ -425,10 +425,13 @@ function corpId() {
 /* Save the edited tier! */
 function saveIGT(rating) {
 
+    var userID = $("#userID").text();
+
     var data = {rating: rating,
-                norm : get_normal_lines(),
-                clean: get_clean_lines(),
-                raw:   get_raw_lines()
+        norm : get_normal_lines(),
+        clean: get_clean_lines(),
+        raw:   get_raw_lines(),
+        userID: userID
     };
 
 

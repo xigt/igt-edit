@@ -8,7 +8,6 @@ import logging
 DB_LOG = logging.getLogger('DB')
 
 KEY_RATING = 'rating'
-KEY_PROGRESS = 'progress'
 KEY_STATE = 'state'
 
 def list_users():
@@ -108,9 +107,6 @@ def get(user_id, corp_id, igt_id, key):
 
 def get_rating(user_id, corp_id, igt_id):
     return get(user_id, corp_id, igt_id, KEY_RATING)
-
-def get_progress(user_id, corp_id, igt_id):
-    return get(user_id, corp_id, igt_id, KEY_PROGRESS)
 
 def set_rating(user_id, corp_id, igt_id, rating):
     set(user_id, corp_id, igt_id, KEY_RATING, rating)
