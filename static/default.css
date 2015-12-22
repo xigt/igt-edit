@@ -140,16 +140,24 @@ td.labels {
 }
 
 /* Ratings */
-#rating-button-container {
+#rating-container {
     text-align: center;
 }
 
-#rating-buttons {
+#buttons-and-reasons {
     display:inline-block;
     border: thin solid black;
     padding:10px;
     border-radius:10px;
     background-color: rgb(241, 255, 253);
+}
+
+#rating-buttons {
+    display:inline-block;
+}
+
+.rating-reasons {
+    display:none;
 }
 
 .rating-button {

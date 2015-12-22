@@ -274,8 +274,8 @@ function disableYellowGreen() {
 function enableYellowGreen() {
     $('.rating-button').removeClass(RATING_DISABLED);
     $('.rating-button').addClass(RATING_ENABLED);
-    $('#rating-green').click(function() {saveIGT(GOOD_QUALITY)});
-    $('#rating-yellow').click(function() {saveIGT(OK_QUALITY)});
+    $('#rating-green').click(function() {setRating(GOOD_QUALITY)});
+    $('#rating-yellow').click(function() {setRating(OK_QUALITY)});
 }
 
 function normalizeSuccess(r, stat, jqXHR) {
@@ -423,27 +423,67 @@ function corpId() {
 }
 
 /* Save the edited tier! */
-function saveIGT(rating) {
+function setRating(rating) {
+    $('.rating-button').removeClass(ICON_CLICKED);
+    $('.rating-reasons').hide();
+    $('#submit-instance').show();
 
-    var userID = $("#userID").text();
+    localStorage.setItem("instance-rating", rating);
 
-    var data = {rating: rating,
-        norm : get_normal_lines(),
-        clean: get_clean_lines(),
-        raw:   get_raw_lines(),
-        userID: userID
-    };
+    if (rating == BAD_QUALITY) {
+        $('#bad-reasons').show();
+        $('#rating-red').addClass(ICON_CLICKED);
+    } else if (rating == OK_QUALITY) {
+        $('#ok-reasons').show();
+        $('#rating-yellow').addClass(ICON_CLICKED);
+    } else if (rating == GOOD_QUALITY) {
+        $('#rating-green').addClass(ICON_CLICKED);
+    }
+}
 
 
-    console.log(igtId() + ' ' + corpId());
-    $.ajax({
-        url: '/save/'+corpId()+'/'+igtId(),
-        type: 'PUT',
-        data: JSON.stringify(data),
-        success: saveSuccess,
-        contentType: 'application/json',
-        error: saveError
-    });
+// Save IGT
+function saveIGT() {
+
+    rating = parseInt(localStorage.getItem('instance-rating'));
+    reason_select = null;
+    if (rating == BAD_QUALITY) {
+        reason_select = $('#bad-reasons');
+    } else if (rating == OK_QUALITY) {
+        reason_select = $('#ok-reasons');
+    }
+
+    reason_str = null;
+    if (!(reason_select === null)) {
+        reason_str = reason_select.find('option:selected').val();
+    }
+    console.log(reason_str);
+
+    if (!(reason_select === null) && !(reason_str)) {
+        alert('Please choose a reason for the rating.');
+        } else {
+
+        var userID = $("#userID").text();
+
+        var data = {
+            rating: rating,
+            norm: get_normal_lines(),
+            clean: get_clean_lines(),
+            raw: get_raw_lines(),
+            userID: userID
+        };
+
+
+        console.log(igtId() + ' ' + corpId());
+        $.ajax({
+            url: '/save/' + corpId() + '/' + igtId(),
+            type: 'PUT',
+            data: JSON.stringify(data),
+            success: saveSuccess,
+            contentType: 'application/json',
+            error: saveError
+        });
+    }
 }
 
 function saveSuccess(r, stat, jqXHR) {

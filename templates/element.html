@@ -78,11 +78,40 @@
         </div>
 
         {# BEGIN RATING BUTTONS #}
-        <div id="rating-button-container">
-            <div id="rating-buttons">
-                {{ rating_button('red', True, 'BAD_QUALITY') }}
-                {{ rating_button('yellow', nt_content, 'OK_QUALITY') }}
-                {{ rating_button('green', nt_content, 'GOOD_QUALITY') }}
+        <div id="rating-container">
+
+            <div id="buttons-and-reasons">
+
+                {# Buttons #}
+                <div id="rating-buttons">
+                    {{ rating_button('red', True, 'BAD_QUALITY') }}
+                    {{ rating_button('yellow', nt_content, 'OK_QUALITY') }}
+                    {{ rating_button('green', nt_content, 'GOOD_QUALITY') }}
+                </div>
+
+                {# Rating Reasons #}
+                <div id="rating-reasons">
+                    <select class="rating-reasons" id="bad-reasons">
+                        <option></option>
+                        {% for key in config.BAD_REASONS.keys() %}
+                            <option value="{{ key }}">{{ config.BAD_REASONS[key] }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <select class="rating-reasons" id="ok-reasons">
+                        <option></option>
+                        {% for key in config.OK_REASONS.keys() %}
+                            <option value="{{ key }}">{{ config.OK_REASONS[key] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <input id="submit-instance"
+                       style="display:none"
+                       type="button"
+                       value="Submit Instance"
+                       onclick="saveIGT()"
+                />
             </div>
         </div>
 
