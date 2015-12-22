@@ -99,13 +99,13 @@ function createCombos() {
             $(comboElt).combo({
                 multiple: true,
                 editable: false,
-                checkbox: true
+                checkbox: true,
+                panelHeight: 'auto'
             });
             var panel = $(comboElt).combo('panel');
             labels.appendTo(panel);
 
             labels.find('input').each(function (i, elt) {
-
                 $(elt).click(function () {
                     updateCombo(comboElt, labels);
                 });
@@ -115,6 +115,8 @@ function createCombos() {
             updateCombo(comboElt, labels);
         }
     });
+
+    labelTooltips();
 }
 
 function updateCombo(comboElt, labels) {
@@ -151,9 +153,12 @@ function get_tier_lines(rowSelector) {
     /* Iterate over all the clean items, and add them to the data */
     $(rowSelector).each(function(i, el) {
 
+        // Set up the data that will be returned for the lines.
         linedata = {};
 
+        // Set the tag value.
         linedata['tag'] = $(el).find('.tags option:selected').val();
+        linedata['labels'] = $(el).find('.taglabel-combo').combo('getText');
 
         li = $(el).find('.line-input');
         linedata['text'] = li.val();
@@ -420,10 +425,13 @@ function corpId() {
 /* Save the edited tier! */
 function saveIGT(rating) {
 
+    var userID = $("#userID").text();
+
     var data = {rating: rating,
-                norm : get_normal_lines(),
-                clean: get_clean_lines(),
-                raw:   get_raw_lines()
+        norm : get_normal_lines(),
+        clean: get_clean_lines(),
+        raw:   get_raw_lines(),
+        userID: userID
     };
 
 
