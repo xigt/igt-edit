@@ -159,6 +159,7 @@ function get_tier_lines(rowSelector) {
         // Set the tag value.
         linedata['tag'] = $(el).find('.tags option:selected').val();
         linedata['labels'] = $(el).find('.taglabel-combo').combo('getText');
+        linedata['judgment'] = $(el).find('input.judgment').val();
 
         li = $(el).find('.line-input');
         linedata['text'] = li.val();
