@@ -104,6 +104,22 @@
                             <option value="{{ key }}">{{ config.OK_REASONS[key] }}</option>
                         {% endfor %}
                     </select>
+
+                    {# Additional Comments #}
+                    <div id="comment-container" style="display:none">
+                        <input type="button"
+                               id="comment-toggle"
+                               value="Add Additional Comment"
+                               onclick="toggleCommentBox()"
+                        />
+
+                        <div id="comments" style="display:none">
+                            <textarea id="freeform-comment">
+
+                            </textarea>
+                        </div>
+        </div>
+
                 </div>
 
                 <input id="submit-instance"
@@ -116,12 +132,7 @@
         </div>
 
 
-        {# REMAINING TIERS / VISUALIZATIONS #}
-        <div id="remaining-tiers">
-            <div id="remaining-content">
 
-            </div>
-        </div>
 
     </div>
 

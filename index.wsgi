@@ -23,7 +23,7 @@ sys.path.append(INTENT_LIB)
 sys.path.append(XIGT_LIB)
 sys.path.append(SLEIPNIR_LIB)
 
-from yggdrasil.metadata import get_rating, set_rating
+from yggdrasil.metadata import get_rating, set_rating, set_comment
 from yggdrasil.users import get_user_corpora
 
 # -------------------------------------------
@@ -249,6 +249,7 @@ def save(corp_id, igt_id):
     clean = data.get('clean')
     norm  = data.get('norm')
     user_id = data.get('userID')
+    comment = data.get('comment', '')
 
     # Set the rating...
 
@@ -258,6 +259,11 @@ def save(corp_id, igt_id):
     igt = dbi.get_igt(corp_id, igt_id)
     igt = replace_lines(igt, clean, norm)
     set_rating(igt, user_id, rating)
+
+    # Only add the comment if it is contentful.
+    if comment.strip():
+        set_comment(igt, user_id, comment)
+
 
     # Add the data provenance to the tier.
     ct = cleaned_tier(igt)
