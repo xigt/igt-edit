@@ -159,6 +159,7 @@ function get_tier_lines(rowSelector) {
         // Set the tag value.
         linedata['tag'] = $(el).find('.tags option:selected').val();
         linedata['labels'] = $(el).find('.taglabel-combo').combo('getText');
+        linedata['judgment'] = $(el).find('input.judgment').val();
 
         li = $(el).find('.line-input');
         linedata['text'] = li.val();
@@ -427,6 +428,7 @@ function setRating(rating) {
     $('.rating-button').removeClass(ICON_CLICKED);
     $('.rating-reasons').hide();
     $('#submit-instance').show();
+    $('#comment-container').show();
 
     localStorage.setItem("instance-rating", rating);
 
@@ -470,7 +472,8 @@ function saveIGT() {
             norm: get_normal_lines(),
             clean: get_clean_lines(),
             raw: get_raw_lines(),
-            userID: userID
+            userID: userID,
+            comment: $("#freeform-comment").val()
         };
 
 
@@ -483,6 +486,19 @@ function saveIGT() {
             contentType: 'application/json',
             error: saveError
         });
+    }
+}
+
+/* Deal with the additional comment field */
+function toggleCommentBox() {
+    var comments = $('#comments');
+    var toggle = $('#comment-toggle');
+    if (comments.is(':visible')) {
+        comments.hide();
+        toggle.val('Add Additional Comment');
+    } else {
+        comments.show();
+        toggle.val('Hide Comment Field');
     }
 }
 

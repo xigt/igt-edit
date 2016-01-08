@@ -6,6 +6,7 @@
         <TD class="short-col buttons"></TD>
         <TD class="short-col tags">Tag</TD>
         <TD class="short-col labels">Labels</TD>
+        <TD class="short-col judgment">Judgment</TD>
         <TD>Line Text</TD>
     </TR>
 
@@ -21,10 +22,12 @@
         {% set item_id = '' %}
         {% set tagresult = ['M'] %}
         {% set item_text = '' %}
+        {% set judgment = '' %}
     {% else %}
         {% set item_id = item.id %}
         {% set tagresult = item.attributes.get('tag').split('+') %}
         {% set item_text = item.text %}
+        {% set judgment  = item.attributes.get('judgment', '') %}
     {% endif %}
     <TR id="{{ item_id }}" class="textrow {{ table_type }}row">
 
@@ -71,6 +74,15 @@
             {# 3B: DISPLAY ONLY #}
             {% else %}
                 <pre class="tags">{{ '+'.join(tagresult[1:]) }}</pre>
+            {% endif %}
+        </TD>
+
+        {# COLUMN 4 - Judgment #}
+        <TD style="text-align:center">
+            {% if editable %}
+                <input class="judgment" type="text" size="3" value="{{ judgment }}"/>
+            {% else %}
+                {{ judgment }}
             {% endif %}
         </TD>
 
