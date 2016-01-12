@@ -6,7 +6,9 @@
         <TD class="short-col buttons"></TD>
         <TD class="short-col tags">Tag</TD>
         <TD class="short-col labels">Labels</TD>
-        <TD class="short-col judgment">Judgment</TD>
+        {% if table_type == 'normal' %}
+            <TD class="short-col judgment">Judgment</TD>
+        {% endif %}
         <TD>Line Text</TD>
     </TR>
 
@@ -78,13 +80,12 @@
         </TD>
 
         {# COLUMN 4 - Judgment #}
-        <TD style="text-align:center">
-            {% if editable %}
+        {# Have this column only in the normalized table. #}
+        {% if table_type == 'normal' %}
+            <TD style="text-align:center">
                 <input class="judgment" type="text" size="3" value="{{ judgment }}"/>
-            {% else %}
-                {{ judgment }}
-            {% endif %}
-        </TD>
+            </TD>
+        {% endif %}
 
         {# COLUMN 4 - ACTUAL TEXT #}
         <TD {% if editable %}class="textinput"{% endif %}>

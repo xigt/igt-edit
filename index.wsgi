@@ -43,11 +43,10 @@ from sleipnir import dbi
 
 
 from intent.igt.metadata import set_meta_attr
-from intent.igt.rgxigt import RGCorpus, RGIgt, retrieve_normal_line
-from intent.igt.creation import create_text_tier_from_lines
-from intent.igt.xigt_manipulations import get_clean_tier, get_normal_tier, get_raw_tier, replace_lines
+from intent.igt.rgxigt import RGIgt, retrieve_normal_line
+from intent.igt.creation import get_clean_tier, get_normal_tier, get_raw_tier, replace_lines
 from intent.igt.consts import ODIN_LANG_TAG, ODIN_GLOSS_TAG, CLEAN_ID, NORM_ID, DATA_PROV, DATA_SRC
-from intent.igt.igtutils import is_strict_columnar_alignment, rgencode
+from intent.igt.igtutils import is_strict_columnar_alignment
 from intent.igt.search import raw_tier, cleaned_tier, normalized_tier
 
 app.debug = True
