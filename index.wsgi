@@ -22,7 +22,7 @@ sys.path.append(XIGT_LIB)
 sys.path.append(SLEIPNIR_LIB)
 
 from yggdrasil.metadata import get_rating, set_rating, set_comment
-from yggdrasil.users import get_user_corpora
+from yggdrasil.users import get_user_corpora, get_state, set_state
 
 # -------------------------------------------
 # Add the configuration to the app config
@@ -112,23 +112,22 @@ def display(corp_id, igt_id):
     # -------------------------------------------
     inst = dbi.get_igt(corp_id, igt_id)
 
+
+
     # -------------------------------------------
-    # Now, get the raw tier, and see if there's a clean tier.
+    # Get the state from the user file.
     # -------------------------------------------
+    state = get_state(request.args.get('user'), corp_id, igt_id)
+    if state is None:
+        state = RAW_STATE
+
     rt = raw_tier(inst)
-    ct = cleaned_tier(inst)
+    ct, nt = None, None
+    if state >= CLEAN_STATE:
+        ct = cleaned_tier(inst)
+    elif state == NORM_STATE:
+        nt = normalized_tier(inst)
 
-    # -------------------------------------------
-    # Check to see if we already have a clean tier
-    # or normalized tier. If so, display them.
-    # -------------------------------------------
-    state = RAW_STATE
-    if ct is not None:
-        state = CLEAN_STATE
-    else:
-        ct = get_clean_tier(inst, merge=True)
-
-    nt = normalized_tier(inst)
     nt_content = None
     if nt is not None:
         state = NORM_STATE
@@ -284,6 +283,13 @@ def save(corp_id, igt_id):
     comment = data.get('comment', '')
 
     # Set the rating...
+    if norm:
+        set_state(user_id, corp_id, igt_id, NORM_STATE)
+    elif clean:
+        set_state(user_id, corp_id, igt_id, CLEAN_STATE)
+    else:
+        set_state(user_id, corp_id, igt_id, RAW_STATE)
+
 
 
     # Retrieve the IGT instance, and swap in the
@@ -301,7 +307,8 @@ def save(corp_id, igt_id):
     ct = cleaned_tier(igt)
     nt = normalized_tier(igt)
     for t in [ct, nt]:
-        set_meta_attr(t, DATA_PROV, DATA_SRC, EDITOR_DATA_SRC, metadata_type=EDITOR_METADATA_TYPE)
+        if t is not None:
+            set_meta_attr(t, DATA_PROV, DATA_SRC, EDITOR_DATA_SRC, metadata_type=EDITOR_METADATA_TYPE)
 
     # Do the actually saving of the igt instance.
     dbi.set_igt(corp_id, igt_id, igt)
