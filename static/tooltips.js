@@ -47,6 +47,6 @@ function labelTooltips() {
 
 function hoverIconTooltips() {
     tt('.undo', "Restore the tier to its initial state.");
-    tt('.delete', "Mark this tier for deletion, or remove if empty. Click again to undelete.");
+    tt('.delete', "Mark this tier for deletion, or remove if empty. Click again to undelete.", true);
     tt('.add', "Add a blank new line beneath this line.");
 }
