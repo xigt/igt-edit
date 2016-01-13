@@ -402,7 +402,10 @@ function addItem(prefix, jqAfter, rowtype) {
 
     id = prefix+(numitems+1).toString();
 
-    var lineHTML = $($('#row_template').html());
+    if (rowtype == 'normalrow')
+        var lineHTML = $($('#norm_row_template').html());
+    else
+        var lineHTML = $($('#row_template').html());
     lineHTML.attr('id', id);    // set the id to the new id
     lineHTML.addClass(rowtype); // Add the row class
 
