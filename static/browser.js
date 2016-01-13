@@ -64,7 +64,7 @@ function populateError() {
 /* display a single IGT instance */
 function displayIGT(corp_id, igt_id) {
     $('#editor-panel').html(AJAX_LOADER_BIG);
-    url = '/display/'+corp_id+'/'+igt_id
+    url = '/display/'+corp_id+'/'+igt_id+'?user='+userID();
     $.ajax({
         url: url,
         success: displaySuccess,
@@ -444,6 +444,9 @@ function setRating(rating) {
     }
 }
 
+function userID() {
+    return $("#userID").text();
+}
 
 // Save IGT
 function saveIGT() {
@@ -466,14 +469,12 @@ function saveIGT() {
         alert('Please choose a reason for the rating.');
         } else {
 
-        var userID = $("#userID").text();
-
         var data = {
             rating: rating,
             norm: get_normal_lines(),
             clean: get_clean_lines(),
             raw: get_raw_lines(),
-            userID: userID,
+            userID: userID(),
             comment: $("#freeform-comment").val()
         };
 
