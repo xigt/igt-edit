@@ -169,3 +169,13 @@ td.labels {
     filter: grayscale(100%);
     opacity: 0.3;
 }
+
+/* GROUP 2 INFO */
+#word-table {
+    border-collapse: collapse;
+}
+
+#word-table td {
+    border-left: thin solid black;
+    border-right: thin solid black
+}

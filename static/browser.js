@@ -351,6 +351,7 @@ function intentifySuccess(r, stat, jqXHR) {
     analysisNotifier(r, 'glm');
     analysisNotifier(r, 'tag');
     analysisNotifier(r, 'col');
+    $('#group-2-content').html(r['words']);
 }
 
 function intentifyError() {
@@ -518,4 +519,32 @@ function saveSuccess(r, stat, jqXHR) {
 function saveError(r, stat, jqXHR) {
     console.error("An error occurred saving the instance.");
     console.error(jqXHR.toString());
+}
+
+/* Highlighting for Word Display */
+function modIdlist(idlist, classes, highlight) {
+    cs = classes.split(',');
+    for (j=0; j<cs.length; j++) {
+        c = cs[j];
+
+        ids = idlist.split(',');
+        for (i=0; i < ids.length; i++) {
+            s = '.'+c+'-' + ids[i];
+            if (highlight == true) {
+                $(s).css('background-color', 'red');
+            } else {
+                $(s).css('background-color', 'white');
+            }
+        }
+    }
+}
+
+function highlightSrcs(obj, idlist, classes) {
+    $(obj).css('background-color','cyan');
+    modIdlist(idlist, 'gw,lw', true);
+}
+
+function unhighlightSrcs(obj, idlist) {
+    $(obj).css('background-color', 'white');
+    modIdlist(idlist, 'gw,lw', false);
 }
