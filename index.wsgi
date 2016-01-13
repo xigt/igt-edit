@@ -5,8 +5,6 @@ import json, sys, logging, os
 # -------------------------------------------
 from flask import Flask, render_template, url_for, request, g, make_response
 
-
-
 app = Flask(__name__)
 application = app
 
@@ -43,7 +41,8 @@ from sleipnir import dbi
 
 
 from intent.igt.metadata import set_meta_attr
-from intent.igt.rgxigt import RGIgt, retrieve_normal_line
+from intent.igt.rgxigt import RGIgt, retrieve_normal_line, retrieve_lang_words, retrieve_gloss_words, \
+    retrieve_trans_words, find_lang_word, x_contains_y
 from intent.igt.creation import get_clean_tier, get_normal_tier, get_raw_tier, replace_lines
 from intent.igt.consts import ODIN_LANG_TAG, ODIN_GLOSS_TAG, CLEAN_ID, NORM_ID, DATA_PROV, DATA_SRC
 from intent.igt.igtutils import is_strict_columnar_alignment
@@ -208,29 +207,63 @@ def intentify(corp_id, igt_id):
     inst.add_clean_tier(data.get('clean'))
     inst.add_normal_tier(data.get('normal'))
 
-    feedback = {}
+    response = {}
 
     # Check that the language line and gloss line
     # have the same number of whitespace-delineated tokens.
-    feedback['glw'] = 1 if len(inst.lang) == len(inst.gloss) else 0
+    response['glw'] = 1 if len(inst.lang) == len(inst.gloss) else 0
 
     # Check that the language line and gloss line
     # have the same number of morphemes.
-    feedback['glm'] = 1 if len(inst.morphemes) == len(inst.glosses) else 0
+    response['glm'] = 1 if len(inst.morphemes) == len(inst.glosses) else 0
 
     # Check that the normalized tier has only L, G, T for tags.
     norm_tags = set([l.attributes.get('tag') for l in inst.normal_tier()])
-    feedback['tag'] = 1 if set(['L','G','T']) == norm_tags else 0
+    response['tag'] = 1 if set(['L','G','T']) == norm_tags else 0
 
     # Check that the g/l lines are aligned in strict columns
     lang_line  = retrieve_normal_line(inst, ODIN_LANG_TAG)
     gloss_line = retrieve_normal_line(inst, ODIN_GLOSS_TAG)
     if lang_line is None or gloss_line is None:
-        feedback['col'] = 0
+        response['col'] = 0
     else:
-        feedback['col'] = 1 if is_strict_columnar_alignment(lang_line.value(), gloss_line.value()) else 0
+        response['col'] = 1 if is_strict_columnar_alignment(lang_line.value(), gloss_line.value()) else 0
 
-    return json.dumps(feedback)
+    # figure out how many columns we're going to need to number.
+    col_nums = range(1, max(len(inst.lang), len(inst.gloss), len(inst.trans))+1)
+
+
+    lws = retrieve_lang_words(inst)
+    gws = retrieve_gloss_words(inst)
+    tw = retrieve_trans_words(inst)
+
+    lms = inst.morphemes
+    gms = inst.glosses
+
+    lang_list = []
+    for lw in lws:
+        pairs = (lw, [])
+        for lm in lms:
+            if x_contains_y(inst, lw, lm):
+                pairs[1].append(lm)
+        lang_list.append(pairs)
+
+    gloss_list = []
+    for gw in gws:
+        pairs = (gw, [])
+        for gm in gms:
+            if x_contains_y(inst, gw, gm):
+                pairs[1].append(gm)
+        gloss_list.append(pairs)
+
+
+    response['words'] = render_template('group_2.html',
+                                        col_nums=col_nums,
+                                        lang=lang_list,
+                                        gloss=gloss_list,
+                                        trans=tw,
+                                        aln=inst.heur_align())
+    return json.dumps(response)
 
 
 # -------------------------------------------
