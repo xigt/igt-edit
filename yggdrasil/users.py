@@ -1,3 +1,4 @@
+import os
 from random import randint
 
 import sys
@@ -19,8 +20,20 @@ def load_db():
     """
     :rtype: dict
     """
-    with open(USER_DB) as f:
-        return json.load(f)
+    if not os.path.exists(USER_DB):
+        return {"users":{}}
+    else:
+        f = open(USER_DB, 'r')
+        s = f.read()
+        if not s.strip():
+            data = {"users":{}}
+        else:
+            data = json.loads(s)
+
+        if "users" not in data:
+            data["users"] = {}
+        f.close()
+        return data
 
 def dump_db(json_obj):
     if json_obj is not None:
