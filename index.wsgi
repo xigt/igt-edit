@@ -125,7 +125,8 @@ def display(corp_id, igt_id):
     ct, nt = None, None
     if state >= CLEAN_STATE:
         ct = cleaned_tier(inst)
-    elif state == NORM_STATE:
+
+    if state == NORM_STATE:
         nt = normalized_tier(inst)
 
     nt_content = None
