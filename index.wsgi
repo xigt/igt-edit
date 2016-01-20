@@ -46,7 +46,7 @@ from intent.igt.rgxigt import RGIgt, retrieve_normal_line, retrieve_lang_words, 
 from intent.igt.creation import get_clean_tier, get_normal_tier, get_raw_tier, replace_lines
 from intent.igt.consts import ODIN_LANG_TAG, ODIN_GLOSS_TAG, CLEAN_ID, NORM_ID, DATA_PROV, DATA_SRC
 from intent.igt.igtutils import is_strict_columnar_alignment
-from intent.igt.search import raw_tier, cleaned_tier, normalized_tier
+from intent.igt.search import raw_tier, cleaned_tier, normalized_tier, gloss_line, lang_line, trans_line
 
 app.debug = True
 
@@ -207,6 +207,14 @@ def intentify(corp_id, igt_id):
     inst.add_clean_tier(data.get('clean'))
     inst.add_normal_tier(data.get('normal'))
 
+    ll = lang_line(inst)
+    gl = gloss_line(inst)
+    tl = trans_line(inst)
+
+    if (ll is None) or (gl is None) or (tl is None):
+        raise Exception("Missing L, G, or T line")
+
+
     response = {}
 
     # Check that the language line and gloss line
@@ -222,12 +230,10 @@ def intentify(corp_id, igt_id):
     response['tag'] = 1 if set(['L','G','T']) == norm_tags else 0
 
     # Check that the g/l lines are aligned in strict columns
-    lang_line  = retrieve_normal_line(inst, ODIN_LANG_TAG)
-    gloss_line = retrieve_normal_line(inst, ODIN_GLOSS_TAG)
-    if lang_line is None or gloss_line is None:
+    if ll is None or gl is None:
         response['col'] = 0
     else:
-        response['col'] = 1 if is_strict_columnar_alignment(lang_line.value(), gloss_line.value()) else 0
+        response['col'] = 1 if is_strict_columnar_alignment(ll.value(), gl.value()) else 0
 
     # figure out how many columns we're going to need to number.
     col_nums = range(1, max(len(inst.lang), len(inst.gloss), len(inst.trans))+1)
