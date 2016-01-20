@@ -363,6 +363,9 @@ function deleteItem(elt, itemId) {
 
     var identifier = '#'+itemId;
 
+    /* Start by hiding the tooltip, if there is one shown. */
+    $(elt).tooltip('hide');
+
     /* If this button has been clicked already,
      * restore (as a toggle) */
     if ($(elt).hasClass(ICON_CLICKED)) {
