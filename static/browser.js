@@ -200,6 +200,7 @@ function cleanIGT(corp_id, igt_id, alreadyGenerated) {
         $('#normalized-tier').hide();
         $('#normalized-contents').html('');
         disableYellowGreen();
+        $('#group-2-content').html(''); // Blank out the group 2 content.
 
 
         $.ajax({
@@ -309,6 +310,8 @@ function generateFromNormalized(corp_id, igt_id) {
             clean: cleanData,
             normal: normalData};
 
+    $('#group-2-content').html("Analyzing...");
+
     analyzeUnmark('glm');
     analyzeUnmark('glw');
     analyzeUnmark('tag');
@@ -355,13 +358,17 @@ function intentifySuccess(r, stat, jqXHR) {
 }
 
 function intentifyError() {
-    $('#remaining-content').text("An error occurred producing the remaining tiers.")
+    $('#group-2-content').html('')
+    $('#group-2-content').text("An error occurred producing the remaining tiers.")
 }
 
 /* Edit/Delete Scripts */
 function deleteItem(elt, itemId) {
 
     var identifier = '#'+itemId;
+
+    /* Start by hiding the tooltip, if there is one shown. */
+    $(elt).tooltip('hide');
 
     /* If this button has been clicked already,
      * restore (as a toggle) */

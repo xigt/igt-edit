@@ -28,7 +28,11 @@
     {% else %}
         {% set item_id = item.id %}
         {% set tagresult = item.attributes.get('tag').split('+') %}
-        {% set item_text = item.text %}
+        {% if item.text is none %}
+            {% set item_text = '' %}
+        {% else %}
+            {% set item_text = item.text %}
+        {% endif %}
         {% set judgment  = item.attributes.get('judgment', '') %}
     {% endif %}
     <TR id="{{ item_id }}" class="textrow {{ table_type }}row">
