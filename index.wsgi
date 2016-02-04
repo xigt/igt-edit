@@ -9,8 +9,6 @@ import sys
 from flask import Flask, render_template, url_for, request, make_response
 
 
-from xigt import Igt
-
 app = Flask(__name__)
 application = app
 
@@ -29,6 +27,8 @@ sys.path.append(SLEIPNIR_LIB)
 
 from yggdrasil.metadata import get_rating, set_rating, set_comment
 from yggdrasil.users import get_user_corpora, get_state, set_state
+
+from xigt import Igt
 
 # -------------------------------------------
 # Add the configuration to the app config
