@@ -1,9 +1,15 @@
-import json, sys, logging, os
+import json
+import logging
+import os
+import sys
 
 # -------------------------------------------
 # Set up the Flask app
 # -------------------------------------------
-from flask import Flask, render_template, url_for, request, g, make_response
+from flask import Flask, render_template, url_for, request, make_response
+
+
+from xigt import Igt
 
 app = Flask(__name__)
 application = app
@@ -39,14 +45,14 @@ from sleipnir import dbi
 # Import other stuff here.
 # -------------------------------------------
 
-
 from intent.igt.metadata import set_meta_attr
-from intent.igt.rgxigt import RGIgt, retrieve_normal_line, retrieve_lang_words, retrieve_gloss_words, \
-    retrieve_trans_words, find_lang_word, x_contains_y
-from intent.igt.creation import get_clean_tier, get_normal_tier, get_raw_tier, replace_lines
-from intent.igt.consts import ODIN_LANG_TAG, ODIN_GLOSS_TAG, CLEAN_ID, NORM_ID, DATA_PROV, DATA_SRC
+from intent.consts import CLEAN_ID, NORM_ID, DATA_PROV, DATA_SRC
 from intent.igt.igtutils import is_strict_columnar_alignment
-from intent.igt.search import raw_tier, cleaned_tier, normalized_tier, gloss_line, lang_line, trans_line
+from intent.igt.create_tiers import generate_normal_tier, generate_clean_tier, lang_lines, gloss_line, trans_lines, \
+    generate_lang_words, generate_gloss_glosses, generate_trans_words, lang, gloss, morphemes, glosses, trans
+from intent.igt.igt_functions import replace_lines, x_contains_y, add_raw_tier, add_clean_tier, add_normal_tier, \
+    heur_align_inst
+from intent.igt.references import raw_tier, cleaned_tier, normalized_tier, item_index
 
 app.debug = True
 
@@ -160,7 +166,7 @@ def normalize(corp_id, igt_id):
     # tier based on that.
     i = dbi.get_igt(corp_id, igt_id)
     replace_lines(i, clean_lines, None)
-    nt = get_normal_tier(i, force_generate=True)
+    nt = generate_normal_tier(i, force_generate=True)
 
     content = render_template("tier_table.html", tier=nt, table_type=NORMAL_TABLE_TYPE, id_prefix=NORM_ID, editable=True)
 
@@ -185,7 +191,7 @@ def clean(corp_id, igt_id):
     inst = dbi.get_igt(corp_id, igt_id)
     return render_template("tier_table.html",
                            table_type=CLEAN_TABLE_TYPE,
-                           tier=get_clean_tier(inst, force_generate=True),
+                           tier=generate_clean_tier(inst, force_generate=True),
                            id_prefix=CLEAN_ID,
                            editable=True,
                            tag_options=LINE_TAGS,
@@ -202,14 +208,14 @@ def intentify(corp_id, igt_id):
 
     data = request.get_json()
 
-    inst = RGIgt(id=igt_id)
-    inst.add_raw_tier(data.get('raw'))
-    inst.add_clean_tier(data.get('clean'))
-    inst.add_normal_tier(data.get('normal'))
+    inst = Igt(id=igt_id)
+    add_raw_tier(inst, data.get('raw'))
+    add_clean_tier(inst, data.get('clean'))
+    add_normal_tier(inst, data.get('normal'))
 
-    ll = lang_line(inst)
+    ll = lang_lines(inst)[0]
     gl = gloss_line(inst)
-    tl = trans_line(inst)
+    tl = trans_lines(inst)[0]
 
     if (ll is None) or (gl is None) or (tl is None):
         raise Exception("Missing L, G, or T line")
@@ -219,14 +225,14 @@ def intentify(corp_id, igt_id):
 
     # Check that the language line and gloss line
     # have the same number of whitespace-delineated tokens.
-    response['glw'] = 1 if len(inst.lang) == len(inst.gloss) else 0
+    response['glw'] = 1 if len(lang(inst)) == len(gloss(inst)) else 0
 
     # Check that the language line and gloss line
     # have the same number of morphemes.
-    response['glm'] = 1 if len(inst.morphemes) == len(inst.glosses) else 0
+    response['glm'] = 1 if len(morphemes(inst)) == len(glosses(inst)) else 0
 
     # Check that the normalized tier has only L, G, T for tags.
-    norm_tags = set([l.attributes.get('tag') for l in inst.normal_tier()])
+    norm_tags = set([l.attributes.get('tag') for l in normalized_tier(inst)])
     response['tag'] = 1 if set(['L','G','T']) == norm_tags else 0
 
     # Check that the g/l lines are aligned in strict columns
@@ -236,15 +242,15 @@ def intentify(corp_id, igt_id):
         response['col'] = 1 if is_strict_columnar_alignment(ll.value(), gl.value()) else 0
 
     # figure out how many columns we're going to need to number.
-    col_nums = range(1, max(len(inst.lang), len(inst.gloss), len(inst.trans))+1)
+    col_nums = range(1, max(len(lang(inst)), len(gloss(inst)), len(trans(inst))+1))
 
 
-    lws = retrieve_lang_words(inst)
-    gws = retrieve_gloss_words(inst)
-    tw = retrieve_trans_words(inst)
+    lws = generate_lang_words(inst)
+    gws = generate_gloss_glosses(inst)
+    tw = generate_trans_words(inst)
 
-    lms = inst.morphemes
-    gms = inst.glosses
+    lms = morphemes(inst)
+    gms = glosses(inst)
 
     lang_list = []
     for lw in lws:
@@ -268,7 +274,8 @@ def intentify(corp_id, igt_id):
                                         lang=lang_list,
                                         gloss=gloss_list,
                                         trans=tw,
-                                        aln=inst.heur_align())
+                                        aln=heur_align_inst(inst),
+                                        item_index=item_index)
     return json.dumps(response)
 
 
