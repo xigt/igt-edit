@@ -372,8 +372,6 @@ def split(corp_id, igt_id):
     igt_a.id = igt.id+'_a'
     igt_b.id = igt.id+'_b'
 
-    assert igt_a.id != igt_b.id
-
     dbi.add_igt(corp_id, igt_a)
     dbi.add_igt(corp_id, igt_b)
 
@@ -386,6 +384,10 @@ def split(corp_id, igt_id):
 @app.route('/delete/<corp_id>/<igt_id>', methods=['POST'])
 def delete_igt(corp_id, igt_id):
 
+    user = request.get_json().get('userID')
+
+    # TODO: FIXME: A sleipnir update should fix this so that we don't need to hide deleted instances.
+    set_state(user, corp_id, igt_id, HIDDEN)
     dbi.del_igt(corp_id, igt_id)
 
     return make_response()
