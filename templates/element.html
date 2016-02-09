@@ -67,6 +67,9 @@
                    value="Analyze Normalized Tier"
                    onclick="generateFromNormalized('{{ corp_id }}','{{ igt.id }}')" />
 
+            <input type="button"
+                   value="Split Instance"
+                   onclick="splitIGT('{{ corp_id }}', '{{ igt.id }}')"/>
 
             <div id="analysis">
                 <span id="glw" class="feedback">GLW</span>
@@ -138,5 +141,9 @@
 
     </div>
 
+{#    <input type="button"#}
+{#           value="Delete Instance"#}
+{#           onclick="deleteIGT()"#}
+{#    />#}
 
 </div>

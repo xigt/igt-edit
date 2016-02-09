@@ -54,38 +54,45 @@ def manage_user(user_id):
             from sleipnir import dbi
             i = 0
             all_corpora = {c.get('id'):c for c in dbi.list_corpora()}
-            user_corpora = get_user_corpora(user_id)
 
-            print("\nCurrent user corpora:")
-            deldict = {}
-            for corp_id in user_corpora:
-                print("\t({}) {}".format(i, all_corpora.get(corp_id).get('name')))
-                deldict[str(i)] = corp_id
-                i+=1
-
-            corpdict = enum_corpora(all_corpora, user_corpora, i=i)
-            resp = input("Add/delete corpus for user?\nOptions: {{#}} or {{q}}: ")
-
-            if resp.strip() in corpdict:
-                add_user_corpora(user_id, corpdict[resp.strip()])
-                print('Corpus "{}" added to user "{}"'.format(all_corpora[corpdict[resp.strip()]].get('name'), user_id), end='\n\n')
+            if not all_corpora:
+                print("No current corpora to add.",end='\n\n')
                 add_delete_exit = True
-                break
-            elif resp.strip() in deldict:
-                corp_name = all_corpora[deldict[resp.strip()]].get('name')
-                while True:
-                    yn = input('\nThis will remove corpus "{}" from user "{}". Continue?\nOptions {{y}} {{n}}'.format(corp_name, user_id))
-                    if yn.strip() == 'y':
-                        del_user_corpora(user_id, deldict[resp.strip()])
-                        print('Corpus "{}" was removed from user "{}".'.format(corp_name, user_id), end='\n\n')
-                        add_delete_exit = True
-                        break
-                    elif yn.strip() == 'n':
-                        print("Aborted.\n")
-                        add_delete_exit = True
-                        break
-            elif resp.strip() == 'q':
                 return
+            else:
+                user_corpora = get_user_corpora(user_id)
+
+                print("\nCurrent user corpora:")
+                deldict = {}
+                for corp_id in user_corpora:
+                    if all_corpora.get(corp_id):
+                        print("\t({}) {}".format(i, all_corpora.get(corp_id).get('name')))
+                        deldict[str(i)] = corp_id
+                        i+=1
+
+                corpdict = enum_corpora(all_corpora, user_corpora, i=i)
+                resp = input("Add/delete corpus for user?\nOptions: {{#}} or {{q}}: ")
+
+                if resp.strip() in corpdict:
+                    add_user_corpora(user_id, corpdict[resp.strip()])
+                    print('Corpus "{}" added to user "{}"'.format(all_corpora[corpdict[resp.strip()]].get('name'), user_id), end='\n\n')
+                    add_delete_exit = True
+                    break
+                elif resp.strip() in deldict:
+                    corp_name = all_corpora[deldict[resp.strip()]].get('name')
+                    while True:
+                        yn = input('\nThis will remove corpus "{}" from user "{}". Continue?\nOptions {{y}} {{n}}'.format(corp_name, user_id))
+                        if yn.strip() == 'y':
+                            del_user_corpora(user_id, deldict[resp.strip()])
+                            print('Corpus "{}" was removed from user "{}".'.format(corp_name, user_id), end='\n\n')
+                            add_delete_exit = True
+                            break
+                        elif yn.strip() == 'n':
+                            print("Aborted.\n")
+                            add_delete_exit = True
+                            break
+                elif resp.strip() == 'q':
+                    return
 
 
 def manage_users():

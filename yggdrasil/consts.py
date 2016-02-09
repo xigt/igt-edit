@@ -8,10 +8,12 @@ JUDGMENT_META_TYPE = 'judgment'
 # Editor Data Provenance
 # -------------------------------------------
 EDITOR_DATA_SRC = 'annotator'
+DUPLICATE_ATTR  = 'duplicate-of'
 
 # -------------------------------------------
 # Editor Quality Ratings
 # -------------------------------------------
+HIDDEN = 4
 BAD_QUALITY = 3
 OK_QUALITY = 2
 GOOD_QUALITY = 1

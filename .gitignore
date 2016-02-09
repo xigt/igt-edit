@@ -1,2 +1,3 @@
 dbdir
 users.js
+*.pyc

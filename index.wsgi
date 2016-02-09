@@ -9,6 +9,7 @@ import sys
 from flask import Flask, render_template, url_for, request, make_response
 
 
+
 app = Flask(__name__)
 application = app
 
@@ -19,7 +20,7 @@ sys.path.append(os.path.dirname(__file__))
 from yggdrasil import config
 from yggdrasil.config import INTENT_LIB, XIGT_LIB, SLEIPNIR_LIB, LINE_TAGS, LINE_ATTRS
 from yggdrasil.consts import NORM_STATE, CLEAN_STATE, RAW_STATE, NORMAL_TABLE_TYPE, CLEAN_TABLE_TYPE, EDITOR_DATA_SRC, \
-    EDITOR_METADATA_TYPE
+    EDITOR_METADATA_TYPE, HIDDEN
 
 sys.path.append(INTENT_LIB)
 sys.path.append(XIGT_LIB)
@@ -27,6 +28,7 @@ sys.path.append(SLEIPNIR_LIB)
 
 from yggdrasil.metadata import get_rating, set_rating, set_comment
 from yggdrasil.users import get_user_corpora, get_state, set_state
+from yggdrasil.igt_operations import replace_lines, add_editor_metadata, add_split_metadata
 
 from xigt import Igt
 
@@ -46,12 +48,12 @@ from sleipnir import dbi
 # -------------------------------------------
 
 from intent.igt.metadata import set_meta_attr
-from intent.consts import CLEAN_ID, NORM_ID, DATA_PROV, DATA_SRC
+from intent.consts import CLEAN_ID, NORM_ID, DATA_PROV, DATA_SRC_ATTR
 from intent.igt.igtutils import is_strict_columnar_alignment
 from intent.igt.create_tiers import generate_normal_tier, generate_clean_tier, lang_lines, gloss_line, trans_lines, \
     generate_lang_words, generate_gloss_glosses, generate_trans_words, lang, gloss, morphemes, glosses, trans
-from intent.igt.igt_functions import replace_lines, x_contains_y, add_raw_tier, add_clean_tier, add_normal_tier, \
-    heur_align_inst
+from intent.igt.igt_functions import x_contains_y, add_raw_tier, add_clean_tier, add_normal_tier, \
+    heur_align_inst, copy_xigt
 from intent.igt.references import raw_tier, cleaned_tier, normalized_tier, item_index
 
 app.debug = True
@@ -92,18 +94,35 @@ def get_user(userid):
 # When a user clicks a "corpus", display the
 # IGT instances contained by that corpus below.
 # -------------------------------------------
-@app.route('/populate/<corp_id>')
+@app.route('/populate/<corp_id>', methods=['POST'])
 def populate(corp_id):
     xc = dbi.get_corpus(corp_id)
+    xc = sorted(xc, key=lambda x: x.id)
+
+    data = json.loads(request.get_data().decode())
+    user_id = data.get('userID')
+
+    filtered_list = []
+
     ratings = {inst.id: get_rating(inst) for inst in xc}
     nexts = {}
     for i, igt in enumerate(xc):
+
+        # Skip this instance if we've hidden it
+        # (As we do for duplicates)
+        if get_state(user_id, corp_id, igt.id) != HIDDEN:
+            filtered_list.append(igt)
+
         if i < len(xc)-1:
             nexts[igt.id] = xc[i+1].id
         else:
             nexts[igt.id] = None
 
-    return render_template('igt_list.html', igts=xc, corp_id=corp_id, ratings=ratings, nexts=nexts)
+
+    filtered_list = sorted(filtered_list, key=lambda x: x.id)
+
+
+    return render_template('igt_list.html', igts=filtered_list, corp_id=corp_id, ratings=ratings, nexts=nexts)
 
 # -------------------------------------------
 # When a user clicks an IGT instance, display
@@ -287,7 +306,6 @@ def save(corp_id, igt_id):
     data = request.get_json()
 
     rating = data.get('rating')
-
     # -------------------------------------------
     # Get the lines
     # -------------------------------------------
@@ -318,11 +336,7 @@ def save(corp_id, igt_id):
 
 
     # Add the data provenance to the tier.
-    ct = cleaned_tier(igt)
-    nt = normalized_tier(igt)
-    for t in [ct, nt]:
-        if t is not None:
-            set_meta_attr(t, DATA_PROV, DATA_SRC, EDITOR_DATA_SRC, metadata_type=EDITOR_METADATA_TYPE)
+    add_editor_metadata(igt)
 
     # Do the actually saving of the igt instance.
     dbi.set_igt(corp_id, igt_id, igt)
@@ -330,7 +344,55 @@ def save(corp_id, igt_id):
     return make_response()
 
 # -------------------------------------------
+# Split an instance
+# -------------------------------------------
+@app.route('/split/<corp_id>/<igt_id>', methods=['POST'])
+def split(corp_id, igt_id):
+    data = request.get_json()
+
+    user_id = data.get('userID')
+    clean   = data.get('clean')
+    norm    = data.get('norm')
+
+    # -------------------------------------------
+    # Get the original instance that we're going
+    # to split, and add some metadata info.
+    # -------------------------------------------
+    igt = dbi.get_igt(corp_id, igt_id)
+    igt = replace_lines(igt, clean, norm)
+    add_editor_metadata(igt)
+    add_split_metadata(igt, igt.id)
+
+    # -------------------------------------------
+    # Make our new copies.
+    # -------------------------------------------
+    igt_a = copy_xigt(igt)
+    igt_b = copy_xigt(igt)
+
+    igt_a.id = igt.id+'_a'
+    igt_b.id = igt.id+'_b'
+
+    assert igt_a.id != igt_b.id
+
+    dbi.add_igt(corp_id, igt_a)
+    dbi.add_igt(corp_id, igt_b)
+
+    set_state(user_id, corp_id, igt.id, HIDDEN)
+    set_state(user_id, corp_id, igt_a.id, NORM_STATE)
+    set_state(user_id, corp_id, igt_b.id, NORM_STATE)
+
+    return json.dumps({'next':igt_a.id})
+
+@app.route('/delete/<corp_id>/<igt_id>', methods=['POST'])
+def delete_igt(corp_id, igt_id):
+
+    dbi.del_igt(corp_id, igt_id)
+
+    return make_response()
+
+# -------------------------------------------
 # Static files
+# -------------------------------------------
 
 @app.route('/static/<path:path>', methods=['GET'])
 def default(path):
