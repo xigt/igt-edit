@@ -13,6 +13,9 @@ XIGT_LIB = '/Users/rgeorgi/Documents/code/xigt'
 # SLEIPNIR
 SLEIPNIR_LIB = '/Users/rgeorgi/Documents/code/sleipnir'
 
+# ODIN_UTILS_DIR
+ODIN_UTILS   = '/Users/rgeorgi/Documents/code/odin-utils'
+
 # -------------------------------------------
 # Users DB
 USER_DB = '/Users/rgeorgi/Documents/code/yggdrasil/users.js'

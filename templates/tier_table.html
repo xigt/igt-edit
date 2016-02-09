@@ -25,6 +25,7 @@
         {% set tagresult = ['M'] %}
         {% set item_text = '' %}
         {% set judgment = '' %}
+        {% set lineno = '' %}
     {% else %}
         {% set item_id = item.id %}
         {% set tagresult = item.attributes.get('tag').split('+') %}
@@ -33,6 +34,7 @@
         {% else %}
             {% set item_text = item.text %}
         {% endif %}
+        {% set lineno = item.attributes.get('line') %}
         {% set judgment  = item.attributes.get('judgment', '') %}
     {% endif %}
     <TR id="{{ item_id }}" class="textrow {{ table_type }}row">
@@ -99,6 +101,9 @@
                 <pre class="text">{{ item_text }}</pre>
             {% endif %}
         </TD>
+
+        {# Hidden data: #}
+        <TD class="lineno" style="display:none">{{ lineno }}</TD>
     </TR>
 {% endmacro %}
 

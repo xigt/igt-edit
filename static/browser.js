@@ -146,6 +146,7 @@ function get_raw_lines() {
         linedata = {};
         linedata['tag'] = $(el).find('.tags').text();
         linedata['text'] = $(el).find('.text').text();
+        linedata['lineno'] = $(el).find('.lineno').text();
         lines.push(linedata);
     });
     return lines;
@@ -166,6 +167,7 @@ function get_tier_lines(rowSelector) {
         linedata['tag'] = $(el).find('.tags option:selected').val();
         linedata['labels'] = $(el).find('.taglabel-combo').combo('getText');
         linedata['judgment'] = $(el).find('input.judgment').val();
+        linedata['lineno'] = $(el).find('.lineno').text();
 
         li = $(el).find('.line-input');
         linedata['text'] = li.val();
