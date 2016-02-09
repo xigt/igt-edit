@@ -517,26 +517,29 @@ function saveIGT() {
 /* Split an Instance */
 function splitIGT(corpId, IgtId) {
 
-    //-------------------------------------------
-    // Let's start by doing the same thing as
-    // we would in saving (e.g., getting all the
-    // clean and normalized lines)
-    //-------------------------------------------
-    var data = {
-        norm: get_normal_lines(),
-        clean: get_clean_lines(),
-        raw:   get_raw_lines,
-        userID: userID()
-    };
+    var confirmSplit = confirm("This will make two copies of the current instance at the current state. Do you wish to proceed?");
+    if (confirmSplit) {
+        //-------------------------------------------
+        // Let's start by doing the same thing as
+        // we would in saving (e.g., getting all the
+        // clean and normalized lines)
+        //-------------------------------------------
+        var data = {
+            norm: get_normal_lines(),
+            clean: get_clean_lines(),
+            raw:   get_raw_lines,
+            userID: userID()
+        };
 
-    $.ajax({
-        url: '/split/' + corpId + '/' + igtId(),
-        type: 'POST',
-        success: splitSuccess,
-        data: JSON.stringify(data),
-        contentType: 'application/json',
-        error: splitError
-    });
+        $.ajax({
+            url: '/split/' + corpId + '/' + igtId(),
+            type: 'POST',
+            success: splitSuccess,
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            error: splitError
+        });
+    }
 }
 
 function splitSuccess(r, stat, jqXHR) {
@@ -595,11 +598,15 @@ function deleteIGT() {
     if (doDelete) {
         next = JSON.parse(localStorage.getItem('nexts'))[igtId()];
         localStorage.setItem('deleteNext', next);
-        
+
+        data = {userID: userID()};
+
         $.ajax(
             {
                 url: '/delete/' + corpId() + '/' + igtId(),
                 type: "POST",
+                data: JSON.stringify(data),
+                contentType: 'application/json',
                 success: deleteSuccess,
                 error: deleteError
             }
