@@ -92,7 +92,7 @@ def create_text_tier_from_lines(inst, lines, id_base, state):
 
         # Add the linenumber
         if line.get('lineno'):
-            line_attributes['line'] = int(line.get('lineno'))
+            line_attributes['line'] = line.get('lineno', '')
 
 
         l = Item(id=gen_item_id(tier.id, len(tier)),
