@@ -26,7 +26,7 @@ XIGT_LIB = '/opt/xigt'
 SLEIPNIR_LIB = '/opt/sleipnir'
 
 # ODIN_UTILS_DIR
-ODIN_UTILS   = '/Users/rgeorgi/Documents/code/odin-utils'
+ODIN_UTILS   = '/opt/odin-utils'
 
 # XIGTVIZ DIR
 XIGTVIZ      = os.path.join(STATIC, 'xigtviz')
