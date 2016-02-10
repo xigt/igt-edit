@@ -8,7 +8,6 @@ import sys
 # -------------------------------------------
 from flask import Flask, render_template, url_for, request, make_response
 
-
 app = Flask(__name__)
 application = app
 
@@ -17,18 +16,25 @@ application = app
 # -------------------------------------------
 sys.path.append(os.path.dirname(__file__))
 from yggdrasil import config
-from yggdrasil.config import INTENT_LIB, XIGT_LIB, SLEIPNIR_LIB, LINE_TAGS, LINE_ATTRS
+from yggdrasil.config import INTENT_LIB, XIGT_LIB, SLEIPNIR_LIB, LINE_TAGS, LINE_ATTRS, ODIN_UTILS, XIGTVIZ
 from yggdrasil.consts import NORM_STATE, CLEAN_STATE, RAW_STATE, NORMAL_TABLE_TYPE, CLEAN_TABLE_TYPE, EDITOR_DATA_SRC, \
-    EDITOR_METADATA_TYPE
+    EDITOR_METADATA_TYPE, HIDDEN
 
 sys.path.append(INTENT_LIB)
 sys.path.append(XIGT_LIB)
 sys.path.append(SLEIPNIR_LIB)
+sys.path.append(ODIN_UTILS)
 
 from yggdrasil.metadata import get_rating, set_rating, set_comment
 from yggdrasil.users import get_user_corpora, get_state, set_state
+from yggdrasil.igt_operations import replace_lines, add_editor_metadata, add_split_metadata, add_raw_tier, \
+    add_clean_tier, add_normal_tier
+
+from odinclean import add_cleaned_tier
+from odinnormalize import add_normalized_tier
 
 from xigt import Igt
+from xigt.codecs import xigtjson
 
 # -------------------------------------------
 # Add the configuration to the app config
@@ -45,14 +51,14 @@ from sleipnir import dbi
 # Import other stuff here.
 # -------------------------------------------
 
-from intent.igt.metadata import set_meta_attr
-from intent.consts import CLEAN_ID, NORM_ID, DATA_PROV, DATA_SRC
+from intent.consts import CLEAN_ID, NORM_ID
 from intent.igt.igtutils import is_strict_columnar_alignment
-from intent.igt.create_tiers import generate_normal_tier, generate_clean_tier, lang_lines, gloss_line, trans_lines, \
+from intent.igt.create_tiers import lang_lines, gloss_line, trans_lines, \
     generate_lang_words, generate_gloss_glosses, generate_trans_words, lang, gloss, morphemes, glosses, trans
-from intent.igt.igt_functions import replace_lines, x_contains_y, add_raw_tier, add_clean_tier, add_normal_tier, \
-    heur_align_inst
-from intent.igt.references import raw_tier, cleaned_tier, normalized_tier, item_index
+from intent.igt.igt_functions import x_contains_y, copy_xigt, delete_tier, heur_align_inst, classify_gloss_pos, \
+    tag_trans_pos, project_gloss_pos_to_lang
+from intent.igt.references import raw_tier, cleaned_tier, normalized_tier
+from intent.igt.exceptions import NoNormLineException, NoGlossLineException, GlossLangAlignException
 
 app.debug = True
 
@@ -83,7 +89,13 @@ def get_user(userid):
 
         sorted_corpora = sorted(filtered_corpora,
                                 key=lambda x: x.get('name'))
-        return render_template('browser.html', corpora=sorted_corpora, user_id=userid)
+
+        xigtviz_conf = os.path.join(XIGTVIZ, 'config.json')
+        with open(xigtviz_conf) as f:
+            xigtviz_settings = json.loads(f.read())
+
+
+        return render_template('browser.html', corpora=sorted_corpora, user_id=userid, xv_settings=xigtviz_settings)
     else:
         return render_template('login_screen.html', try_again=True)
 
@@ -92,18 +104,35 @@ def get_user(userid):
 # When a user clicks a "corpus", display the
 # IGT instances contained by that corpus below.
 # -------------------------------------------
-@app.route('/populate/<corp_id>')
+@app.route('/populate/<corp_id>', methods=['POST'])
 def populate(corp_id):
     xc = dbi.get_corpus(corp_id)
+    xc = sorted(xc, key=lambda x: x.id)
+
+    data = json.loads(request.get_data().decode())
+    user_id = data.get('userID')
+
+    filtered_list = []
+
     ratings = {inst.id: get_rating(inst) for inst in xc}
     nexts = {}
     for i, igt in enumerate(xc):
+
+        # Skip this instance if we've hidden it
+        # (As we do for duplicates)
+        if get_state(user_id, corp_id, igt.id) != HIDDEN:
+            filtered_list.append(igt)
+
         if i < len(xc)-1:
             nexts[igt.id] = xc[i+1].id
         else:
             nexts[igt.id] = None
 
-    return render_template('igt_list.html', igts=xc, corp_id=corp_id, ratings=ratings, nexts=nexts)
+
+    filtered_list = sorted(filtered_list, key=lambda x: x.id)
+
+
+    return render_template('igt_list.html', igts=filtered_list, corp_id=corp_id, ratings=ratings, nexts=nexts)
 
 # -------------------------------------------
 # When a user clicks an IGT instance, display
@@ -117,8 +146,6 @@ def display(corp_id, igt_id):
     # Start by getting the IGT instance.
     # -------------------------------------------
     inst = dbi.get_igt(corp_id, igt_id)
-
-
 
     # -------------------------------------------
     # Get the state from the user file.
@@ -164,9 +191,16 @@ def normalize(corp_id, igt_id):
     # and swap out the new clean lines for the old
     # clean lines, then generate a new normalized
     # tier based on that.
-    i = dbi.get_igt(corp_id, igt_id)
-    replace_lines(i, clean_lines, None)
-    nt = generate_normal_tier(i, force_generate=True)
+    inst = dbi.get_igt(corp_id, igt_id)
+    replace_lines(inst, clean_lines, None)
+
+    # Now, remove any old normalized tier and replace it with
+    # one generated by the odin-utils script.
+    if normalized_tier(inst) is not None:
+        delete_tier(normalized_tier(inst))
+
+    add_normalized_tier(inst, cleaned_tier(inst))
+    nt = normalized_tier(inst)
 
     content = render_template("tier_table.html", tier=nt, table_type=NORMAL_TABLE_TYPE, id_prefix=NORM_ID, editable=True)
 
@@ -189,9 +223,16 @@ def tagfunc(tagstr):
 def clean(corp_id, igt_id):
 
     inst = dbi.get_igt(corp_id, igt_id)
+
+    # Remove the previously cleaned tier, and
+    # regenerate it with the odin-utils script.
+    delete_tier(cleaned_tier(inst))
+    add_cleaned_tier(inst, raw_tier(inst))
+    ct = cleaned_tier(inst)
+
     return render_template("tier_table.html",
                            table_type=CLEAN_TABLE_TYPE,
-                           tier=generate_clean_tier(inst, force_generate=True),
+                           tier=ct,
                            id_prefix=CLEAN_ID,
                            editable=True,
                            tag_options=LINE_TAGS,
@@ -213,23 +254,38 @@ def intentify(corp_id, igt_id):
     add_clean_tier(inst, data.get('clean'))
     add_normal_tier(inst, data.get('normal'))
 
-    ll = lang_lines(inst)[0]
-    gl = gloss_line(inst)
-    tl = trans_lines(inst)[0]
+    try:
+        ll = lang_lines(inst)[0]
+    except NoNormLineException:
+        ll = None
 
-    if (ll is None) or (gl is None) or (tl is None):
-        raise Exception("Missing L, G, or T line")
+    try:
+        gl = gloss_line(inst)
+    except (NoNormLineException, NoGlossLineException):
+        gl = None
+
+    try:
+        tl = trans_lines(inst)[0]
+    except NoNormLineException:
+        tl = None
+
+    # if (ll is None) or (gl is None) or (tl is None):
+    #     raise Exception("Missing L, G, or T line")
 
 
     response = {}
 
     # Check that the language line and gloss line
     # have the same number of whitespace-delineated tokens.
-    response['glw'] = 1 if len(lang(inst)) == len(gloss(inst)) else 0
+    if ll is not None and gl is not None:
+        response['glw'] = 1 if len(lang(inst)) == len(gloss(inst)) else 0
 
-    # Check that the language line and gloss line
-    # have the same number of morphemes.
-    response['glm'] = 1 if len(morphemes(inst)) == len(glosses(inst)) else 0
+        # Check that the language line and gloss line
+        # have the same number of morphemes.
+        response['glm'] = 1 if len(morphemes(inst)) == len(glosses(inst)) else 0
+    else:
+        response['glw'] = 0
+        response['glm'] = 0
 
     # Check that the normalized tier has only L, G, T for tags.
     norm_tags = set([l.attributes.get('tag') for l in normalized_tier(inst)])
@@ -241,41 +297,68 @@ def intentify(corp_id, igt_id):
     else:
         response['col'] = 1 if is_strict_columnar_alignment(ll.value(), gl.value()) else 0
 
+    # -------------------------------------------
+    # DO ENRICHMENT
+    # -------------------------------------------
+    if tl is not None:
+        generate_trans_words(inst)
+        tag_trans_pos(inst)
+
+        # If we have translation AND gloss, align them.
+        if gl is not None:
+            generate_gloss_glosses(inst)
+            heur_align_inst(inst)
+
+    if gl is not None and ll is not None:
+        generate_lang_words(inst)
+        if classify_gloss_pos(inst):
+            try:
+                project_gloss_pos_to_lang(inst)
+            except GlossLangAlignException:
+                pass
+
+    inst.sort_tiers()
+
     # figure out how many columns we're going to need to number.
-    col_nums = range(1, max(len(lang(inst)), len(gloss(inst)), len(trans(inst))+1))
+
+    # col_nums = range(1, max(len(lang(inst)), len(gloss(inst)), len(trans(inst))+1))
+    #
+    #
+    # lws = generate_lang_words(inst)
+    # gws = generate_gloss_glosses(inst)
+    # tw = generate_trans_words(inst)
+    #
+    # lms = morphemes(inst)
+    # gms = glosses(inst)
+    #
+    # lang_list = []
+    # for lw in lws:
+    #     pairs = (lw, [])
+    #     for lm in lms:
+    #         if x_contains_y(inst, lw, lm):
+    #             pairs[1].append(lm)
+    #     lang_list.append(pairs)
+    #
+    # gloss_list = []
+    # for gw in gws:
+    #     pairs = (gw, [])
+    #     for gm in gms:
+    #         if x_contains_y(inst, gw, gm):
+    #             pairs[1].append(gm)
+    #     gloss_list.append(pairs)
 
 
-    lws = generate_lang_words(inst)
-    gws = generate_gloss_glosses(inst)
-    tw = generate_trans_words(inst)
+    # response['words'] = render_template('group_2.html',
+    #                                     col_nums=col_nums,
+    #                                     lang=lang_list,
+    #                                     gloss=gloss_list,
+    #                                     trans=tw,
+    #                                     aln=heur_align_inst(inst),
+    #                                     item_index=item_index)
 
-    lms = morphemes(inst)
-    gms = glosses(inst)
+    igtjson = xigtjson.encode_igt(inst)
+    response['igt'] = igtjson
 
-    lang_list = []
-    for lw in lws:
-        pairs = (lw, [])
-        for lm in lms:
-            if x_contains_y(inst, lw, lm):
-                pairs[1].append(lm)
-        lang_list.append(pairs)
-
-    gloss_list = []
-    for gw in gws:
-        pairs = (gw, [])
-        for gm in gms:
-            if x_contains_y(inst, gw, gm):
-                pairs[1].append(gm)
-        gloss_list.append(pairs)
-
-
-    response['words'] = render_template('group_2.html',
-                                        col_nums=col_nums,
-                                        lang=lang_list,
-                                        gloss=gloss_list,
-                                        trans=tw,
-                                        aln=heur_align_inst(inst),
-                                        item_index=item_index)
     return json.dumps(response)
 
 
@@ -287,7 +370,6 @@ def save(corp_id, igt_id):
     data = request.get_json()
 
     rating = data.get('rating')
-
     # -------------------------------------------
     # Get the lines
     # -------------------------------------------
@@ -318,11 +400,7 @@ def save(corp_id, igt_id):
 
 
     # Add the data provenance to the tier.
-    ct = cleaned_tier(igt)
-    nt = normalized_tier(igt)
-    for t in [ct, nt]:
-        if t is not None:
-            set_meta_attr(t, DATA_PROV, DATA_SRC, EDITOR_DATA_SRC, metadata_type=EDITOR_METADATA_TYPE)
+    add_editor_metadata(igt)
 
     # Do the actually saving of the igt instance.
     dbi.set_igt(corp_id, igt_id, igt)
@@ -330,7 +408,57 @@ def save(corp_id, igt_id):
     return make_response()
 
 # -------------------------------------------
+# Split an instance
+# -------------------------------------------
+@app.route('/split/<corp_id>/<igt_id>', methods=['POST'])
+def split(corp_id, igt_id):
+    data = request.get_json()
+
+    user_id = data.get('userID')
+    clean   = data.get('clean')
+    norm    = data.get('norm')
+
+    # -------------------------------------------
+    # Get the original instance that we're going
+    # to split, and add some metadata info.
+    # -------------------------------------------
+    igt = dbi.get_igt(corp_id, igt_id)
+    igt = replace_lines(igt, clean, norm)
+    add_editor_metadata(igt)
+    add_split_metadata(igt, igt.id)
+
+    # -------------------------------------------
+    # Make our new copies.
+    # -------------------------------------------
+    igt_a = copy_xigt(igt)
+    igt_b = copy_xigt(igt)
+
+    igt_a.id = igt.id+'_a'
+    igt_b.id = igt.id+'_b'
+
+    dbi.add_igt(corp_id, igt_a)
+    dbi.add_igt(corp_id, igt_b)
+
+    set_state(user_id, corp_id, igt.id, HIDDEN)
+    set_state(user_id, corp_id, igt_a.id, NORM_STATE)
+    set_state(user_id, corp_id, igt_b.id, NORM_STATE)
+
+    return json.dumps({'next':igt_a.id})
+
+@app.route('/delete/<corp_id>/<igt_id>', methods=['POST'])
+def delete_igt(corp_id, igt_id):
+
+    user = request.get_json().get('userID')
+
+    # TODO: FIXME: A sleipnir update should fix this so that we don't need to hide deleted instances.
+    set_state(user, corp_id, igt_id, HIDDEN)
+    dbi.del_igt(corp_id, igt_id)
+
+    return make_response()
+
+# -------------------------------------------
 # Static files
+# -------------------------------------------
 
 @app.route('/static/<path:path>', methods=['GET'])
 def default(path):

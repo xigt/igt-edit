@@ -1,3 +1,18 @@
+# Configuration file for the web interface
+import os
+
+# -------------------------------------------
+# Get the default paths for the project...
+# -------------------------------------------
+from urllib.parse import urljoin
+
+PROJ_ROOT    = os.path.dirname(os.path.dirname(__file__))
+STATIC       = os.path.join(PROJ_ROOT, 'static')
+STATIC_URL   = '/static/'
+# -------------------------------------------
+
+XIGT_DIR = '/Users/rgeorgi/Dropbox/riples/data/xigt_data/XAML'
+
 # Debug mode?
 DEBUG = True
 
@@ -9,6 +24,13 @@ XIGT_LIB = '/opt/xigt'
 
 # SLEIPNIR
 SLEIPNIR_LIB = '/opt/sleipnir'
+
+# ODIN_UTILS_DIR
+ODIN_UTILS   = '/Users/rgeorgi/Documents/code/odin-utils'
+
+# XIGTVIZ DIR
+XIGTVIZ      = os.path.join(STATIC, 'xigtviz')
+XIGTVIZ_URL  = urljoin(STATIC_URL, 'xigtviz')
 
 # -------------------------------------------
 # Users DB

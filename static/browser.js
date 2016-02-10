@@ -3,6 +3,7 @@ var AJAX_LOADER_BIG = '<IMG src="/static/images/ajax-loader.gif"/>';
 var AJAX_LOADER_SMALL = '<IMG src="/static/images/ajax-loader-small.gif"/>';
 
 /* QUALITY CONSTANTS */
+const HIDDEN = 4;
 const BAD_QUALITY = 3;
 const OK_QUALITY = 2;
 const GOOD_QUALITY = 1;
@@ -36,11 +37,16 @@ function login() {
 /* Populate the IGT pane */
 function populateIGTs(corpId, async) {
 
-    if (typeof async === 'undefined') {async = true;}
+    if (typeof async === 'undefined') {async = false;}
+
+    data = {userID : userID()};
+    console.log(data);
 
     $('#fine-list').html('<div style="text-align:center;top:40px;position:relative;">'+AJAX_LOADER_SMALL+'</div>');
     $.ajax({
         url:'/populate/'+corpId,
+        type: 'POST',
+        data: JSON.stringify(data),
         error: populateError,
         success: populateSuccess,
         async: async
@@ -140,6 +146,7 @@ function get_raw_lines() {
         linedata = {};
         linedata['tag'] = $(el).find('.tags').text();
         linedata['text'] = $(el).find('.text').text();
+        linedata['lineno'] = $(el).find('.lineno').text();
         lines.push(linedata);
     });
     return lines;
@@ -160,6 +167,7 @@ function get_tier_lines(rowSelector) {
         linedata['tag'] = $(el).find('.tags option:selected').val();
         linedata['labels'] = $(el).find('.taglabel-combo').combo('getText');
         linedata['judgment'] = $(el).find('input.judgment').val();
+        linedata['lineno'] = $(el).find('.lineno').text();
 
         li = $(el).find('.line-input');
         linedata['text'] = li.val();
@@ -252,8 +260,8 @@ function normalizeIGT(corp_id, igt_id, alreadyGenerated) {
             url: '/normalize/' + corp_id + '/' + igt_id,
             type: 'POST',
             dataType: 'json',
-            contentType: 'application/json',
             data: JSON.stringify(cleanData),
+            contentType: 'application/json',
             success: normalizeSuccess,
             error: normalizeError
         });
@@ -319,10 +327,10 @@ function generateFromNormalized(corp_id, igt_id) {
 
     $.ajax({
         url: '/intentify/'+corp_id+'/'+igt_id,
-        dataType: 'json',
-        contentType: 'application/json',
         type: 'POST',
+        dataType: 'json',
         data: JSON.stringify(data),
+        contentType: 'application/json',
         success: intentifySuccess,
         error: intentifyError
     });
@@ -354,7 +362,8 @@ function intentifySuccess(r, stat, jqXHR) {
     analysisNotifier(r, 'glm');
     analysisNotifier(r, 'tag');
     analysisNotifier(r, 'col');
-    $('#group-2-content').html(r['words']);
+    $('#group-2-content').html('');
+    igtLayout('#group-2-content', r['igt']);
 }
 
 function intentifyError() {
@@ -427,7 +436,9 @@ function addItem(prefix, jqAfter, rowtype) {
 
 /* Retrieve the IGT id and Corp ID */
 function igtId() {
-    return $('#igt-instance').attr('igtid');
+    id = $('#igt-instance').attr('igtid');
+    console.log(id);
+    return id;
 }
 
 function corpId() {
@@ -461,6 +472,9 @@ function userID() {
 // Save IGT
 function saveIGT() {
 
+    // ----------------------------------
+    // Get the reason for editing
+    // ----------------------------------
     rating = parseInt(localStorage.getItem('instance-rating'));
     reason_select = null;
     if (rating == BAD_QUALITY) {
@@ -473,8 +487,10 @@ function saveIGT() {
     if (!(reason_select === null)) {
         reason_str = reason_select.find('option:selected').val();
     }
-    console.log(reason_str);
 
+    // ----------------------------------
+    // Ensure that a reason was given
+    // ----------------------------------
     if (!(reason_select === null) && !(reason_str)) {
         alert('Please choose a reason for the rating.');
         } else {
@@ -501,6 +517,47 @@ function saveIGT() {
     }
 }
 
+/* Split an Instance */
+function splitIGT(corpId, IgtId) {
+
+    var confirmSplit = confirm("This will make two copies of the current instance at the current state. Do you wish to proceed?");
+    if (confirmSplit) {
+        //-------------------------------------------
+        // Let's start by doing the same thing as
+        // we would in saving (e.g., getting all the
+        // clean and normalized lines)
+        //-------------------------------------------
+        var data = {
+            norm: get_normal_lines(),
+            clean: get_clean_lines(),
+            raw:   get_raw_lines,
+            userID: userID()
+        };
+
+        $.ajax({
+            url: '/split/' + corpId + '/' + igtId(),
+            type: 'POST',
+            success: splitSuccess,
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            error: splitError
+        });
+    }
+}
+
+function splitSuccess(r, stat, jqXHR) {
+    populateIGTs(corpId(), false);
+    data = JSON.parse(r);
+    displayIGT(corpId(), data['next']);
+    scrollToIGT(data['next']);
+}
+
+function splitError(r, stat, jq) {
+    alert(r);
+}
+
+//-------------------------------------------
+
 /* Deal with the additional comment field */
 function toggleCommentBox() {
     var comments = $('#comments');
@@ -514,14 +571,18 @@ function toggleCommentBox() {
     }
 }
 
+function scrollToIGT(igtId) {
+    var scrollPos = $('#igtrow-'+igtId).position().top + $('#fine-list').scrollTop()-52;
+    $('#fine-list').animate({scrollTop : scrollPos}, 0);
+}
+
 function saveSuccess(r, stat, jqXHR) {
     populateIGTs(corpId(), false);
     nexts = JSON.parse(localStorage.getItem('nexts'));
     nextId = nexts[igtId()];
 
     // scroll the igt list to the appropriate position
-    var scrollPos = $('#igtrow-'+igtId()).position().top + $('#fine-list').scrollTop()-52;
-    $('#fine-list').animate({scrollTop : scrollPos}, 0);
+    scrollToIGT(nextId);
 
     // Now display the current IGT.
     displayIGT(corpId(), nextId);
@@ -530,6 +591,44 @@ function saveSuccess(r, stat, jqXHR) {
 function saveError(r, stat, jqXHR) {
     console.error("An error occurred saving the instance.");
     console.error(jqXHR.toString());
+}
+
+function deleteIGT() {
+
+    doDelete = confirm("Are you sure you want to DELETE this instance?");
+
+
+    if (doDelete) {
+        next = JSON.parse(localStorage.getItem('nexts'))[igtId()];
+        localStorage.setItem('deleteNext', next);
+
+        data = {userID: userID()};
+
+        $.ajax(
+            {
+                url: '/delete/' + corpId() + '/' + igtId(),
+                type: "POST",
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: deleteSuccess,
+                error: deleteError
+            }
+        )
+    }
+}
+
+function deleteSuccess(r) {
+    populateIGTs(corpId(), false);
+    nextId = localStorage.getItem('deleteNext');
+    console.log("NEXT INSTANCE: " + nextId);
+    scrollToIGT(nextId);
+    displayIGT(corpId(), nextId);
+    localStorage.removeItem('deleteNext');
+
+}
+
+function deleteError(r) {
+    alert(r.toString());
 }
 
 /* Highlighting for Word Display */
