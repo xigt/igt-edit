@@ -6,6 +6,7 @@ import sys
 # -------------------------------------------
 # Set up the Flask app
 # -------------------------------------------
+import re
 from flask import Flask, render_template, url_for, request, make_response
 
 app = Flask(__name__)
@@ -51,12 +52,12 @@ from sleipnir import dbi
 # Import other stuff here.
 # -------------------------------------------
 
-from intent.consts import CLEAN_ID, NORM_ID
+from intent.consts import CLEAN_ID, NORM_ID, all_punc_re_mult
 from intent.igt.igtutils import is_strict_columnar_alignment
 from intent.igt.create_tiers import lang_lines, gloss_line, trans_lines, \
-    generate_lang_words, generate_gloss_glosses, generate_trans_words, lang, gloss, morphemes, glosses, trans
+    generate_lang_words, generate_gloss_words, generate_trans_words, lang, gloss, morphemes, glosses, trans
 from intent.igt.igt_functions import x_contains_y, copy_xigt, delete_tier, heur_align_inst, classify_gloss_pos, \
-    tag_trans_pos, project_gloss_pos_to_lang
+    tag_trans_pos, project_gloss_pos_to_lang, add_gloss_lang_alignments
 from intent.igt.references import raw_tier, cleaned_tier, normalized_tier
 from intent.igt.exceptions import NoNormLineException, NoGlossLineException, GlossLangAlignException
 
@@ -278,14 +279,20 @@ def intentify(corp_id, igt_id):
 
     response = {}
 
+    def equal_lengths(tier_a, tier_b):
+        tier_a_items = [i for i in tier_a if not re.match('^{}$'.format(all_punc_re_mult), i.value())]
+        tier_b_items = [i for i in tier_b if not re.match('^{}$'.format(all_punc_re_mult), i.value())]
+        return len(tier_a_items) == len(tier_b_items)
+
+
     # Check that the language line and gloss line
     # have the same number of whitespace-delineated tokens.
     if ll is not None and gl is not None:
-        response['glw'] = 1 if len(lang(inst)) == len(gloss(inst)) else 0
+        response['glw'] = 1 if equal_lengths(lang(inst), gloss(inst)) else 0
 
         # Check that the language line and gloss line
         # have the same number of morphemes.
-        response['glm'] = 1 if len(morphemes(inst)) == len(glosses(inst)) else 0
+        response['glm'] = 1 if equal_lengths(morphemes(inst), glosses(inst)) else 0
     else:
         response['glw'] = 0
         response['glm'] = 0
@@ -309,11 +316,18 @@ def intentify(corp_id, igt_id):
 
         # If we have translation AND gloss, align them.
         if gl is not None:
-            generate_gloss_glosses(inst)
+            generate_gloss_words(inst)
             heur_align_inst(inst)
 
     if gl is not None and ll is not None:
         generate_lang_words(inst)
+        generate_gloss_words(inst)
+        glosses(inst)
+        try:
+            add_gloss_lang_alignments(inst)
+        except GlossLangAlignException:
+            pass
+
         if classify_gloss_pos(inst):
             try:
                 project_gloss_pos_to_lang(inst)
@@ -321,43 +335,6 @@ def intentify(corp_id, igt_id):
                 pass
 
     inst.sort_tiers()
-
-    # figure out how many columns we're going to need to number.
-
-    # col_nums = range(1, max(len(lang(inst)), len(gloss(inst)), len(trans(inst))+1))
-    #
-    #
-    # lws = generate_lang_words(inst)
-    # gws = generate_gloss_glosses(inst)
-    # tw = generate_trans_words(inst)
-    #
-    # lms = morphemes(inst)
-    # gms = glosses(inst)
-    #
-    # lang_list = []
-    # for lw in lws:
-    #     pairs = (lw, [])
-    #     for lm in lms:
-    #         if x_contains_y(inst, lw, lm):
-    #             pairs[1].append(lm)
-    #     lang_list.append(pairs)
-    #
-    # gloss_list = []
-    # for gw in gws:
-    #     pairs = (gw, [])
-    #     for gm in gms:
-    #         if x_contains_y(inst, gw, gm):
-    #             pairs[1].append(gm)
-    #     gloss_list.append(pairs)
-
-
-    # response['words'] = render_template('group_2.html',
-    #                                     col_nums=col_nums,
-    #                                     lang=lang_list,
-    #                                     gloss=gloss_list,
-    #                                     trans=tw,
-    #                                     aln=heur_align_inst(inst),
-    #                                     item_index=item_index)
 
     igtjson = xigtjson.encode_igt(inst)
     response['igt'] = igtjson
