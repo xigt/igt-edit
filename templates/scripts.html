@@ -1,4 +1,4 @@
-{% macro scripts() %}
+{% macro scripts(xv_settings) %}
     {# Set the character set #}
     <meta charset="UTF-8">
 
@@ -14,4 +14,11 @@
     <script type="text/javascript" src="/static/tooltips.js"></script>
     <script type="text/javascript" src="/static/browser.js"></script>
     <script type="text/javascript" src="/static/tiers.js"></script>
+
+    {# XIGTVIZ STUFF #}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
+    <script src="{{ config['XIGTVIZ_URL'] }}/xigtviz.js" charset="utf-8"></script>
+    <script>var settings = {{xv_settings|tojson|safe}};</script>
+    <link rel="stylesheet" type="text/css" href="{{ config['XIGTVIZ_URL'] }}/xigtviz.css"/>
+
 {% endmacro %}

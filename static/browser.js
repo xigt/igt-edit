@@ -362,7 +362,8 @@ function intentifySuccess(r, stat, jqXHR) {
     analysisNotifier(r, 'glm');
     analysisNotifier(r, 'tag');
     analysisNotifier(r, 'col');
-    $('#group-2-content').html(r['words']);
+    $('#group-2-content').html('');
+    igtLayout('#group-2-content', r['igt']);
 }
 
 function intentifyError() {
