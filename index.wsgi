@@ -67,6 +67,13 @@ app.debug = True
 # -------------------------------------------
 YGG_LOG = logging.getLogger('YGG')
 
+# -------------------------------------------
+# Set up XigtViz settings
+# -------------------------------------------
+xv_conf = os.path.join(XIGTVIZ, 'config.json')
+with open(xv_conf) as f:
+    xv_settings = json.loads(f.read())
+    app.config['xvs'] = xv_settings
 
 # -------------------------------------------
 # The default route. Display the browser window
@@ -90,12 +97,8 @@ def get_user(userid):
         sorted_corpora = sorted(filtered_corpora,
                                 key=lambda x: x.get('name'))
 
-        xigtviz_conf = os.path.join(XIGTVIZ, 'config.json')
-        with open(xigtviz_conf) as f:
-            xigtviz_settings = json.loads(f.read())
 
-
-        return render_template('browser.html', corpora=sorted_corpora, user_id=userid, xv_settings=xigtviz_settings)
+        return render_template('browser.html', corpora=sorted_corpora, user_id=userid)
     else:
         return render_template('login_screen.html', try_again=True)
 
