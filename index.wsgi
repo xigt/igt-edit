@@ -29,10 +29,9 @@ sys.path.append(ODIN_UTILS)
 from yggdrasil.metadata import get_rating, set_rating, set_comment
 from yggdrasil.users import get_user_corpora, get_state, set_state
 from yggdrasil.igt_operations import replace_lines, add_editor_metadata, add_split_metadata, add_raw_tier, \
-    add_clean_tier, add_normal_tier
+    add_clean_tier, add_normal_tier, columnar_align_l_g
 
-from odinclean import add_cleaned_tier
-from odinnormalize import add_normalized_tier
+import odinclean, odinnormalize
 
 from xigt import Igt
 from xigt.codecs import xigtjson
@@ -203,7 +202,7 @@ def normalize(corp_id, igt_id):
     if normalized_tier(inst) is not None:
         delete_tier(normalized_tier(inst))
 
-    add_normalized_tier(inst, cleaned_tier(inst))
+    odinnormalize.add_normalized_tier(inst, cleaned_tier(inst))
     nt = normalized_tier(inst)
 
     content = render_template("tier_table.html", tier=nt, table_type=NORMAL_TABLE_TYPE, id_prefix=NORM_ID, editable=True)
@@ -231,7 +230,7 @@ def clean(corp_id, igt_id):
     # Remove the previously cleaned tier, and
     # regenerate it with the odin-utils script.
     delete_tier(cleaned_tier(inst))
-    add_cleaned_tier(inst, raw_tier(inst))
+    odinclean.add_cleaned_tier(inst, raw_tier(inst))
     ct = cleaned_tier(inst)
 
     return render_template("tier_table.html",
@@ -299,7 +298,7 @@ def intentify(corp_id, igt_id):
 
     # Check that the normalized tier has only L, G, T for tags.
     norm_tags = set([l.attributes.get('tag') for l in normalized_tier(inst)])
-    response['tag'] = 1 if set(['L','G','T']) == norm_tags else 0
+    response['tag'] = 1 if set(['L','G','T']).issubset(norm_tags) else 0
 
     # Check that the g/l lines are aligned in strict columns
     if ll is None or gl is None:
@@ -430,7 +429,6 @@ def delete_igt(corp_id, igt_id):
 
     user = request.get_json().get('userID')
 
-    # TODO: FIXME: A sleipnir update should fix this so that we don't need to hide deleted instances.
     set_state(user, corp_id, igt_id, HIDDEN)
     dbi.del_igt(corp_id, igt_id)
 

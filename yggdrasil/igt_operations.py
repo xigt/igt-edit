@@ -1,5 +1,6 @@
 from intent.consts import CLEAN_STATE, CLEAN_ID, NORM_ID, NORM_STATE, DATA_SRC_ATTR, DATA_PROV, ODIN_TAG_ATTRIBUTE, \
     ODIN_JUDGMENT_ATTRIBUTE, RAW_ID, RAW_STATE, ODIN_TYPE, STATE_ATTRIBUTE
+from intent.igt.create_tiers import gloss, lang, lang_lines
 from intent.igt.metadata import set_meta_attr, set_meta
 from intent.igt.references import cleaned_tier, normalized_tier, gen_item_id, gen_tier_id
 from xigt import Item, Tier
@@ -100,6 +101,32 @@ def create_text_tier_from_lines(inst, lines, id_base, state):
                    text=line.get('text'))
         tier.append(l)
     return tier
+
+def columnar_align_l_g(g_t, l_t):
+
+
+    l_text = l_t.text.split()
+    g_text = g_t.text.split()
+
+    l_line = ''
+    g_line = ''
+
+    for i in range(max(len(l_text), len(g_text))):
+        l_w = ''
+        g_w = ''
+        if i < len(l_text):
+            l_w = l_text[i]
+        if i < len(g_text):
+            g_w = g_text[i]
+
+        format = '{{:<{}s}}'.format(max(len(g_w), len(l_w))+1)
+        l_line += format.format(l_w)
+        g_line += format.format(g_w)
+
+    return l_line, g_line
+
+
+
 
 def add_text_tier_from_lines(inst, lines, id_base, state):
     tier = create_text_tier_from_lines(inst, lines, id_base, state)
