@@ -7,7 +7,7 @@ import sys
 # Set up the Flask app
 # -------------------------------------------
 import re
-from flask import Flask, render_template, url_for, request, make_response, Response
+from flask import Flask, render_template, url_for, request, make_response, Response, abort
 
 app = Flask(__name__)
 application = app
@@ -17,7 +17,7 @@ application = app
 # -------------------------------------------
 sys.path.append(os.path.dirname(__file__))
 from yggdrasil import config
-from yggdrasil.config import INTENT_LIB, XIGT_LIB, SLEIPNIR_LIB, LINE_TAGS, LINE_ATTRS, ODIN_UTILS, XIGTVIZ
+from yggdrasil.config import INTENT_LIB, XIGT_LIB, SLEIPNIR_LIB, LINE_TAGS, LINE_ATTRS, ODIN_UTILS, XIGTVIZ, PDF_DIR
 from yggdrasil.consts import NORM_STATE, CLEAN_STATE, RAW_STATE, NORMAL_TABLE_TYPE, CLEAN_TABLE_TYPE, EDITOR_DATA_SRC, \
     EDITOR_METADATA_TYPE, HIDDEN
 
@@ -185,19 +185,42 @@ def display(corp_id, igt_id):
         nt = normalized_tier(inst)
 
     nt_content = None
-    comment    = None
     if nt is not None:
         state = NORM_STATE
         nt_content = render_template("tier_table.html", tier=nt, table_type=NORMAL_TABLE_TYPE, id_prefix=NORM_ID, editable=True)
-        comment = get_comment(inst)
+
+    docid = inst.attributes.get('doc-id')
+    pdflink = None
+    if pdfpath(docid):
+        pdflink='/pdf/'+docid
 
     # -------------------------------------------
     # Render the element template.
     # -------------------------------------------
-    content = render_template('element.html', state=state, rt=rt, ct=ct, nt_content=nt_content, igt=inst, igt_id=igt_id, corp_id=corp_id, comment=comment, rating=get_rating(inst), reason=get_reason(inst))
+    content = render_template('element.html', state=state, rt=rt, ct=ct, nt_content=nt_content,
+                              igt=inst, igt_id=igt_id, corp_id=corp_id,
+                              comment=get_comment(inst), rating=get_rating(inst), reason=get_reason(inst),
+                              pdflink=pdflink)
 
     return json.dumps({"content":content})
 
+def pdfpath(docid):
+    path = os.path.join(PDF_DIR, '{}.pdf'.format(docid))
+    if docid and os.path.exists(path):
+        return path
+    else:
+        return None
+
+@app.route('/pdf/<docid>', methods=['GET'])
+def get_pdf(docid):
+    pdfpath = os.path.join(PDF_DIR, '{}.pdf'.format(docid))
+    if os.path.exists(pdfpath):
+        with open(pdfpath, 'rb') as f:
+            r = Response(f.read(), mimetype='application/pdf')
+            r.headers['Content-Disposition'] = "attachment; filename={}.pdf".format(docid)
+            return r
+    else:
+        abort(404)
 
 # -------------------------------------------
 # After the user has corrected the clean tier

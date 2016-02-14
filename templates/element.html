@@ -6,6 +6,9 @@
     {# Iterate over every igt in the page... #}
     <div class="igt-panel">
     <H1>Instance {{ igt_id }}</H1>
+    {% if pdflink %}
+        <a href="{{ pdflink }}">Download PDF Source</a>
+   {% endif %}
     <HR/>
 
         {# RAW TIER... #}
