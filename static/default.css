@@ -3,6 +3,8 @@
     z-index: 9900000 !important;
 }
 
+
+
 /* IGT Rows */
 .igtrow {
     border-top: thin solid black;
@@ -11,6 +13,11 @@
 
 .igtrow:hover {
     background-color: rgb(232, 241, 255);
+}
+
+/* Bottom of IGT/Corp Lists */
+.endlist {
+    border-top: thin solid black;
 }
 
 /* Ratings */

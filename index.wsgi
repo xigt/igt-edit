@@ -7,7 +7,7 @@ import sys
 # Set up the Flask app
 # -------------------------------------------
 import re
-from flask import Flask, render_template, url_for, request, make_response
+from flask import Flask, render_template, url_for, request, make_response, Response
 
 app = Flask(__name__)
 application = app
@@ -34,7 +34,7 @@ from yggdrasil.igt_operations import replace_lines, add_editor_metadata, add_spl
 import odinclean, odinnormalize
 
 from xigt import Igt
-from xigt.codecs import xigtjson
+from xigt.codecs import xigtjson, xigtxml
 
 # -------------------------------------------
 # Add the configuration to the app config
@@ -102,6 +102,25 @@ def get_user(userid):
     else:
         return render_template('login_screen.html', try_again=True)
 
+# -------------------------------------------
+# Download the corpus in xml.
+# -------------------------------------------
+@app.route('/download/<corp_id>')
+def download_corp(corp_id):
+    xc = dbi.get_corpus(corp_id)
+    r = Response(xigtxml.dumps(xc), mimetype='text/xml', )
+    r.headers['Content-Disposition'] = "attachment; filename={}.xml".format(dbi._get_name(corp_id))
+    return r
+
+
+def igt_id_sort(igt):
+    id_str = igt.id
+    igt_re = re.search('([0-9]+)-([0-9]+)', id_str)
+    if igt_re:
+        igt_id, inst_id = igt_re.groups()
+        return (int(igt_id), int(inst_id))
+    else:
+        return id_str
 
 # -------------------------------------------
 # When a user clicks a "corpus", display the
@@ -132,7 +151,7 @@ def populate(corp_id):
             nexts[igt.id] = None
 
 
-    filtered_list = sorted(filtered_list, key=lambda x: x.id)
+    # filtered_list = sorted(filtered_list, key=igt_id_sort)
 
 
     return render_template('igt_list.html', igts=filtered_list, corp_id=corp_id, ratings=ratings, nexts=nexts)
