@@ -67,6 +67,11 @@ function populateError() {
     $('#fine-list').text("An error occurred.");
 }
 
+/* Download the corpus in XML if requested */
+function downloadCorpus(corpId){
+    location.href='/download/'+corpId;
+}
+
 /* display a single IGT instance */
 function displayIGT(corp_id, igt_id) {
     $('#editor-panel').html(AJAX_LOADER_BIG);

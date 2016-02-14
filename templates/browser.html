@@ -21,38 +21,55 @@
 <BODY>
 
 
-    {# MAIN LAYOUT ELEMENT #}
-    <div class="easyui-layout" style="width: 100%;height: 100%">
+{# MAIN LAYOUT ELEMENT #}
+<div class="easyui-layout" style="width: 100%;height: 100%">
 
-        {# Left-Hand Side Elements #}
-        <div id="browser-panels" class="easyui-layout" data-options="split:true,region:'west'" style="width:20%">
+    {# Left-Hand Side Elements #}
+    <div id="browser-panels" class="easyui-layout" data-options="split:true,region:'west'" style="width:20%">
 
-            <div id="course-list" data-options="split:true,region:'center',title:'Corpora'" style="width:50%">
+        <div id="course-list" data-options="split:true,region:'center',title:'Corpora'" style="width:50%">
 
-                {# BEGIN CORPUS LIST #}
-                <ul class="easyui-datalist" data-options="onSelect:function(index, data){populateIGTs(data['value'])}" lines="true" style="width:100%">
-                {% for corpus in corpora %}
-                    <li value="{{ corpus.get('id') }}" id="{{ corpus.get('name') }}">{{ corpus.get('name') }}</li>
-                {% endfor %}
-                </ul>
-                {# END CORPUS LIST #}
+            {# BEGIN CORPUS LIST #}
+            {#                <ul class="easyui-datalist" data-options="onSelect:function(index, data){populateIGTs(data['value'])}" lines="true" style="width:100%">#}
+            {% for corpus in corpora %}
 
-            </div>
+                <div
+                     id="corp-{{ corpus.get('name') }}"
 
-            <div id="fine-list" data-options="split:true,region:'south',title:'IGTs'" style="height:50%">
-
-            </div>
+                >
+                    <div class="corpname igtrow" style="width:80%; float:left"
+                         onclick="populateIGTs('{{ corpus.get('id') }}')"
+                    >
+                        {{ corpus.get('name') }}
+                    </div>
+                    <div class="corpdown igtrow"
+                         style="width:10%;float:left;text-align: center"
+                        onclick="downloadCorpus('{{ corpus.get('id') }}')">
+                        <img height=13  src="/static/images/download.svg"/>
+                    </div>
+                    <div style="clear:both"></div>
+                </div>
+            {% endfor %}
+            <div class="endlist"></div>
+            {#                </ul>#}
+            {# END CORPUS LIST #}
 
         </div>
-        <div id="editor-panel" class="easyui-panel" data-options="region:'center',split:'true',title:'Editor'" style="width:80%">
-            <div style="font-size:large;margin:20px">
-                <P>Nothing currently selected.</P>
-                <P>To select an element to edit, please click on it in the left-hand menu.</P>
-            </div>
+
+        <div id="fine-list" class="easyui-panel" data-options="split:true,region:'south',title:'IGTs'" style="height:50%">
+
+        </div>
+
+    </div>
+    <div id="editor-panel" class="easyui-panel" data-options="region:'center',split:'true',title:'Editor'" style="width:80%">
+        <div style="font-size:large;margin:20px">
+            <P>Nothing currently selected.</P>
+            <P>To select an element to edit, please click on it in the left-hand menu.</P>
         </div>
     </div>
+</div>
 
-    {# END LAYOUT ELEMENT #}
+{# END LAYOUT ELEMENT #}
 
 </BODY>
 </HTML>

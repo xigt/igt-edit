@@ -32,6 +32,9 @@ ODIN_UTILS   = '/opt/odin-utils'
 XIGTVIZ      = os.path.join(STATIC, 'xigtviz')
 XIGTVIZ_URL  = urljoin(STATIC_URL, 'xigtviz')
 
+# PDF Data Dir
+PDFS = '/Users/rgeorgi/Documents/treebanks/ODIN_data/pdfs'
+
 # -------------------------------------------
 # Users DB
 USER_DB = '/var/www/yggdrasil-users/users.js'
@@ -40,7 +43,7 @@ USER_DB = '/var/www/yggdrasil-users/users.js'
 # Values for line
 # -------------------------------------------
 LINE_TAGS = ['L','G','T','M','B']
-LINE_ATTRS = ['AC', 'CN', 'CR', 'DB', 'LN', 'SY', 'LT', 'AL', 'EX']
+LINE_ATTRS = ['AC', 'AL', 'CN', 'CR', 'DB', 'EX', 'LN', 'LT', 'SY']
 
 # -------------------------------------------
 # Reasons
