@@ -29,6 +29,7 @@ RATINGS_REV = {RATINGS[key]:key for key in RATINGS}
 
 QUALITY_META_ATTR = 'quality'
 USER_META_ATTR = 'user'
+REASON_META_ATTR = 'reason'
 
 # -------------------------------------------
 
