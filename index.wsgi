@@ -26,7 +26,7 @@ sys.path.append(XIGT_LIB)
 sys.path.append(SLEIPNIR_LIB)
 sys.path.append(ODIN_UTILS)
 
-from yggdrasil.metadata import get_rating, set_rating, set_comment
+from yggdrasil.metadata import get_rating, set_rating, set_comment, get_comment, get_reason
 from yggdrasil.users import get_user_corpora, get_state, set_state
 from yggdrasil.igt_operations import replace_lines, add_editor_metadata, add_split_metadata, add_raw_tier, \
     add_clean_tier, add_normal_tier, columnar_align_l_g
@@ -185,14 +185,16 @@ def display(corp_id, igt_id):
         nt = normalized_tier(inst)
 
     nt_content = None
+    comment    = None
     if nt is not None:
         state = NORM_STATE
         nt_content = render_template("tier_table.html", tier=nt, table_type=NORMAL_TABLE_TYPE, id_prefix=NORM_ID, editable=True)
+        comment = get_comment(inst)
 
     # -------------------------------------------
     # Render the element template.
     # -------------------------------------------
-    content = render_template('element.html', state=state, rt=rt, ct=ct, nt_content=nt_content, igt=inst, igt_id=igt_id, corp_id=corp_id)
+    content = render_template('element.html', state=state, rt=rt, ct=ct, nt_content=nt_content, igt=inst, igt_id=igt_id, corp_id=corp_id, comment=comment, rating=get_rating(inst), reason=get_reason(inst))
 
     return json.dumps({"content":content})
 
@@ -367,13 +369,16 @@ def intentify(corp_id, igt_id):
 def save(corp_id, igt_id):
     data = request.get_json()
 
-    rating = data.get('rating')
     # -------------------------------------------
     # Get the lines
     # -------------------------------------------
     clean = data.get('clean')
     norm  = data.get('norm')
     user_id = data.get('userID')
+
+    # Get the other data
+    rating = data.get('rating')
+    reason = data.get('reason')
     comment = data.get('comment', '')
 
     # Set the rating...
@@ -386,11 +391,13 @@ def save(corp_id, igt_id):
 
 
 
+
+
     # Retrieve the IGT instance, and swap in the
     # new cleaned and normalized tiers.
     igt = dbi.get_igt(corp_id, igt_id)
     igt = replace_lines(igt, clean, norm)
-    set_rating(igt, user_id, rating)
+    set_rating(igt, user_id, rating, reason)
 
     # Only add the comment if it is contentful.
     if comment.strip():

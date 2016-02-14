@@ -504,6 +504,7 @@ function saveIGT() {
             rating: rating,
             norm: get_normal_lines(),
             clean: get_clean_lines(),
+            reason: reason_str,
             raw: get_raw_lines(),
             userID: userID(),
             comment: $("#freeform-comment").val()
