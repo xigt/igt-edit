@@ -89,6 +89,8 @@ def main():
 @app.route('/user/<userid>')
 def get_user(userid):
     user_corpora = get_user_corpora(userid)
+    YGG_LOG.critical(user_corpora)
+    YGG_LOG.critical(dbi.list_corpora())
     if user_corpora is not None:
         all_corpora  = dbi.list_corpora()
 
@@ -108,6 +110,7 @@ def get_user(userid):
 @app.route('/download/<corp_id>')
 def download_corp(corp_id):
     xc = dbi.get_corpus(corp_id)
+    xc.sort(key=igt_id_sort)
     r = Response(xigtxml.dumps(xc), mimetype='text/xml', )
     r.headers['Content-Disposition'] = "attachment; filename={}.xml".format(dbi._get_name(corp_id))
     return r
@@ -120,7 +123,11 @@ def igt_id_sort(igt):
         igt_id, inst_id = igt_re.groups()
         return (int(igt_id), int(inst_id))
     else:
-        return id_str
+        igt_re=re.search('([0-9]+)', id_str)
+        if igt_re:
+            return int(igt_re.group(1))
+        else:
+            return id_str
 
 # -------------------------------------------
 # When a user clicks a "corpus", display the
@@ -129,7 +136,7 @@ def igt_id_sort(igt):
 @app.route('/populate/<corp_id>', methods=['POST'])
 def populate(corp_id):
     xc = dbi.get_corpus(corp_id)
-    xc = sorted(xc, key=lambda x: x.id)
+    xc.sort(key=igt_id_sort)
 
     data = json.loads(request.get_data().decode())
     user_id = data.get('userID')
@@ -273,7 +280,9 @@ def clean(corp_id, igt_id):
 
     # Remove the previously cleaned tier, and
     # regenerate it with the odin-utils script.
-    delete_tier(cleaned_tier(inst))
+    if cleaned_tier(inst):
+        delete_tier(cleaned_tier(inst))
+
     odinclean.add_cleaned_tier(inst, raw_tier(inst))
     ct = cleaned_tier(inst)
 
