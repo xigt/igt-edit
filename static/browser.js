@@ -96,6 +96,9 @@ function displaySuccess(r, stat, jqXHR) {
     // Assign the tooltips to the interface elements.
     assign_tooltips();
 
+    // resize the generated lines as neccessary
+    checkTextWidths();
+
     // Stash the current versions of the clean lines for undo-ing.
     stashCleanLines();
     $('.igtrow').removeClass(CURRENT_ROW);
@@ -237,6 +240,8 @@ function cleanSuccess(r, stat, jqXHR) {
     assign_tooltips();
     stashCleanLines();
 
+    checkTextWidths();
+
 }
 
 function cleanError(r) {
@@ -303,6 +308,8 @@ function normalizeSuccess(r, stat, jqXHR) {
     assign_tooltips();
     stashNormLines();
     createCombos();
+
+    checkTextWidths();
 
     // Once the normalized lines are shown, it's okay for
     // the user to use the green/yellow buttons.
@@ -444,7 +451,6 @@ function addItem(prefix, jqAfter, rowtype) {
 /* Retrieve the IGT id and Corp ID */
 function igtId() {
     id = $('#igt-instance').attr('igtid');
-    console.log(id);
     return id;
 }
 
@@ -513,7 +519,6 @@ function saveIGT() {
         };
 
 
-        console.log(igtId() + ' ' + corpId());
         $.ajax({
             url: '/save/' + corpId() + '/' + igtId(),
             type: 'PUT',
@@ -672,7 +677,6 @@ function unhighlightSrcs(obj, idlist) {
 function doResizeStuff() {
     checkTextWidths();
     $('#mainwindow').height($(document).height() -35);
-    console.log($(document).height());
 }
 
 // -------------------------------------------
@@ -696,9 +700,8 @@ function doResizeStuff() {
 function checkTextWidths() {
     maxwidth=0;
     $('.line-input').each(function(i, elt) {
-        maxwidth=Math.max(maxwidth, $(elt).textWidth());
+        maxwidth=Math.max(maxwidth, $(elt).textWidth()+10);
     });
-    console.log(maxwidth);
     $('.textrow,.line-input').each(function(i, elt) {
        $(elt).css('min-width', maxwidth);
     });

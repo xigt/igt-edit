@@ -96,7 +96,7 @@
         {# COLUMN 4 - ACTUAL TEXT #}
         <TD {% if editable %}class="textinput"{% endif %}>
             {% if editable %}
-                <input class="line-input" type="text" value="{{ item_text }}" style="min-width:{{ item_text|length * 7 }}px"/>
+                <input class="line-input" type="text" value="{{ item_text }}"/>
             {% else %}
                 <pre class="text">{{ item_text }}</pre>
             {% endif %}
