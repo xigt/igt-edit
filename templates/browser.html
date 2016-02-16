@@ -25,43 +25,42 @@
 <div class="easyui-layout" style="width: 100%;height: 100%">
 
     {# Left-Hand Side Elements #}
-    <div id="browser-panels" class="easyui-layout" data-options="split:true,region:'west'" style="width:20%">
+    <div id="list-container" region="west" split="true" style="width:20%;min-width:90px">
 
-        <div id="course-list" data-options="split:true,region:'center',title:'Corpora'" style="width:50%">
+        <div id="list-layout" class="easyui-layout" fit="true">
+            <div id="course-list" split="true" region="north"  title="Corpora" style="height:20%">
 
-            {# BEGIN CORPUS LIST #}
-            {#                <ul class="easyui-datalist" data-options="onSelect:function(index, data){populateIGTs(data['value'])}" lines="true" style="width:100%">#}
-            {% for corpus in corpora %}
+                {# BEGIN CORPUS LIST #}
+                {#                <ul class="easyui-datalist" data-options="onSelect:function(index, data){populateIGTs(data['value'])}" lines="true" style="width:100%">#}
+                {% for corpus in corpora %}
 
-                <div
-                     id="corp-{{ corpus.get('name') }}"
+                    <div
+                            id="corp-{{ corpus.get('name') }}"
 
-                >
-                    <div class="corpname igtrow" style="width:80%; float:left"
-                         onclick="populateIGTs('{{ corpus.get('id') }}')"
                     >
-                        {{ corpus.get('name') }}
+                        <div class="corpname igtrow"
+                             style="width:calc(100% - 40px); float:left"
+                             onclick="populateIGTs('{{ corpus.get('id') }}')"
+                        >
+                            {{ corpus.get('name') }}
+                        </div>
+                        <div class="corpdown igtrow"
+                             style="width:20px;float:left;text-align: center"
+                             onclick="downloadCorpus('{{ corpus.get('id') }}')">
+                            <img height=13  src="/static/images/download.svg"/>
+                        </div>
+                        <div style="clear:both"></div>
                     </div>
-                    <div class="corpdown igtrow"
-                         style="width:10%;float:left;text-align: center"
-                        onclick="downloadCorpus('{{ corpus.get('id') }}')">
-                        <img height=13  src="/static/images/download.svg"/>
-                    </div>
-                    <div style="clear:both"></div>
-                </div>
-            {% endfor %}
-            <div class="endlist"></div>
-            {#                </ul>#}
-            {# END CORPUS LIST #}
+                {% endfor %}
+                <div class="endlist"></div>
+                {#                </ul>#}
+                {# END CORPUS LIST #}
 
+            </div>
+            <div id="fine-list"   split="true" region="center" title="IGTs" class="easyui-panel" style="height: 80%;min-height: 50px" ></div>
         </div>
-
-        <div id="fine-list" class="easyui-panel" data-options="split:true,region:'south',title:'IGTs'" style="height:50%">
-
-        </div>
-
     </div>
-    <div id="editor-panel" class="easyui-panel" data-options="region:'center',split:'true',title:'Editor'" style="width:80%">
+    <div id="editor-panel" class="easyui-panel" region="center" split="true" title="Editor" style="width:80%">
         <div style="font-size:large;margin:20px">
             <P>Nothing currently selected.</P>
             <P>To select an element to edit, please click on it in the left-hand menu.</P>
