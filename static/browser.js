@@ -102,6 +102,7 @@ function displaySuccess(r, stat, jqXHR) {
     $('#igtrow-'+igtId()).addClass(CURRENT_ROW);
 
     checkTextWidths();
+    $('.line-input').keydown(checkTextWidths);
 }
 
 /* COMBO FUNCTIONS */
@@ -238,6 +239,9 @@ function cleanSuccess(r, stat, jqXHR) {
     createCombos();
     assign_tooltips();
     stashCleanLines();
+
+    checkTextWidths();
+    $('#clean-tier .line-input').keydown(checkTextWidths);
 }
 
 function cleanError(r) {
@@ -304,6 +308,14 @@ function normalizeSuccess(r, stat, jqXHR) {
     assign_tooltips();
     stashNormLines();
     createCombos();
+    checkTextWidths();
+
+    /* Make sure to bind the event to resize the contents of the text fields if they change*/
+    $('#normalized-tier .line-input').bind('cut copy paste', function() {
+        setTimeout(checkTextWidths(), 300);
+    });
+
+    $('#normalized-tier .line-input').keydown(checkTextWidths);
 
     // Once the normalized lines are shown, it's okay for
     // the user to use the green/yellow buttons.
@@ -314,6 +326,7 @@ function normalizeError(r) {
     $('#normalized-contents').text("An error occured while normalizing.");
     console.error(r);
 }
+
 
 /* INTENT-ification */
 function generateFromNormalized(corp_id, igt_id) {
@@ -675,7 +688,9 @@ function doResizeStuff() {
     console.log($(document).height());
 }
 
+// -------------------------------------------
 /* Make sure that the text input fields are the right width */
+
 function checkTextWidths() {
     maxwidth=0;
     $('.line-input').each(function(i, elt) {
@@ -686,6 +701,26 @@ function checkTextWidths() {
     });
 }
 
+// -------------------------------------------
+// Functions that trigger on resize and catch keystrokes
+// -------------------------------------------
+
+$(document).keydown(function(e) {
+
+   switch(e.which) {
+       case 37: //left
+           break;
+       case 38: //up
+           break;
+       case 39: //right
+           break;
+       case 40: //down
+           break;
+   }
+});
+
 $(window).resize(function() {
     doResizeStuff();
 });
+
+/*  */
