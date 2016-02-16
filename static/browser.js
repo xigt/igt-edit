@@ -676,7 +676,9 @@ function doResizeStuff() {
     console.log($(document).height());
 }
 
+// -------------------------------------------
 /* Make sure that the text input fields are the right width */
+
 function checkTextWidths() {
     maxwidth=0;
     $('.line-input').each(function(i, elt) {
@@ -687,6 +689,26 @@ function checkTextWidths() {
     });
 }
 
+// -------------------------------------------
+// Functions that trigger on resize and catch keystrokes
+// -------------------------------------------
+
+$(document).keydown(function(e) {
+    checkTextWidths();
+   switch(e.which) {
+       case 37: //left
+           break;
+       case 38: //up
+           break;
+       case 39: //right
+           break;
+       case 40: //down
+           break;
+   }
+});
+
 $(window).resize(function() {
     doResizeStuff();
 });
+
+/*  */
