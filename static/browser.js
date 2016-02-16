@@ -304,6 +304,7 @@ function normalizeSuccess(r, stat, jqXHR) {
     assign_tooltips();
     stashNormLines();
     createCombos();
+    checkTextWidths();
 
     // Once the normalized lines are shown, it's okay for
     // the user to use the green/yellow buttons.
