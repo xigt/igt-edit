@@ -100,9 +100,6 @@ function displaySuccess(r, stat, jqXHR) {
     stashCleanLines();
     $('.igtrow').removeClass(CURRENT_ROW);
     $('#igtrow-'+igtId()).addClass(CURRENT_ROW);
-
-    checkTextWidths();
-    $('.line-input').keydown(checkTextWidths);
 }
 
 /* COMBO FUNCTIONS */
@@ -240,8 +237,6 @@ function cleanSuccess(r, stat, jqXHR) {
     assign_tooltips();
     stashCleanLines();
 
-    checkTextWidths();
-    $('#clean-tier .line-input').keydown(checkTextWidths);
 }
 
 function cleanError(r) {
@@ -308,14 +303,6 @@ function normalizeSuccess(r, stat, jqXHR) {
     assign_tooltips();
     stashNormLines();
     createCombos();
-    checkTextWidths();
-
-    /* Make sure to bind the event to resize the contents of the text fields if they change*/
-    $('#normalized-tier .line-input').bind('cut copy paste', function() {
-        setTimeout(checkTextWidths(), 300);
-    });
-
-    $('#normalized-tier .line-input').keydown(checkTextWidths);
 
     // Once the normalized lines are shown, it's okay for
     // the user to use the green/yellow buttons.
@@ -697,7 +684,7 @@ function checkTextWidths() {
         maxwidth=Math.max(maxwidth, $(elt).val().length);
     });
     $('.textrow,.line-input').each(function(i, elt) {
-       $(elt).css('width', maxwidth*7);
+       $(elt).css('min-width', maxwidth*7);
     });
 }
 
@@ -706,7 +693,7 @@ function checkTextWidths() {
 // -------------------------------------------
 
 $(document).keydown(function(e) {
-
+    checkTextWidths();
    switch(e.which) {
        case 37: //left
            break;
