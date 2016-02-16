@@ -102,6 +102,7 @@ function displaySuccess(r, stat, jqXHR) {
     $('#igtrow-'+igtId()).addClass(CURRENT_ROW);
 
     checkTextWidths();
+    $('.line-input').keydown(checkTextWidths);
 }
 
 /* COMBO FUNCTIONS */
@@ -238,6 +239,9 @@ function cleanSuccess(r, stat, jqXHR) {
     createCombos();
     assign_tooltips();
     stashCleanLines();
+
+    checkTextWidths();
+    $('#clean-tier .line-input').keydown(checkTextWidths);
 }
 
 function cleanError(r) {
@@ -306,6 +310,13 @@ function normalizeSuccess(r, stat, jqXHR) {
     createCombos();
     checkTextWidths();
 
+    /* Make sure to bind the event to resize the contents of the text fields if they change*/
+    $('#normalized-tier .line-input').bind('cut copy paste', function() {
+        setTimeout(checkTextWidths(), 300);
+    });
+
+    $('#normalized-tier .line-input').keydown(checkTextWidths);
+
     // Once the normalized lines are shown, it's okay for
     // the user to use the green/yellow buttons.
     enableYellowGreen();
@@ -315,6 +326,7 @@ function normalizeError(r) {
     $('#normalized-contents').text("An error occured while normalizing.");
     console.error(r);
 }
+
 
 /* INTENT-ification */
 function generateFromNormalized(corp_id, igt_id) {
@@ -694,7 +706,7 @@ function checkTextWidths() {
 // -------------------------------------------
 
 $(document).keydown(function(e) {
-    checkTextWidths();
+
    switch(e.which) {
        case 37: //left
            break;
