@@ -678,15 +678,33 @@ function doResizeStuff() {
 // -------------------------------------------
 /* Make sure that the text input fields are the right width */
 
+(function($) {
+    $.fn.textWidth = function () {
+        $body = $('body');
+        $this =  $(this);
+        $text = $this.text();
+        if($text=='') $text = $this.val();
+        var calc = '<div style="clear:both;display:block;visibility:hidden;white-space:pre"><span style="width;inherit;margin:0;font-family:'  + $this.css('font-family') + ';font-size:'  + $this.css('font-size') + ';font-weight:' + $this.css('font-weight') + '">' + $text + '</span></div>';
+        $body.append(calc);
+        var width = $('body').find('span:last').width();
+        $body.find('span:last').parent().remove();
+        return width;
+    };
+})(jQuery);
+
+
 function checkTextWidths() {
     maxwidth=0;
     $('.line-input').each(function(i, elt) {
-        maxwidth=Math.max(maxwidth, $(elt).val().length);
+        maxwidth=Math.max(maxwidth, $(elt).textWidth());
     });
+    console.log(maxwidth);
     $('.textrow,.line-input').each(function(i, elt) {
-       $(elt).css('min-width', maxwidth*7);
+       $(elt).css('min-width', maxwidth);
     });
 }
+
+
 
 // -------------------------------------------
 // Functions that trigger on resize and catch keystrokes
