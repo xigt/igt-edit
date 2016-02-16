@@ -100,6 +100,8 @@ function displaySuccess(r, stat, jqXHR) {
     stashCleanLines();
     $('.igtrow').removeClass(CURRENT_ROW);
     $('#igtrow-'+igtId()).addClass(CURRENT_ROW);
+
+    checkTextWidths();
 }
 
 /* COMBO FUNCTIONS */
@@ -664,3 +666,26 @@ function unhighlightSrcs(obj, idlist) {
     $(obj).css('background-color', 'white');
     modIdlist(idlist, 'gw,lw', false);
 }
+
+/* All the stuff that needs fixing when the window is resized */
+
+function doResizeStuff() {
+    checkTextWidths();
+    $('#mainwindow').height($(document).height() -35);
+    console.log($(document).height());
+}
+
+/* Make sure that the text input fields are the right width */
+function checkTextWidths() {
+    maxwidth=0;
+    $('.line-input').each(function(i, elt) {
+        maxwidth=Math.max(maxwidth, $(elt).val().length);
+    });
+    $('.textrow,.line-input').each(function(i, elt) {
+       $(elt).css('width', maxwidth*7);
+    });
+}
+
+$(window).resize(function() {
+    doResizeStuff();
+});
