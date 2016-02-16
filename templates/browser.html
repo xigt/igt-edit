@@ -31,13 +31,9 @@
             <div id="course-list" split="true" region="north"  title="Corpora" style="height:20%">
 
                 {# BEGIN CORPUS LIST #}
-                {#                <ul class="easyui-datalist" data-options="onSelect:function(index, data){populateIGTs(data['value'])}" lines="true" style="width:100%">#}
                 {% for corpus in corpora %}
 
-                    <div
-                            id="corp-{{ corpus.get('name') }}"
-
-                    >
+                    <div id="corp-{{ corpus.get('name') }}">
                         <div class="corpname igtrow"
                              style="width:calc(100% - 40px); float:left"
                              onclick="populateIGTs('{{ corpus.get('id') }}')"
@@ -53,7 +49,6 @@
                     </div>
                 {% endfor %}
                 <div class="endlist"></div>
-                {#                </ul>#}
                 {# END CORPUS LIST #}
 
             </div>
