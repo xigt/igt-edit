@@ -18,10 +18,11 @@ def prompt_corpora():
         if resp == 'q':
             main_loop = False
         elif resp.strip() and int(resp) in corpus_map:
-            print('This will delete the corpus "#{}" with name "{}" and id "{}."'.format(i, corpus_map[i]['name'], corpus_map[i]['id']))
+            r = int(resp)
+            print('This will delete the corpus "#{}" with name "{}" and id "{}."'.format(r, corpus_map[r]['name'], corpus_map[r]['id']))
             del_conf = input("Are you sure? [y/n]")
             if del_conf.lower() == 'y':
-                dbi.del_corpus(corpus_map[int(resp)]['id'])
+                dbi.del_corpus(corpus_map[r]['id'])
 
 
 
