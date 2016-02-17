@@ -4,19 +4,19 @@
 
 $(document).keydown(function(e) {
     $selectedInput = $('.line-input:focus');
-    if ($selectedInput) {
+    if ($selectedInput.length) {
         var pos = $selectedInput.caret();
         var upDown = false;
         switch (e.which) {
             case 38: //up
-                $prevRow  = $selectedInput.closest('tr').prev('.textrow');
+                $prevRow  = $($selectedInput.closest('tr').prevAll('.textrow').not('.for-deletion')[0]);
                 $prevLine = $prevRow.find('.line-input');
                 $prevLine.focus();
                 $prevLine.caret(pos);
                 upDown = true;
                 break;
             case 40: //down
-                $nextRow = $selectedInput.closest('tr').next('.textrow');
+                $nextRow = $($selectedInput.closest('tr').nextAll('.textrow').not('.for-deletion')[0]);
                 $nextLine = $nextRow.find('.line-input');
                 $nextLine.focus();
                 upDown = true;
@@ -26,7 +26,7 @@ $(document).keydown(function(e) {
             setTimeout(function () {
                 $selectedInput = $('.line-input:focus');
                 $selectedInput.caret(pos);
-            }, 5);
+            }, 0);
         }
 
     }
