@@ -712,20 +712,10 @@ function checkTextWidths() {
 // -------------------------------------------
 // Functions that trigger on resize and catch keystrokes
 // -------------------------------------------
-
-$(document).keydown(function(e) {
-    checkTextWidths();
-   switch(e.which) {
-       case 37: //left
-           break;
-       case 38: //up
-           break;
-       case 39: //right
-           break;
-       case 40: //down
-           break;
-   }
+$(document).keyup(function(e) {
+   checkTextWidths();
 });
+
 
 $(window).resize(function() {
     doResizeStuff();
