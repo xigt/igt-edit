@@ -26,7 +26,7 @@ $(document).keydown(function(e) {
             setTimeout(function () {
                 $selectedInput = $('.line-input:focus');
                 $selectedInput.caret(pos);
-            }, );
+            }, 5);
         }
 
     }
