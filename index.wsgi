@@ -9,6 +9,8 @@ import sys
 import re
 from flask import Flask, render_template, url_for, request, make_response, Response, abort
 
+
+
 app = Flask(__name__)
 application = app
 
@@ -17,10 +19,22 @@ application = app
 # -------------------------------------------
 sys.path.append(os.path.dirname(__file__))
 from yggdrasil import config
+
+# -------------------------------------------
+# Add the configuration to the app config
+# -------------------------------------------
+app.config.from_object(config)
+
+# -------------------------------------------
+# Get the other constants, config vars
+# -------------------------------------------
 from yggdrasil.config import INTENT_LIB, XIGT_LIB, SLEIPNIR_LIB, LINE_TAGS, LINE_ATTRS, ODIN_UTILS, XIGTVIZ, PDF_DIR
 from yggdrasil.consts import NORM_STATE, CLEAN_STATE, RAW_STATE, NORMAL_TABLE_TYPE, CLEAN_TABLE_TYPE, EDITOR_DATA_SRC, \
     EDITOR_METADATA_TYPE, HIDDEN
 
+# -------------------------------------------
+# Append the defined config vars to the path
+# -------------------------------------------
 sys.path.append(INTENT_LIB)
 sys.path.append(XIGT_LIB)
 sys.path.append(SLEIPNIR_LIB)
@@ -31,15 +45,18 @@ from yggdrasil.users import get_user_corpora, get_state, set_state
 from yggdrasil.igt_operations import replace_lines, add_editor_metadata, add_split_metadata, add_raw_tier, \
     add_clean_tier, add_normal_tier, columnar_align_l_g
 
+# -------------------------------------------
+# ODIN_UTILS IMPORTS
+# -------------------------------------------
 import odinclean, odinnormalize
 
+# -------------------------------------------
+# XIGT Imports
+# -------------------------------------------
 from xigt import Igt
 from xigt.codecs import xigtjson, xigtxml
 
-# -------------------------------------------
-# Add the configuration to the app config
-# -------------------------------------------
-app.config.from_object(config)
+
 
 # -------------------------------------------
 # Now that we've imported our dependencies,
@@ -59,6 +76,7 @@ from intent.igt.igt_functions import x_contains_y, copy_xigt, delete_tier, heur_
     tag_trans_pos, project_gloss_pos_to_lang, add_gloss_lang_alignments
 from intent.igt.references import raw_tier, cleaned_tier, normalized_tier
 from intent.igt.exceptions import NoNormLineException, NoGlossLineException, GlossLangAlignException
+from intent.utils.listutils import flatten_list
 
 app.debug = True
 
@@ -332,19 +350,21 @@ def intentify(corp_id, igt_id):
     response = {}
 
     def equal_lengths(tier_a, tier_b):
-        tier_a_items = [i for i in tier_a if not re.match('^{}$'.format(all_punc_re_mult), i.value())]
-        tier_b_items = [i for i in tier_b if not re.match('^{}$'.format(all_punc_re_mult), i.value())]
+        tier_a_items = [i for i in tier_a if not re.match('^{}$'.format(all_punc_re_mult), i)]
+        tier_b_items = [i for i in tier_b if not re.match('^{}$'.format(all_punc_re_mult), i)]
         return len(tier_a_items) == len(tier_b_items)
 
 
     # Check that the language line and gloss line
     # have the same number of whitespace-delineated tokens.
     if ll is not None and gl is not None:
-        response['glw'] = 1 if equal_lengths(lang(inst), gloss(inst)) else 0
+        response['glw'] = 1 if equal_lengths([l.value() for l in lang(inst)], [g.value() for g in gloss(inst)]) else 0
 
         # Check that the language line and gloss line
         # have the same number of morphemes.
-        response['glm'] = 1 if equal_lengths(morphemes(inst), glosses(inst)) else 0
+        morph_list = flatten_list([re.split('[\-=]', w.value()) for w in lang(inst)])
+        gloss_list = flatten_list([re.split('[\-=]', g.value()) for g in gloss(inst)])
+        response['glm'] = 1 if equal_lengths(morph_list, gloss_list) else 0
     else:
         response['glw'] = 0
         response['glm'] = 0
