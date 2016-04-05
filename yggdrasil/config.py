@@ -33,7 +33,7 @@ XIGTVIZ      = os.path.join(STATIC, 'xigtviz')
 XIGTVIZ_URL  = urljoin(STATIC_URL, 'xigtviz')
 
 # PDF Data Dir
-PDF_DIR = '/Users/rgeorgi/Documents/treebanks/ODIN_data/pdfs'
+PDF_DIR = '/odin_pdfs'
 
 # -------------------------------------------
 # Users DB
