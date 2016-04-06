@@ -217,6 +217,7 @@ function cleanIGT(corp_id, igt_id, alreadyGenerated) {
         $('#normalized-contents').html('');
         disableYellowGreen();
         $('#group-2-content').html(''); // Blank out the group 2 content.
+        $('#analysis').hide();
 
 
         $.ajax({
@@ -302,6 +303,7 @@ function enableYellowGreen() {
 function normalizeSuccess(r, stat, jqXHR) {
 
     $('#normalized-tier').show();
+    $('#analysis').show();
     $('#generate-normalized').val(NORM_REGEN);
     $('#normalized-contents').html(r['content']);
 
