@@ -17,27 +17,27 @@ XIGT_DIR = '/Users/rgeorgi/Dropbox/riples/data/xigt_data/XAML'
 DEBUG = True
 
 # INTENT
-INTENT_LIB = '/Users/rgeorgi/Documents/code/intent'
+INTENT_LIB = '/opt/intent'
 
 # XIGT
-XIGT_LIB = '/Users/rgeorgi/Documents/code/xigt'
+XIGT_LIB = '/opt/xigt'
 
 # SLEIPNIR
-SLEIPNIR_LIB = '/Users/rgeorgi/Documents/code/sleipnir'
+SLEIPNIR_LIB = '/opt/sleipnir'
 
 # ODIN_UTILS_DIR
-ODIN_UTILS   = '/Users/rgeorgi/Documents/code/odin-utils'
+ODIN_UTILS   = '/opt/odin-utils'
 
 # XIGTVIZ DIR
 XIGTVIZ      = os.path.join(STATIC, 'xigtviz')
 XIGTVIZ_URL  = urljoin(STATIC_URL, 'xigtviz')
 
 # PDF Data Dir
-PDF_DIR = '/Users/rgeorgi/Documents/treebanks/ODIN_data/pdfs'
+PDF_DIR = '/odin_pdfs'
 
 # -------------------------------------------
 # Users DB
-USER_DB = os.path.join(PROJ_ROOT, 'users.js')
+USER_DB = '/var/www/yggdrasil-users/users.js'
 
 # -------------------------------------------
 # Values for line
