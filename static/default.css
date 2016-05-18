@@ -182,11 +182,6 @@ td.labels {
 }
 
 /* GROUP 2 INFO */
-#word-table {
-    border-collapse: collapse;
-}
-
-#word-table td {
-    border-left: thin solid black;
-    border-right: thin solid black
+#group-2-content .item {
+    cursor: default;
 }

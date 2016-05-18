@@ -74,13 +74,6 @@
                    value="Split Instance"
                    onclick="splitIGT('{{ corp_id }}', '{{ igt.id }}')"/>
 
-            <div id="analysis">
-                <span id="glw" class="feedback">GLW</span>
-                <span id="glm" class="feedback">GLM</span>
-                <span id="tag" class="feedback">TAG</span>
-                <span id="col" class="feedback">COL</span>
-            </div>
-            <div style="clear:both"/>
         </div>
 
         {# BEGIN RATING BUTTONS #}
@@ -125,7 +118,7 @@
                         <div id="comments" {% if comment is none %}style="display:none"{% endif %}>
                             <textarea id="freeform-comment">{% if comment is not none %}{{ comment }}{% endif %}</textarea>
                         </div>
-        </div>
+                    </div>
 
                 </div>
 
@@ -138,16 +131,18 @@
             </div>
         </div>
 
+        <div id="analysis" style="display:none">
+            <span id="glw" class="feedback">GLW</span>
+            <span id="glm" class="feedback">GLM</span>
+            <span id="tag" class="feedback">TAG</span>
+            <span id="col" class="feedback">COL</span>
+        </div>
+        <div style="clear:both"/>
 
-    <div id="group-2-content">
+        <div id="group-2-content">
 
     </div>
 
     </div>
-
-    <input type="button"
-           value="Delete Instance"
-           onclick="deleteIGT()"
-    />
 
 </div>
