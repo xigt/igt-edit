@@ -1,26 +1,28 @@
 #!/usr/bin/env python3.4
 
-import sys
-sys.path.append('/opt/local/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/site-packages/')
-sys.path.append('/Users/rgeorgi/Documents/code/dissertation')
-sys.path.append('/Users/rgeorgi/Documents/code/xigt')
-
+import sys, os
 import logging
-import os
 import urllib
 from io import StringIO
 from tempfile import NamedTemporaryFile
+from flask import Flask, render_template, url_for, request, Response
 
-from flask import Flask, render_template, send_from_directory, send_file, url_for, request, Response
-from werkzeug.utils import secure_filename
 
-from intent.igt.igtutils import rgp, rgencode
-from intent.igt.rgxigt import RGCorpus
-from intent.scripts.conversion.text_to_xigt import text_to_xigtxml
-from intent.subcommands import enrich
-from intent.utils.arg_consts import ALN_VAR, ALN_GIZA, ALN_HEUR, POS_VAR, POS_LANG_PROJ, POS_LANG_CLASS, PARSE_VAR, \
-    PARSE_LANG_PROJ, PARSE_TRANS
+
+sys.path.insert(0, os.path.dirname(__file__))
+from config import *
+
+# -------------------------------------------
+# Import INTENT and XIGT
+# -------------------------------------------
+sys.path.insert(0, INTENT_DIR)
+sys.path.insert(0, XIGT_DIR)
+
+from intent.igt.igtutils import rgencode
 from intent.utils.argpasser import ArgPasser
+from intent.commands.enrich import enrich
+from intent.igt.parsing import raw_txt_to_xc
+from intent.consts import *
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
@@ -54,17 +56,17 @@ def process_file():
     kwargs[PARSE_VAR] = []
 
     if 'align_giza' in request.form.keys():
-        kwargs[ALN_VAR].append(ALN_GIZA)
+        kwargs[ALN_VAR].append(ARG_ALN_GIZA)
     if 'align_heur' in request.form.keys():
-        kwargs[ALN_VAR].append(ALN_HEUR)
+        kwargs[ALN_VAR].append(ARG_ALN_HEUR)
     if 'pos_proj' in request.form.keys():
-        kwargs[POS_VAR].append(POS_LANG_PROJ)
+        kwargs[POS_VAR].append(ARG_POS_PROJ)
     if 'pos_class' in request.form.keys():
-        kwargs[POS_VAR].append(POS_LANG_CLASS)
+        kwargs[POS_VAR].append(ARG_POS_CLASS)
     if 'parse_proj' in request.form.keys():
-        kwargs[PARSE_VAR].extend([PARSE_TRANS, PARSE_LANG_PROJ])
+        kwargs[PARSE_VAR].append(ARG_PARSE_PROJ)
     if 'parse_trans' in request.form.keys():
-        kwargs[PARSE_VAR].append(PARSE_TRANS)
+        kwargs[PARSE_VAR].append(ARG_PARSE_TRANS)
 
     if 'verbose' in request.form.keys():
         root.setLevel(logging.DEBUG)
@@ -113,7 +115,7 @@ def convert_text():
     r = Response()
     # root.log(1000, "This is a test")
     try:
-        xc = RGCorpus.from_raw_txt(request.form['text'])
+        xc = raw_txt_to_xc(request.form['text'])
     except Exception as e:
         r.headers['Exit-Code'] = 1
         root.error(e)
