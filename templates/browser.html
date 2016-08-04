@@ -16,6 +16,8 @@
     </script>
 
     <script id="userID" type="text/plain">{{ user_id }}</script>
+    <script id="appRoot" type="text/plain">{{ config['APPLICATION_ROOT'] }}</script>
+    <script id="staticURL" type="text/plain">{{ config['STATIC_URL'] }}</script>
 </HEAD>
 
 <BODY>
@@ -43,7 +45,7 @@
                         <div class="corpdown igtrow"
                              style="width:20px;float:left;text-align: center"
                              onclick="downloadCorpus('{{ corpus.get('id') }}')">
-                            <img height=13  src="/static/images/download.svg"/>
+                            <img height=13  src="{{ config['STATIC_URL'] }}/images/download.svg"/>
                         </div>
                         <div style="clear:both"></div>
                     </div>
@@ -57,8 +59,8 @@
     </div>
     <div id="editor-panel" class="easyui-panel" region="center" split="true" title="Editor" style="width:80%">
         <div style="font-size:large;margin:20px">
-            <P>Nothing currently selected.</P>
-            <P>To select an element to edit, please click on it in the left-hand menu.</P>
+            <P>No instance is selected.</P>
+            <P>To select an instance to edit, please click on it in the left-hand menu.</P>
         </div>
     </div>
 </div>

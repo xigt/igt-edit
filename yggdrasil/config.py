@@ -6,9 +6,10 @@ import os
 # -------------------------------------------
 from urllib.parse import urljoin
 
+APPLICATION_ROOT = '/editor/'
 PROJ_ROOT    = os.path.dirname(os.path.dirname(__file__))
 STATIC       = os.path.join(PROJ_ROOT, 'static')
-STATIC_URL   = '/static/'
+STATIC_URL   = os.path.join(APPLICATION_ROOT, 'static/')
 # -------------------------------------------
 
 XIGT_DIR = '/Users/rgeorgi/Dropbox/riples/data/xigt_data/XAML'

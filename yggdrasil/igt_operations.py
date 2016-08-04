@@ -1,7 +1,5 @@
-from intent.consts import CLEAN_STATE, CLEAN_ID, NORM_ID, NORM_STATE, DATA_SRC_ATTR, DATA_PROV, ODIN_TAG_ATTRIBUTE, \
-    ODIN_JUDGMENT_ATTRIBUTE, RAW_ID, RAW_STATE, ODIN_TYPE, STATE_ATTRIBUTE
-from intent.igt.create_tiers import gloss, lang, lang_lines
-from intent.igt.metadata import set_meta_attr, set_meta
+from intent.consts import *
+from intent.igt.metadata import set_meta_attr
 from intent.igt.references import cleaned_tier, normalized_tier, gen_item_id, gen_tier_id
 from xigt import Item, Tier
 from yggdrasil.consts import EDITOR_DATA_SRC, DUPLICATE_ATTR
@@ -66,7 +64,7 @@ def create_text_tier_from_lines(inst, lines, id_base, state):
     """
     # -------------------------------------------
     # 1) Generate the parent tier.
-    tier = Tier(id=gen_tier_id(inst, id_base), type=ODIN_TYPE, attributes={STATE_ATTRIBUTE:state})
+    tier = Tier(id=gen_tier_id(inst, id_base), type=ODIN_TIER_TYPE, attributes={STATE_ATTRIBUTE:state})
 
 
     # -------------------------------------------

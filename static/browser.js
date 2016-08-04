@@ -1,6 +1,11 @@
 /* Constant Strings */
-var AJAX_LOADER_BIG = '<IMG src="/static/images/ajax-loader.gif"/>';
-var AJAX_LOADER_SMALL = '<IMG src="/static/images/ajax-loader-small.gif"/>';
+function ajax_loader_big() {
+    return '<IMG src="'+staticURL()+'/images/ajax-loader.gif"/>';
+}
+
+function ajax_loader_small() {
+    return '<IMG src="'+staticURL()+'/images/ajax-loader-small.gif"/>';
+}
 
 /* QUALITY CONSTANTS */
 const HIDDEN = 4;
@@ -42,9 +47,9 @@ function populateIGTs(corpId, async) {
     data = {userID : userID()};
     console.log(data);
 
-    $('#fine-list').html('<div style="text-align:center;top:40px;position:relative;">'+AJAX_LOADER_SMALL+'</div>');
+    $('#fine-list').html('<div style="text-align:center;top:40px;position:relative;">'+ajax_loader_small()+'</div>');
     $.ajax({
-        url:'/populate/'+corpId,
+        url:appRoot()+'/populate/'+corpId,
         type: 'POST',
         data: JSON.stringify(data),
         error: populateError,
@@ -69,13 +74,13 @@ function populateError() {
 
 /* Download the corpus in XML if requested */
 function downloadCorpus(corpId){
-    location.href='/download/'+corpId;
+    location.href=appRoot()+'/download/'+corpId;
 }
 
 /* display a single IGT instance */
 function displayIGT(corp_id, igt_id) {
-    $('#editor-panel').html(AJAX_LOADER_BIG);
-    url = '/display/'+corp_id+'/'+igt_id+'?user='+userID();
+    $('#editor-panel').html(ajax_loader_big());
+    url = appRoot()+'/display/'+corp_id+'/'+igt_id+'?user='+userID();
     $.ajax({
         url: url,
         success: displaySuccess,
@@ -220,7 +225,7 @@ function cleanIGT(corp_id, igt_id, alreadyGenerated) {
 
 
         $.ajax({
-            url: '/clean/' + corp_id + '/' + igt_id,
+            url: appRoot()+'/clean/' + corp_id + '/' + igt_id,
             type: 'GET',
             dataType: 'html',
             success: cleanSuccess,
@@ -268,7 +273,7 @@ function normalizeIGT(corp_id, igt_id, alreadyGenerated) {
         cleanData = {lines: get_clean_lines()};
 
         $.ajax({
-            url: '/normalize/' + corp_id + '/' + igt_id,
+            url: appRoot()+'/normalize/' + corp_id + '/' + igt_id,
             type: 'POST',
             dataType: 'json',
             data: JSON.stringify(cleanData),
@@ -340,7 +345,7 @@ function generateFromNormalized(corp_id, igt_id) {
     analyzeUnmark('col');
 
     $.ajax({
-        url: '/intentify/'+corp_id+'/'+igt_id,
+        url: appRoot()+'/intentify/'+corp_id+'/'+igt_id,
         type: 'POST',
         dataType: 'json',
         data: JSON.stringify(data),
@@ -482,6 +487,14 @@ function userID() {
     return $("#userID").text();
 }
 
+function appRoot(){
+    return $("#appRoot").text();
+}
+
+function staticURL(){
+    return $("#staticURL").text();
+}
+
 // Save IGT
 function saveIGT() {
 
@@ -520,7 +533,7 @@ function saveIGT() {
 
 
         $.ajax({
-            url: '/save/' + corpId() + '/' + igtId(),
+            url: appRoot()+'/save/' + corpId() + '/' + igtId(),
             type: 'PUT',
             data: JSON.stringify(data),
             success: saveSuccess,
@@ -548,7 +561,7 @@ function splitIGT(corpId, IgtId) {
         };
 
         $.ajax({
-            url: '/split/' + corpId + '/' + igtId(),
+            url: appRoot()+'/split/' + corpId + '/' + igtId(),
             type: 'POST',
             success: splitSuccess,
             data: JSON.stringify(data),
@@ -619,7 +632,7 @@ function deleteIGT() {
 
         $.ajax(
             {
-                url: '/delete/' + corpId() + '/' + igtId(),
+                url: appRoot()+'/delete/' + corpId() + '/' + igtId(),
                 type: "POST",
                 data: JSON.stringify(data),
                 contentType: 'application/json',
