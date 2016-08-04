@@ -55,6 +55,7 @@ import odinclean, odinnormalize
 # -------------------------------------------
 from xigt import Igt
 from xigt.codecs import xigtjson, xigtxml
+import xigt.xigtpath
 
 
 
@@ -193,6 +194,7 @@ def display(corp_id, igt_id):
     # Start by getting the IGT instance.
     # -------------------------------------------
     inst = dbi.get_igt(corp_id, igt_id)
+    assert isinstance(inst, Igt)
 
     # -------------------------------------------
     # Get the state from the user file.
@@ -225,7 +227,7 @@ def display(corp_id, igt_id):
     content = render_template('element.html', state=state, rt=rt, ct=ct, nt_content=nt_content,
                               igt=inst, igt_id=igt_id, corp_id=corp_id,
                               comment=get_comment(inst), rating=get_rating(inst), reason=get_reason(inst),
-                              pdflink=pdflink)
+                              pdflink=pdflink, lang=xigt.xigtpath.find(inst, './/dc:subject').text)
 
     return json.dumps({"content":content})
 
