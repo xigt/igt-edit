@@ -28,20 +28,17 @@ app.config.from_object(config)
 # -------------------------------------------
 # Get the other constants, config vars
 # -------------------------------------------
-from yggdrasil.config import INTENT_LIB, XIGT_LIB, SLEIPNIR_LIB, LINE_TAGS, LINE_ATTRS, ODIN_UTILS, XIGTVIZ, PDF_DIR
-from yggdrasil.consts import NORM_STATE, CLEAN_STATE, RAW_STATE, NORMAL_TABLE_TYPE, CLEAN_TABLE_TYPE, EDITOR_DATA_SRC, \
-    EDITOR_METADATA_TYPE, HIDDEN
+from yggdrasil.config import PYTHONPATH, LINE_TAGS, LINE_ATTRS, XIGTVIZ, PDF_DIR
+from yggdrasil.consts import NORM_STATE, CLEAN_STATE, RAW_STATE, NORMAL_TABLE_TYPE, CLEAN_TABLE_TYPE, HIDDEN
 
 # -------------------------------------------
-# Append the defined config vars to the path
+# Add the additional path items.
 # -------------------------------------------
-sys.path.append(INTENT_LIB)
-sys.path.append(XIGT_LIB)
-sys.path.append(SLEIPNIR_LIB)
-sys.path.append(ODIN_UTILS)
+for path_item in PYTHONPATH.split(':'):
+    sys.path.append(path_item)
 
 from yggdrasil.metadata import get_rating, set_rating, set_comment, get_comment, get_reason
-from yggdrasil.users import get_user_corpora, get_state, set_state
+from yggdrasil.users import get_user_corpora, get_state, set_state, list_users
 from yggdrasil.igt_operations import replace_lines, add_editor_metadata, add_split_metadata, add_raw_tier, \
     add_clean_tier, add_normal_tier, columnar_align_l_g
 
@@ -108,6 +105,8 @@ def main():
 @app.route('/user/<userid>')
 def get_user(userid):
     user_corpora = get_user_corpora(userid)
+    YGG_LOG.critical(list_users())
+    YGG_LOG.critical(userid)
     YGG_LOG.critical(user_corpora)
     YGG_LOG.critical(dbi.list_corpora())
     if user_corpora is not None:

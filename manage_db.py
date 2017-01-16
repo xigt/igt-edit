@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from argparse import ArgumentParser
-
+import yggdrasil.config
 from sleipnir import dbi
 
 def prompt_corpora():

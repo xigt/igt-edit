@@ -11,6 +11,10 @@
     <link rel="stylesheet" type="text/css" href="{{ config['STATIC_URL'] }}default.css"/>
 
     {# And our own scripts... #}
+    <script>
+        var approot="{{ config['APPLICATION_ROOT'] }}";
+        var staticURL="{{ config['STATIC_URL'] }}";
+    </script>
     <script type="text/javascript" src="{{ config['STATIC_URL'] }}tooltips.js"></script>
     <script type="text/javascript" src="{{ config['STATIC_URL'] }}browser.js"></script>
     <script type="text/javascript" src="{{ config['STATIC_URL'] }}tiers.js"></script>

@@ -1,10 +1,10 @@
 /* Constant Strings */
 function ajax_loader_big() {
-    return '<IMG src="'+staticURL()+'/images/ajax-loader.gif"/>';
+    return '<IMG src="'+staticURL+'images/ajax-loader.gif"/>';
 }
 
 function ajax_loader_small() {
-    return '<IMG src="'+staticURL()+'/images/ajax-loader-small.gif"/>';
+    return '<IMG src="'+staticURL+'images/ajax-loader-small.gif"/>';
 }
 
 /* QUALITY CONSTANTS */
@@ -36,7 +36,11 @@ const CURRENT_ROW     = "current-row";
 function login() {
     var userid = $('#userid').val();
     console.log(userid);
-    window.location.href = '/user/'+userid;
+    window.location.href = appRoot()+'/user/'+userid;
+}
+
+function appRoot() {
+    return approot;
 }
 
 /* Populate the IGT pane */
@@ -485,14 +489,6 @@ function setRating(rating) {
 
 function userID() {
     return $("#userID").text();
-}
-
-function appRoot(){
-    return $("#appRoot").text();
-}
-
-function staticURL(){
-    return $("#staticURL").text();
 }
 
 // Save IGT
