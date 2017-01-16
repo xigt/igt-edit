@@ -1,0 +1,23 @@
+{# This template file will be used to display a POS tag tier, with
+   editable dropdowns. #}
+{% macro pos_tier(tier) %}
+    {% for item in tier %}
+        <TD>
+        <SELECT id="{{ item.id }}">
+            {% for tag in config['POS_TAGS'] %}
+                <option value="{{ tag }}"
+                        {% if tag == item.value() %}
+                            selected
+                        {% endif %}
+                >{{ tag }}</option>
+            {% endfor %}
+        </SELECT>
+        </TD>
+    {% endfor %}
+{% endmacro %}
+
+{% macro words(word_tier) %}
+    {% for w in word_tier %}
+        <TD>{{ w.value() }}</TD>
+    {% endfor %}
+{% endmacro %}

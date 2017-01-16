@@ -1,0 +1,28 @@
+{# This template is for rendering all the elements of the
+part-of-speech tiers for an instance. #}
+{% macro first_col(letter) %}
+    <TD style="width:30px">
+        {% if letter %}{{ letter }}{% endif %}
+    </TD>
+{% endmacro %}
+
+{% from 'group2/pos_tag_row.html' import pos_tier, words %}
+
+<TABLE>
+    {# Lang word row #}
+    <TR>{{first_col('L')}}{{ words(lang_w) }}</TR>
+
+    {# Gloss word row #}
+    <TR>{{first_col('G')}}{{ words(gloss_w) }}</TR>
+
+    {# Lang POS row #}
+    <TR>{{first_col(None)}}{{ pos_tier(lang_pos) }}</TR>
+
+    {# Trans word row #}
+    <TR>{{first_col('T')}}{{ words(trans_w) }}</TR>
+
+    {# Trans pos row #}
+    <TR>{{first_col(None)}}{{ pos_tier(trans_pos) }}</TR>
+</TABLE>
+{{ pos_tier(trans) }}
+

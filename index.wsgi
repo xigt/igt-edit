@@ -69,7 +69,8 @@ from sleipnir import dbi
 from intent.consts import CLEAN_ID, NORM_ID, all_punc_re_mult
 from intent.igt.igtutils import is_strict_columnar_alignment
 from intent.igt.create_tiers import lang_lines, gloss_line, trans_lines, \
-    generate_lang_words, generate_gloss_words, generate_trans_words, lang, gloss, morphemes, glosses, trans
+    generate_lang_words, generate_gloss_words, generate_trans_words, lang, gloss, morphemes, glosses, trans, \
+    pos_tag_tier
 from intent.igt.igt_functions import x_contains_y, copy_xigt, delete_tier, heur_align_inst, classify_gloss_pos, \
     tag_trans_pos, project_gloss_pos_to_lang, add_gloss_lang_alignments
 from intent.igt.references import raw_tier, cleaned_tier, normalized_tier
@@ -409,11 +410,38 @@ def intentify(corp_id, igt_id):
 
     inst.sort_tiers()
 
-    igtjson = xigtjson.encode_igt(inst)
-    response['igt'] = igtjson
+    return display_group_2(inst)
 
-    return json.dumps(response)
+    # igtjson = xigtjson.encode_igt(inst)
+    # response['igt'] = igtjson
 
+    # return json.dumps(response)
+
+def display_group_2(inst):
+    """
+    This function is responsible for compiling all the elements of the "group 2"
+    items for editing; e.g. POS tags and word alignment.
+
+    :type inst: Igt
+    """
+    return_html = ''
+
+    # --1) For the POS tag view, we're going to create a table that is 4 rows,
+    #      with as many columns as there are words.
+
+    lang_w = lang(inst)
+    trans_w = trans(inst)
+    cols = max(len(lang_w), len(trans_w))
+
+    return_html += render_template('group2/pos_tags.html',
+                                   cols=cols,
+                                   lang_w=lang(inst),
+                                   gloss_w=gloss(inst),
+                                   trans_w=trans(inst),
+                                   lang_pos=pos_tag_tier(inst, lang(inst).id),
+                                   trans_pos=pos_tag_tier(inst, trans(inst).id)
+                                   )
+    return return_html
 
 # -------------------------------------------
 # Save a file after changes

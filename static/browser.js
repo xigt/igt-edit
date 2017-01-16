@@ -351,7 +351,7 @@ function generateFromNormalized(corp_id, igt_id) {
     $.ajax({
         url: appRoot()+'/intentify/'+corp_id+'/'+igt_id,
         type: 'POST',
-        dataType: 'json',
+        // dataType: 'json',
         data: JSON.stringify(data),
         contentType: 'application/json',
         success: intentifySuccess,
@@ -381,12 +381,13 @@ function analysisNotifier(r, id) {
 }
 
 function intentifySuccess(r, stat, jqXHR) {
-    analysisNotifier(r, 'glw');
-    analysisNotifier(r, 'glm');
-    analysisNotifier(r, 'tag');
-    analysisNotifier(r, 'col');
-    $('#group-2-content').html('');
-    igtLayout('#group-2-content', r['igt']);
+    // analysisNotifier(r, 'glw');
+    // analysisNotifier(r, 'glm');
+    // analysisNotifier(r, 'tag');
+    // analysisNotifier(r, 'col');
+    // $('#group-2-content').html('');
+    // igtLayout('#group-2-content', r['igt']);
+    $('#group-2-content').html(r);
 }
 
 function intentifyError() {
