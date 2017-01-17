@@ -653,31 +653,12 @@ function deleteError(r) {
     alert(r.toString());
 }
 
-/* Highlighting for Word Display */
-function modIdlist(idlist, classes, highlight) {
-    cs = classes.split(',');
-    for (j=0; j<cs.length; j++) {
-        c = cs[j];
-
-        ids = idlist.split(',');
-        for (i=0; i < ids.length; i++) {
-            s = '.'+c+'-' + ids[i];
-            if (highlight == true) {
-                $(s).css('background-color', 'red');
-            } else {
-                $(s).css('background-color', 'white');
-            }
-        }
-    }
-}
-
 function wIdNum(obj) {
     var myId = cssId(obj);
-    var idRegex = /([0-9]+)/;
-    return parseInt(idRegex.exec(myId)[1])
+    return idNum(myId);
 }
 
-function wordType(obj) {
+function itemType(obj) {
     var idRegex = /([^0-9]+)/;
     return idRegex.exec(cssId(obj))[1];
 }
@@ -686,10 +667,18 @@ function cssId(obj) {
     return $(obj).attr('id');
 }
 
-function isWordType(obj, t) { return wordType(obj) == t;}
-function isGw(obj) {return isWordType(obj, 'gw');}
-function isTw(obj) {return isWordType(obj, 'tw');}
-function isLw(obj) {return isWordType(obj, 'w');}
+function idNum(s) {
+    var idRegex = /([0-9]+)/;
+    return parseInt(idRegex.exec(s)[1])
+}
+
+function isItemType(obj, t) { return itemType(obj) == t;}
+function isGw(obj) {return isItemType(obj, 'gw');}
+function isTw(obj) {return isItemType(obj, 'tw');}
+function isLw(obj) {return isItemType(obj, 'w');}
+function isGm(obj) {return isItemType(obj, 'g');}
+function isLm(obj) {return isItemType(obj, 'm');}
+
 
 /* HIGHLIGHTING FOR HOVER */
 
@@ -701,15 +690,24 @@ function unhighlight(obj) {
     highlight_helper(obj, false);
 }
 
-function getNums(myNum, idx) {
+function getAlnNums(arr, myNum, idx) {
     var retArr = [];
-    for (i=0; i<w_aln.length; i++) {
-        if ((idx === 0 && w_aln[i][1] == myNum) ||
-            idx === 1 && w_aln[i][0] == myNum)
-            retArr.push(w_aln[i][idx]);
+    for (i=0; i<arr.length; i++) {
+        if ((idx === 0 && arr[i][1] == myNum) ||
+            idx === 1 && arr[i][0] == myNum)
+            retArr.push(arr[i][idx]);
     }
     return retArr;
 }
+
+function getAlnWNums(myNum, idx) {
+    return getAlnNums(w_aln, myNum, idx);
+}
+
+function getAlnMNums(myNum, idx) {
+    return getAlnNums(m_aln, myNum, idx);
+}
+
 
 function highlight_helper(obj, entering) {
     var myNum = wIdNum(obj);
@@ -737,17 +735,23 @@ function highlight_helper(obj, entering) {
 
 
     if (isGw(obj)) {
-        var myTws = getNums(myNum, 0);
+        var myTws = getAlnWNums(myNum, 0);
         highlightList(myTws, otherColor, 'tw');
         highlightList([myNum], myColor, 'w');
     } else if (isTw(obj)) {
-        var myGws = getNums(myNum, 1);
+        var myGws = getAlnWNums(myNum, 1);
         highlightList(myGws, otherColor, 'gw');
         highlightList(myGws, otherColor, 'w');
     } else if (isLw(obj)) {
-        var myTws = getNums(myNum, 0);
+        var myTws = getAlnWNums(myNum, 0);
         highlightList(myTws, otherColor, 'tw');
         highlightList([myNum], myColor, 'gw');
+    } else if (isLm(obj)) {
+        var parentWord = $(obj).attr('parentWord');
+        highlightList([idNum(parentWord)], otherColor, 'w');
+    } else if (isGm(obj)) {
+        var parentWord = $(obj).attr('parentWord');
+        highlightList([idNum(parentWord)], otherColor, 'gw');
     }
 }
 
@@ -762,9 +766,9 @@ function highlightList(arr, color, prefix) {
 
 // Tell whether or not the word types are the
 function similarType(me, other) {
-    var myWT = wordType(me);
-    var oWT = wordType(other);
-    function isLWT(o) {return (wordType(o) == 'w' || wordType(o) == 'gw')}
+    var myWT = itemType(me);
+    var oWT = itemType(other);
+    function isLWT(o) {return (itemType(o) == 'w' || itemType(o) == 'gw')}
 
     return ((myWT == 'tw' && oWT == 'tw') ||
     (isLWT(me) && isLWT(other)))
@@ -783,8 +787,8 @@ function startAlign(obj) {
         // doing anything if another word of the same
         // type is clicked.
 
-        var myWT = wordType(obj);
-        var oWT = wordType(alignClicked);
+        var myWT = itemType(obj);
+        var oWT = itemType(alignClicked);
         if (similarType(obj, alignClicked)) {stopAlign(obj);}
 
         // Otherwise, we should handle the request
@@ -836,13 +840,13 @@ function stopAlign(obj) {
 }
 
 function toggleArr(srcNum, tgtNum) {
-    for (i=0;i<aln.length;i++) {
-        if (aln[i][0] == srcNum && aln[i][1] == tgtNum) {
-            aln.splice(i, 1);
+    for (i=0;i<w_aln.length;i++) {
+        if (w_aln[i][0] == srcNum && w_aln[i][1] == tgtNum) {
+            w_aln.splice(i, 1);
             return
         }
     }
-    aln.push([srcNum, tgtNum]);
+    w_aln.push([srcNum, tgtNum]);
 }
 
 function addAlign(obj) {

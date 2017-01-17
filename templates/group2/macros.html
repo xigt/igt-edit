@@ -36,7 +36,9 @@
         <TD id="morphs-{{ word.id }}">
         <TABLE><TR>
         {% for morph in word_morphs[1] %}
-            <TD id="{{ morph.id }}">
+            <TD id="{{ morph.id }}" parentWord="{{ word.id }}"
+                onmouseenter="highlight(this);"
+                onmouseleave="unhighlight(this);">
             {{ morph.value() }}
             </TD>
         {% endfor %}
