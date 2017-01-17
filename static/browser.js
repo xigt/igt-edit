@@ -703,10 +703,10 @@ function unhighlight(obj) {
 
 function getNums(myNum, idx) {
     var retArr = [];
-    for (i=0; i<aln.length; i++) {
-        if ((idx === 0 && aln[i][1] == myNum) ||
-            idx === 1 && aln[i][0] == myNum)
-            retArr.push(aln[i][idx]);
+    for (i=0; i<w_aln.length; i++) {
+        if ((idx === 0 && w_aln[i][1] == myNum) ||
+            idx === 1 && w_aln[i][0] == myNum)
+            retArr.push(w_aln[i][idx]);
     }
     return retArr;
 }

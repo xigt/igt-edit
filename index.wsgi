@@ -73,7 +73,8 @@ from intent.igt.create_tiers import lang_lines, gloss_line, trans_lines, \
     pos_tag_tier
 from intent.igt.igt_functions import copy_xigt, delete_tier, heur_align_inst, classify_gloss_pos, \
     tag_trans_pos, project_gloss_pos_to_lang, add_gloss_lang_alignments, get_bilingual_alignment, \
-    get_trans_lang_alignment, get_trans_gloss_alignment
+    get_trans_lang_alignment, get_trans_gloss_alignment, get_trans_glosses_alignment, find_lang_word, find_gloss_word, \
+    x_contains_y
 from intent.igt.references import raw_tier, cleaned_tier, normalized_tier, item_index
 from intent.igt.exceptions import NoNormLineException, NoGlossLineException, GlossLangAlignException, \
     NoLangLineException, NoTransLineException
@@ -424,6 +425,16 @@ def intentify(corp_id, igt_id):
 
     return json.dumps(response)
 
+def group_morphs_by_word(inst, morph_tier, word_tier):
+    words_for_morphs = []
+    for w in word_tier:
+        morphs = []
+        for m in morph_tier:
+            if x_contains_y(inst, w, m):
+                morphs.append(m)
+        words_for_morphs.append((w, morphs))
+    return words_for_morphs
+
 def display_group_2(inst):
     """
     This function is responsible for compiling all the elements of the "group 2"
@@ -439,12 +450,16 @@ def display_group_2(inst):
 
     try:
         lang_w = lang(inst)
+        lang_m = group_morphs_by_word(inst, morphemes(inst), lang_w)
     except NoLangLineException as nlle:
         lang_w = None
+        lang_m = None
     try:
         gloss_w = gloss(inst)
+        gloss_m = group_morphs_by_word(inst, glosses(inst), gloss_w)
     except NoGlossLineException as ngle:
         gloss_w = None
+        gloss_m = None
 
     try:
         trans_w = trans(inst)
@@ -463,19 +478,24 @@ def display_group_2(inst):
         gloss_pos = make_gloss_pos()
 
     if gloss_w is not None and trans_w is not None:
-        aln = get_trans_gloss_alignment(inst)
+        w_aln = get_trans_gloss_alignment(inst)
+        m_aln = get_trans_glosses_alignment(inst)
     else:
-        aln = []
+        w_aln = []
+        m_aln = []
 
 
 
     return_html += render_template('group2/group_2.html',
                                    lang_w=lang_w,
+                                   lang_m=lang_m,
                                    gloss_w=gloss_w,
+                                   gloss_m=gloss_m,
                                    trans_w=trans_w,
                                    gloss_pos=gloss_pos,
                                    trans_pos=trans_pos,
-                                   aln=[[x, y] for x, y in aln]
+                                   w_aln=[[x, y] for x, y in w_aln],
+                                   m_aln=[[x, y] for x, y in m_aln]
                                    )
 
     return return_html

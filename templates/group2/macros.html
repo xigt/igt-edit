@@ -29,3 +29,18 @@
         </TD>
     {% endfor %}
 {% endmacro %}
+
+{% macro morphs(word_morph_list) %}
+    {% for word_morphs in word_morph_list %}
+        {% set word=word_morphs[0] %}
+        <TD id="morphs-{{ word.id }}">
+        <TABLE><TR>
+        {% for morph in word_morphs[1] %}
+            <TD id="{{ morph.id }}">
+            {{ morph.value() }}
+            </TD>
+        {% endfor %}
+        </TR></TABLE>
+        </TD>
+    {% endfor %}
+{% endmacro %}

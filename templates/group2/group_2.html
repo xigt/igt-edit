@@ -6,21 +6,24 @@ part-of-speech tiers for an instance. #}
     </TD>
 {% endmacro %}
 
-{% from 'group2/macros.html' import pos_tier, words %}
+{% from 'group2/macros.html' import pos_tier, words, morphs %}
 <H2>POS Tags and Word Alignment</H2>
 <SCRIPT>
-    var aln={{ aln }};
+    var w_aln={{ w_aln }};
+    var m_aln={{ m_aln }};
     var alignClicked=false;
 </SCRIPT>
 <TABLE style="font-family:Courier">
     {# Lang word row #}
     {% if lang_w != None %}
         <TR>{{first_col('L')}}{{ words(lang_w) }}</TR>
+        <TR>{{first_col(None)}}{{ morphs(lang_m) }}</TR>
     {% endif %}
 
     {# Gloss word row #}
     {% if gloss_w != None %}
         <TR>{{first_col('G')}}{{ words(gloss_w) }}</TR>
+        <TR>{{first_col(None)}}{{ morphs(gloss_m) }}</TR>
     {% endif %}
 
     {# Lang POS row #}
