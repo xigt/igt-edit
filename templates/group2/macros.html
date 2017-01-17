@@ -19,9 +19,12 @@
 {# Display the words for a words tier. #}
 {% macro words(word_tier) %}
     {% for w in word_tier %}
-        <TD id="{{ w.id }}"
+        <TD id="{{ w.id }}" class="alignable-word"
             onmouseenter="highlight(this);"
-            onmouseleave="unhighlight(this);">
+            onmouseleave="unhighlight(this);"
+            onclick="startAlign(this);"
+            style="border:solid white"
+        >
             {{ w.value() }}
         </TD>
     {% endfor %}

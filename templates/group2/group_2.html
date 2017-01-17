@@ -8,8 +8,8 @@ part-of-speech tiers for an instance. #}
 
 {% from 'group2/macros.html' import pos_tier, words %}
 <SCRIPT>
-    var src_to_tgt={{ src_to_tgt }};
-    var tgt_to_src={{ tgt_to_src }}
+    var aln={{ aln }};
+    var alignClicked=false;
 </SCRIPT>
 <TABLE style="font-family:Courier">
     {# Lang word row #}

@@ -439,8 +439,6 @@ def display_group_2(inst):
     trans_w = trans(inst)
 
     aln = get_trans_gloss_alignment(inst)
-    src_to_tgt = aln_to_json(aln, reverse=False)
-    tgt_to_src = aln_to_json(aln, reverse=True)
 
     YGG_LOG.critical(get_bilingual_alignment(inst, trans_w.id, lang_w.id))
 
@@ -450,8 +448,7 @@ def display_group_2(inst):
                                    trans_w=trans_w,
                                    lang_pos=pos_tag_tier(inst, lang_w.id),
                                    trans_pos=pos_tag_tier(inst, trans_w.id),
-                                   src_to_tgt=src_to_tgt,
-                                   tgt_to_src=tgt_to_src
+                                   aln=[[x, y] for x, y in aln]
                                    )
     content = {'html': return_html}
     return json.dumps(content)

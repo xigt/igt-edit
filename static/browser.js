@@ -35,7 +35,6 @@ const CURRENT_ROW     = "current-row";
 /* Login the User */
 function login() {
     var userid = $('#userid').val();
-    console.log(userid);
     window.location.href = appRoot()+'/user/'+userid;
 }
 
@@ -49,7 +48,6 @@ function populateIGTs(corpId, async) {
     if (typeof async === 'undefined') {async = false;}
 
     data = {userID : userID()};
-    console.log(data);
 
     $('#fine-list').html('<div style="text-align:center;top:40px;position:relative;">'+ajax_loader_small()+'</div>');
     $.ajax({
@@ -672,10 +670,25 @@ function modIdlist(idlist, classes, highlight) {
     }
 }
 
-function wid(s) {
-    var idRegex = /w([0-9]+)/
-    return idRegex.exec(s)[1]
+function wIdNum(obj) {
+    var myId = cssId(obj);
+    var idRegex = /([0-9]+)/;
+    return parseInt(idRegex.exec(myId)[1])
 }
+
+function wordType(obj) {
+    var idRegex = /([^0-9]+)/;
+    return idRegex.exec(cssId(obj))[1];
+}
+
+function cssId(obj) {
+    return $(obj).attr('id');
+}
+
+function isWordType(obj, t) { return wordType(obj) == t;}
+function isGw(obj) {return isWordType(obj, 'gw');}
+function isTw(obj) {return isWordType(obj, 'tw');}
+function isLw(obj) {return isWordType(obj, 'w');}
 
 /* HIGHLIGHTING FOR HOVER */
 
@@ -687,12 +700,20 @@ function unhighlight(obj) {
     highlight_helper(obj, false);
 }
 
+function getNums(myNum, idx) {
+    var retArr = [];
+    for (i=0; i<aln.length; i++) {
+        if ((idx === 0 && aln[i][1] == myNum) ||
+            idx === 1 && aln[i][0] == myNum)
+            retArr.push(aln[i][idx]);
+    }
+    return retArr;
+}
 
-function highlight_helper(obj, isOn) {
-    var myId = $(obj).attr('id');
-    var myNum = wid(myId);
+function highlight_helper(obj, entering) {
+    var myNum = wIdNum(obj);
 
-    if (isOn) {
+    if (entering) {
         var myColor = 'cyan';
         var otherColor = 'greenyellow';
     } else {
@@ -700,18 +721,30 @@ function highlight_helper(obj, isOn) {
         var otherColor = 'white';
     }
 
+    // If we are in alignment mode, add a
+    // border, then halt
+    if (alignClicked) {
+        if (obj == alignClicked) {return} // don't alter the item already clicked
+        if (entering) var border = 'solid pink';
+        else var border = 'solid white';
+        $(obj).css('border', border);
+        return
+    }
+
     $(obj).css('background-color', myColor);
 
-    if (myId.startsWith("gw")) {
-        var myTws = src_to_tgt[myNum];
+
+
+    if (isGw(obj)) {
+        var myTws = getNums(myNum, 0);
         highlightList(myTws, otherColor, 'tw');
         highlightList([myNum], myColor, 'w');
-    } else if (myId.startsWith("tw")) {
-        var myGws = tgt_to_src[myNum];
+    } else if (isTw(obj)) {
+        var myGws = getNums(myNum, 1);
         highlightList(myGws, otherColor, 'gw');
         highlightList(myGws, otherColor, 'w');
-    } else if (myId.startsWith("w")) {
-        var myTws = src_to_tgt[myNum];
+    } else if (isLw(obj)) {
+        var myTws = getNums(myNum, 0);
         highlightList(myTws, otherColor, 'tw');
         highlightList([myNum], myColor, 'gw');
     }
@@ -723,6 +756,107 @@ function highlightList(arr, color, prefix) {
             $('#'+prefix+ elt).css('background-color', color);
         });
     }
+}
+
+
+// Tell whether or not the word types are the
+function similarType(me, other) {
+    var myWT = wordType(me);
+    var oWT = wordType(other);
+    function isLWT(o) {return (wordType(o) == 'w' || wordType(o) == 'gw')}
+
+    return ((myWT == 'tw' && oWT == 'tw') ||
+    (isLWT(me) && isLWT(other)))
+}
+
+// -------------------------------------
+// Add/undo alignments when clicked...
+// -------------------------------------
+function startAlign(obj) {
+    // If we have already clicked an alignment,
+    // we need to either add or remove this item
+
+
+    if (alignClicked) {
+        // we would like to cancel the operation without
+        // doing anything if another word of the same
+        // type is clicked.
+
+        var myWT = wordType(obj);
+        var oWT = wordType(alignClicked);
+        if (similarType(obj, alignClicked)) {stopAlign(obj);}
+
+        // Otherwise, we should handle the request
+        // for adding or removing alignment.
+        else {
+            // Blink three times to indicate this is
+            // the one being selected
+            count = 0;
+            blinkOn = false;
+            intervalId = setInterval(function () {
+                if (blinkOn) {
+                    blinkOn = false;
+                    $(obj).css('border', 'solid white');
+                } else {
+                    blinkOn = true;
+                    $(obj).css('border', 'solid red');
+                }
+                count++;
+                if (count == 7) {
+                    blinkOn = false;
+                    $(obj).css('border', 'solid white');
+                    clearInterval(intervalId);
+                    addAlign(obj);
+                    stopAlign(obj);
+                }
+            }, 100);
+        }
+
+        // And no matter what's clicked, we should
+        // exit the alignment mode.
+
+    } else {
+        $(obj).css('border', 'solid red');
+
+        alignClicked = obj;
+    }
+}
+
+// Stop being in adding alignment mode
+function stopAlign(obj) {
+    $(alignClicked).css('border', 'solid white');
+    $(obj).css('border', 'solid white');
+    alignClicked = false;
+
+    $('.alignable-word').each(function(i, elt){
+       unhighlight(elt);
+    });
+    highlight(obj);
+}
+
+function toggleArr(srcNum, tgtNum) {
+    for (i=0;i<aln.length;i++) {
+        if (aln[i][0] == srcNum && aln[i][1] == tgtNum) {
+            aln.splice(i, 1);
+            return
+        }
+    }
+    aln.push([srcNum, tgtNum]);
+}
+
+function addAlign(obj) {
+    var clickedNum = wIdNum(obj);
+    var oNum = wIdNum(alignClicked);
+
+    if (isTw(obj)) {
+        tgtNum = oNum;
+        srcNum = clickedNum;
+    } else {
+        tgtNum = clickedNum;
+        srcNum = oNum;
+    }
+
+    toggleArr(srcNum, tgtNum);
 }
 
 /* All the stuff that needs fixing when the window is resized */
