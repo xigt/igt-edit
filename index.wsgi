@@ -9,7 +9,6 @@ import sys
 import re
 from flask import Flask, render_template, url_for, request, make_response, Response, abort
 
-
 app = Flask(__name__)
 application = app
 
@@ -31,6 +30,7 @@ from yggdrasil.config import PYTHONPATH, LINE_TAGS, LINE_ATTRS, XIGTVIZ, PDF_DIR
 from yggdrasil.consts import NORM_STATE, CLEAN_STATE, RAW_STATE, NORMAL_TABLE_TYPE, CLEAN_TABLE_TYPE, HIDDEN
 from yggdrasil.utils import aln_to_json
 
+
 # -------------------------------------------
 # Add the additional path items.
 # -------------------------------------------
@@ -50,7 +50,7 @@ import odinclean, odinnormalize
 # -------------------------------------------
 # XIGT Imports
 # -------------------------------------------
-from xigt import Igt
+from xigt import Igt, Item
 from xigt.codecs import xigtjson, xigtxml
 import xigt.xigtpath
 
@@ -74,8 +74,9 @@ from intent.igt.create_tiers import lang_lines, gloss_line, trans_lines, \
 from intent.igt.igt_functions import copy_xigt, delete_tier, heur_align_inst, classify_gloss_pos, \
     tag_trans_pos, project_gloss_pos_to_lang, add_gloss_lang_alignments, get_bilingual_alignment, \
     get_trans_lang_alignment, get_trans_gloss_alignment
-from intent.igt.references import raw_tier, cleaned_tier, normalized_tier
-from intent.igt.exceptions import NoNormLineException, NoGlossLineException, GlossLangAlignException
+from intent.igt.references import raw_tier, cleaned_tier, normalized_tier, item_index
+from intent.igt.exceptions import NoNormLineException, NoGlossLineException, GlossLangAlignException, \
+    NoLangLineException, NoTransLineException
 from intent.utils.listutils import flatten_list
 
 app.debug = True
@@ -434,20 +435,44 @@ def display_group_2(inst):
     # --1) For the POS tag view, we're going to create a table that is 4 rows,
     #      with as many columns as there are words.
 
-    lang_w = lang(inst)
-    gloss_w = gloss(inst)
-    trans_w = trans(inst)
+    try:
+        lang_w = lang(inst)
+    except NoLangLineException as nlle:
+        lang_w = None
+    try:
+        gloss_w = gloss(inst)
+    except NoGlossLineException as ngle:
+        gloss_w = None
 
-    aln = get_trans_gloss_alignment(inst)
+    try:
+        trans_w = trans(inst)
+        trans_pos = pos_tag_tier(inst, trans_w.id)
+    except NoTransLineException as ntle:
+        trans_w = None
+        trans_pos = []
 
-    YGG_LOG.critical(get_bilingual_alignment(inst, trans_w.id, lang_w.id))
+    def make_gloss_pos(): return [Item(id='gw-pos{}'.format(item_index(l))) for l in lang_w]
+
+    if gloss_w is not None:
+        gloss_pos = pos_tag_tier(inst, gloss_w.id)
+        if gloss_pos is None:
+            gloss_pos = make_gloss_pos()
+    elif gloss_w is None and lang_w is not None:
+        gloss_pos = make_gloss_pos()
+
+    if gloss_w is not None and trans_w is not None:
+        aln = get_trans_gloss_alignment(inst)
+    else:
+        aln = []
+
+
 
     return_html += render_template('group2/group_2.html',
                                    lang_w=lang_w,
                                    gloss_w=gloss_w,
                                    trans_w=trans_w,
-                                   lang_pos=pos_tag_tier(inst, lang_w.id),
-                                   trans_pos=pos_tag_tier(inst, trans_w.id),
+                                   gloss_pos=gloss_pos,
+                                   trans_pos=trans_pos,
                                    aln=[[x, y] for x, y in aln]
                                    )
     content = {'html': return_html}

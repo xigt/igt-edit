@@ -13,19 +13,26 @@ part-of-speech tiers for an instance. #}
 </SCRIPT>
 <TABLE style="font-family:Courier">
     {# Lang word row #}
-    <TR>{{first_col('L')}}{{ words(lang_w) }}</TR>
+    {% if lang_w != None %}
+        <TR>{{first_col('L')}}{{ words(lang_w) }}</TR>
+    {% endif %}
 
     {# Gloss word row #}
-    <TR>{{first_col('G')}}{{ words(gloss_w) }}</TR>
+    {% if gloss_w != None %}
+        <TR>{{first_col('G')}}{{ words(gloss_w) }}</TR>
+    {% endif %}
 
     {# Lang POS row #}
-    <TR>{{first_col(None)}}{{ pos_tier(lang_pos) }}</TR>
+    <TR>{{first_col(None)}}{{ pos_tier(gloss_pos) }}</TR>
+
 
     {# Trans word row #}
-    <TR>{{first_col('T')}}{{ words(trans_w) }}</TR>
+    {% if trans_w != None %}
+        <TR>{{first_col('T')}}{{ words(trans_w) }}</TR>
 
-    {# Trans pos row #}
-    <TR>{{first_col(None)}}{{ pos_tier(trans_pos) }}</TR>
+        {# Trans pos row #}
+        <TR>{{first_col(None)}}{{ pos_tier(trans_pos) }}</TR>
+    {% endif %}
 </TABLE>
 {{ pos_tier(trans) }}
 
