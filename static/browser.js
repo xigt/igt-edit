@@ -351,7 +351,7 @@ function generateFromNormalized(corp_id, igt_id) {
     $.ajax({
         url: appRoot()+'/intentify/'+corp_id+'/'+igt_id,
         type: 'POST',
-        // dataType: 'json',
+        dataType: 'json',
         data: JSON.stringify(data),
         contentType: 'application/json',
         success: intentifySuccess,
@@ -387,7 +387,7 @@ function intentifySuccess(r, stat, jqXHR) {
     // analysisNotifier(r, 'col');
     // $('#group-2-content').html('');
     // igtLayout('#group-2-content', r['igt']);
-    $('#group-2-content').html(r);
+    $('#group-2-content').html(r['html']);
 }
 
 function intentifyError() {
@@ -672,14 +672,57 @@ function modIdlist(idlist, classes, highlight) {
     }
 }
 
-function highlightSrcs(obj, idlist, classes) {
-    $(obj).css('background-color','cyan');
-    modIdlist(idlist, 'gw,lw', true);
+function wid(s) {
+    var idRegex = /w([0-9]+)/
+    return idRegex.exec(s)[1]
 }
 
-function unhighlightSrcs(obj, idlist) {
-    $(obj).css('background-color', 'white');
-    modIdlist(idlist, 'gw,lw', false);
+/* HIGHLIGHTING FOR HOVER */
+
+function highlight(obj) {
+    highlight_helper(obj, true);
+}
+
+function unhighlight(obj) {
+    highlight_helper(obj, false);
+}
+
+
+function highlight_helper(obj, isOn) {
+    var myId = $(obj).attr('id');
+    var myNum = wid(myId);
+
+    if (isOn) {
+        var myColor = 'cyan';
+        var otherColor = 'greenyellow';
+    } else {
+        var myColor = 'white';
+        var otherColor = 'white';
+    }
+
+    $(obj).css('background-color', myColor);
+
+    if (myId.startsWith("gw")) {
+        var myTws = src_to_tgt[myNum];
+        highlightList(myTws, otherColor, 'tw');
+        highlightList([myNum], myColor, 'w');
+    } else if (myId.startsWith("tw")) {
+        var myGws = tgt_to_src[myNum];
+        highlightList(myGws, otherColor, 'gw');
+        highlightList(myGws, otherColor, 'w');
+    } else if (myId.startsWith("w")) {
+        var myTws = src_to_tgt[myNum];
+        highlightList(myTws, otherColor, 'tw');
+        highlightList([myNum], myColor, 'gw');
+    }
+}
+
+function highlightList(arr, color, prefix) {
+    if (arr != undefined) {
+        arr.forEach(function (elt) {
+            $('#'+prefix+ elt).css('background-color', color);
+        });
+    }
 }
 
 /* All the stuff that needs fixing when the window is resized */

@@ -16,8 +16,13 @@
     {% endfor %}
 {% endmacro %}
 
+{# Display the words for a words tier. #}
 {% macro words(word_tier) %}
     {% for w in word_tier %}
-        <TD>{{ w.value() }}</TD>
+        <TD id="{{ w.id }}"
+            onmouseenter="highlight(this);"
+            onmouseleave="unhighlight(this);">
+            {{ w.value() }}
+        </TD>
     {% endfor %}
 {% endmacro %}

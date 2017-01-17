@@ -10,7 +10,6 @@ import re
 from flask import Flask, render_template, url_for, request, make_response, Response, abort
 
 
-
 app = Flask(__name__)
 application = app
 
@@ -30,6 +29,7 @@ app.config.from_object(config)
 # -------------------------------------------
 from yggdrasil.config import PYTHONPATH, LINE_TAGS, LINE_ATTRS, XIGTVIZ, PDF_DIR
 from yggdrasil.consts import NORM_STATE, CLEAN_STATE, RAW_STATE, NORMAL_TABLE_TYPE, CLEAN_TABLE_TYPE, HIDDEN
+from yggdrasil.utils import aln_to_json
 
 # -------------------------------------------
 # Add the additional path items.
@@ -67,12 +67,13 @@ from sleipnir import dbi
 # -------------------------------------------
 
 from intent.consts import CLEAN_ID, NORM_ID, all_punc_re_mult
-from intent.igt.igtutils import is_strict_columnar_alignment
+from intent.igt.igtutils import is_strict_columnar_alignment, rgp
 from intent.igt.create_tiers import lang_lines, gloss_line, trans_lines, \
     generate_lang_words, generate_gloss_words, generate_trans_words, lang, gloss, morphemes, glosses, trans, \
     pos_tag_tier
-from intent.igt.igt_functions import x_contains_y, copy_xigt, delete_tier, heur_align_inst, classify_gloss_pos, \
-    tag_trans_pos, project_gloss_pos_to_lang, add_gloss_lang_alignments
+from intent.igt.igt_functions import copy_xigt, delete_tier, heur_align_inst, classify_gloss_pos, \
+    tag_trans_pos, project_gloss_pos_to_lang, add_gloss_lang_alignments, get_bilingual_alignment, \
+    get_trans_lang_alignment, get_trans_gloss_alignment
 from intent.igt.references import raw_tier, cleaned_tier, normalized_tier
 from intent.igt.exceptions import NoNormLineException, NoGlossLineException, GlossLangAlignException
 from intent.utils.listutils import flatten_list
@@ -345,12 +346,9 @@ def intentify(corp_id, igt_id):
     except NoNormLineException:
         tl = None
 
-    # if (ll is None) or (gl is None) or (tl is None):
-    #     raise Exception("Missing L, G, or T line")
-
-
     response = {}
 
+    # Check that the tiers are of equal length...
     def equal_lengths(tier_a, tier_b):
         tier_a_items = [i for i in tier_a if not re.match('^{}$'.format(all_punc_re_mult), i)]
         tier_b_items = [i for i in tier_b if not re.match('^{}$'.format(all_punc_re_mult), i)]
@@ -384,19 +382,25 @@ def intentify(corp_id, igt_id):
     # -------------------------------------------
     # DO ENRICHMENT
     # -------------------------------------------
-    if tl is not None:
-        generate_trans_words(inst)
-        tag_trans_pos(inst)
 
-        # If we have translation AND gloss, align them.
-        if gl is not None:
-            generate_gloss_words(inst)
-            heur_align_inst(inst)
-
-    if gl is not None and ll is not None:
-        generate_lang_words(inst)
+    # Start by creating words:
+    if tl is not None: generate_trans_words(inst)
+    if ll is not None: generate_lang_words(inst)
+    if gl is not None:
         generate_gloss_words(inst)
         glosses(inst)
+
+
+    if ll is not None and gl is not None: add_gloss_lang_alignments(inst)
+
+    # Add POS tags as necessary
+    if tl is not None: tag_trans_pos(inst)
+
+    # Add alignment
+    if gl is not None and tl is not None:
+        heur_align_inst(inst)
+
+        # Try POS tagging the language line...
         try:
             add_gloss_lang_alignments(inst)
         except GlossLangAlignException:
@@ -426,22 +430,31 @@ def display_group_2(inst):
     """
     return_html = ''
 
+
     # --1) For the POS tag view, we're going to create a table that is 4 rows,
     #      with as many columns as there are words.
 
     lang_w = lang(inst)
+    gloss_w = gloss(inst)
     trans_w = trans(inst)
-    cols = max(len(lang_w), len(trans_w))
 
-    return_html += render_template('group2/pos_tags.html',
-                                   cols=cols,
-                                   lang_w=lang(inst),
-                                   gloss_w=gloss(inst),
-                                   trans_w=trans(inst),
-                                   lang_pos=pos_tag_tier(inst, lang(inst).id),
-                                   trans_pos=pos_tag_tier(inst, trans(inst).id)
+    aln = get_trans_gloss_alignment(inst)
+    src_to_tgt = aln_to_json(aln, reverse=False)
+    tgt_to_src = aln_to_json(aln, reverse=True)
+
+    YGG_LOG.critical(get_bilingual_alignment(inst, trans_w.id, lang_w.id))
+
+    return_html += render_template('group2/group_2.html',
+                                   lang_w=lang_w,
+                                   gloss_w=gloss_w,
+                                   trans_w=trans_w,
+                                   lang_pos=pos_tag_tier(inst, lang_w.id),
+                                   trans_pos=pos_tag_tier(inst, trans_w.id),
+                                   src_to_tgt=src_to_tgt,
+                                   tgt_to_src=tgt_to_src
                                    )
-    return return_html
+    content = {'html': return_html}
+    return json.dumps(content)
 
 # -------------------------------------------
 # Save a file after changes
