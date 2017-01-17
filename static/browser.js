@@ -379,13 +379,14 @@ function analysisNotifier(r, id) {
 }
 
 function intentifySuccess(r, stat, jqXHR) {
-    // analysisNotifier(r, 'glw');
-    // analysisNotifier(r, 'glm');
-    // analysisNotifier(r, 'tag');
-    // analysisNotifier(r, 'col');
+    analysisNotifier(r, 'glw');
+    analysisNotifier(r, 'glm');
+    analysisNotifier(r, 'tag');
+    analysisNotifier(r, 'col');
     // $('#group-2-content').html('');
     // igtLayout('#group-2-content', r['igt']);
-    $('#group-2-content').html(r['html']);
+    $('#analysis').css('display','block');
+    $('#group-2-content').html(r['group2']);
 }
 
 function intentifyError() {

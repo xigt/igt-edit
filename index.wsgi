@@ -380,6 +380,13 @@ def intentify(corp_id, igt_id):
     else:
         response['col'] = 1 if is_strict_columnar_alignment(ll.value(), gl.value()) else 0
 
+    # If the number of gloss words on the lang line and gloss
+    # line do not match, abort further enrichment and provide
+    # a warning.
+    if response['glw'] == 0:
+        response['group2'] = render_template('group2/group_2_invalid.html')
+        return json.dumps(response)
+
     # -------------------------------------------
     # DO ENRICHMENT
     # -------------------------------------------
@@ -391,8 +398,6 @@ def intentify(corp_id, igt_id):
         generate_gloss_words(inst)
         glosses(inst)
 
-
-    if ll is not None and gl is not None: add_gloss_lang_alignments(inst)
 
     # Add POS tags as necessary
     if tl is not None: tag_trans_pos(inst)
@@ -415,12 +420,9 @@ def intentify(corp_id, igt_id):
 
     inst.sort_tiers()
 
-    return display_group_2(inst)
+    response['group2'] = display_group_2(inst)
 
-    # igtjson = xigtjson.encode_igt(inst)
-    # response['igt'] = igtjson
-
-    # return json.dumps(response)
+    return json.dumps(response)
 
 def display_group_2(inst):
     """
@@ -475,8 +477,8 @@ def display_group_2(inst):
                                    trans_pos=trans_pos,
                                    aln=[[x, y] for x, y in aln]
                                    )
-    content = {'html': return_html}
-    return json.dumps(content)
+
+    return return_html
 
 # -------------------------------------------
 # Save a file after changes
