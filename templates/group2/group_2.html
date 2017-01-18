@@ -6,11 +6,15 @@ part-of-speech tiers for an instance. #}
     </TD>
 {% endmacro %}
 
-{% from 'group2/macros.html' import pos_tier, words, morphs %}
+{% from 'group2/macros.html' import pos_tier, words,
+    morphs, morph_dict_json, aln_json %}
+
 <H2>POS Tags and Word Alignment</H2>
 <SCRIPT>
-    var w_aln={{ w_aln }};
-    var m_aln={{ m_aln }};
+    var gw_to_gm={{ morph_dict_json(gloss_m) }};
+    var lw_to_lm={{ morph_dict_json(lang_m) }};
+    var w_aln={{ aln_json(w_aln, 'tw', 'w') }};
+    var m_aln={{ aln_json(m_aln, 'tw', 'g') }};
     var alignClicked=false;
 </SCRIPT>
 <TABLE style="font-family:Courier">

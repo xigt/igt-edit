@@ -30,12 +30,24 @@
     {% endfor %}
 {% endmacro %}
 
-{% macro morphs(word_morph_list) %}
-    {% for word_morphs in word_morph_list %}
-        {% set word=word_morphs[0] %}
+{% macro morph_dict_json(word_morph_dict) %}
+    {% set outer_comma = joiner(', ') %}
+    {% raw %} { {% endraw %}
+    {% for word in word_morph_dict.keys() %}
+        {% set inner_comma = joiner(',') %}
+        {{ outer_comma()}}"{{ word.id }}":[
+            {% for morph in word_morph_dict[word] %}
+                {{ inner_comma() }}"{{ morph.id }}"
+            {% endfor %} ]
+    {% endfor %}
+    {% raw %} } {% endraw %}
+{% endmacro %}
+
+{% macro morphs(word_morph_dict) %}
+    {% for word, morphs in word_morph_dict.items() %}
         <TD id="morphs-{{ word.id }}">
         <TABLE><TR>
-        {% for morph in word_morphs[1] %}
+        {% for morph in morphs %}
             <TD id="{{ morph.id }}" parentWord="{{ word.id }}"
                 onmouseenter="highlight(this);"
                 onmouseleave="unhighlight(this);">
@@ -45,4 +57,13 @@
         </TR></TABLE>
         </TD>
     {% endfor %}
+{% endmacro %}
+
+{% macro aln_json(aln_pairs, src_prefix, tgt_prefix) %}
+    {% set comma = joiner(',') %}
+    [
+        {% for src, tgt in aln_pairs %}
+            {{ comma() }}["{{ src_prefix }}{{ src }}","{{ tgt_prefix }}{{ tgt }}"]
+        {% endfor %}
+    ]
 {% endmacro %}

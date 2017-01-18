@@ -7,6 +7,8 @@ import sys
 # Set up the Flask app
 # -------------------------------------------
 import re
+from collections import OrderedDict
+
 from flask import Flask, render_template, url_for, request, make_response, Response, abort
 
 app = Flask(__name__)
@@ -426,13 +428,16 @@ def intentify(corp_id, igt_id):
     return json.dumps(response)
 
 def group_morphs_by_word(inst, morph_tier, word_tier):
-    words_for_morphs = []
+    """
+    :rtype: dict[Item, list]
+    """
+    words_for_morphs = OrderedDict()
     for w in word_tier:
         morphs = []
         for m in morph_tier:
             if x_contains_y(inst, w, m):
                 morphs.append(m)
-        words_for_morphs.append((w, morphs))
+        words_for_morphs[w] = morphs
     return words_for_morphs
 
 def display_group_2(inst):

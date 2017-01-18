@@ -690,35 +690,49 @@ function unhighlight(obj) {
     highlight_helper(obj, false);
 }
 
-function getAlnNums(arr, myNum, idx) {
+function getAln(arr, myId, myIdx) {
+    // console.log('Pairing "'+myId+'" with idx='+myIdx+' in arr '+arr.toString());
     var retArr = [];
+    var otherIdx = myIdx == 0 ? 1 : 0;
     for (i=0; i<arr.length; i++) {
-        if ((idx === 0 && arr[i][1] == myNum) ||
-            idx === 1 && arr[i][0] == myNum)
-            retArr.push(arr[i][idx]);
+        var eltId = arr[i][myIdx];
+        var oId = arr[i][otherIdx];
+        if (eltId == myId)
+            retArr.push(oId);
     }
     return retArr;
 }
 
-function getAlnWNums(myNum, idx) {
-    return getAlnNums(w_aln, myNum, idx);
+function getAlnW(myId, myIdx) {
+    return getAln(w_aln, myId, myIdx);
 }
 
-function getAlnMNums(myNum, idx) {
-    return getAlnNums(m_aln, myNum, idx);
+function getAlnM(myId, myIdx) {
+    return getAln(m_aln, myId, myIdx);
 }
 
+// -------------------------------------------
+// COLORS FOR ALIGNMENTS
+// -------------------------------------------
+
+SELF_COLOR = 'tomato';
+
+ALN_COLOR = 'DeepSkyBlue'; // For elements an elt is aligned with directly
+REL_COLOR = 'PowderBlue'; // For elements aligned with a related element
+
+SUB_COLOR = 'lightsalmon'; // For elements subsumed by this element
+SUP_COLOR = 'lightgreen'; // For parents of this element
+
+function highlightList(arr, color, entering) {
+    color = entering ? color : 'white';
+    idArr = arr.map(function(s){return '#'+s;});
+    // console.log('Highlighting "' + arr.join(',') +'" with ' + color);
+    $(idArr.join(',')).css('background-color', color);
+}
 
 function highlight_helper(obj, entering) {
     var myNum = wIdNum(obj);
-
-    if (entering) {
-        var myColor = 'cyan';
-        var otherColor = 'greenyellow';
-    } else {
-        var myColor = 'white';
-        var otherColor = 'white';
-    }
+    var myId = cssId(obj);
 
     // If we are in alignment mode, add a
     // border, then halt
@@ -730,37 +744,42 @@ function highlight_helper(obj, entering) {
         return
     }
 
-    $(obj).css('background-color', myColor);
 
-
+    var rels = [];
+    var subs = [];
+    var sups = [];
+    var alns = [];
 
     if (isGw(obj)) {
-        var myTws = getAlnWNums(myNum, 0);
-        highlightList(myTws, otherColor, 'tw');
-        highlightList([myNum], myColor, 'w');
+        // SUB: gm, REL: m, ALN: w, tw
+        var myLw = 'w'+myNum.toString(); alns = alns.concat([myLw]);
+        var myTws = getAlnW(myLw, 1); alns = alns.concat(myTws);
+        var myGms = gw_to_gm[myId]; subs = subs.concat(myGms);
+        var myMs = lw_to_lm[myLw]; rels = rels.concat(myMs);
     } else if (isTw(obj)) {
-        var myGws = getAlnWNums(myNum, 1);
-        highlightList(myGws, otherColor, 'gw');
-        highlightList(myGws, otherColor, 'w');
+        // ALN: Gw, Lw REL: Gm
+        var myLws = getAlnW(myId, 0); alns = alns.concat(myLws);
+        var myGws = myLws.map(function(x){return 'gw'+idNum(x)}); alns = alns.concat(myGws);
+        var myGms = getAlnM(myId, 0); alns=alns.concat(myGms);
     } else if (isLw(obj)) {
-        var myTws = getAlnWNums(myNum, 0);
-        highlightList(myTws, otherColor, 'tw');
-        highlightList([myNum], myColor, 'gw');
+        var myMs = lw_to_lm[myId]; subs = subs.concat(myMs);
+        var myTws = getAlnW(myId, 1); alns = alns.concat(myTws);
+        var myGw = 'gw'+myNum.toString(); alns = alns.concat([myGw]);
+        var myGms = gw_to_gm[myGw]; rels = rels.concat(myGms);
     } else if (isLm(obj)) {
-        var parentWord = $(obj).attr('parentWord');
-        highlightList([idNum(parentWord)], otherColor, 'w');
+        var myLw = $(obj).attr('parentWord'); sups = sups.concat([myLw]);
+        var myGw = 'gw'+idNum(myLw).toString(); rels = rels.concat([myGw]);
     } else if (isGm(obj)) {
-        var parentWord = $(obj).attr('parentWord');
-        highlightList([idNum(parentWord)], otherColor, 'gw');
+        var myGw = $(obj).attr('parentWord'); sups = sups.concat([myGw]);
+        var myLw = 'w'+idNum(myGw).toString(); rels = rels.concat([myLw]);
+        var myTws = getAlnM(myId, 1); alns = alns.concat(myTws);
     }
-}
 
-function highlightList(arr, color, prefix) {
-    if (arr != undefined) {
-        arr.forEach(function (elt) {
-            $('#'+prefix+ elt).css('background-color', color);
-        });
-    }
+    highlightList(rels, REL_COLOR, entering);
+    highlightList(subs, SUB_COLOR, entering);
+    highlightList(sups, SUP_COLOR, entering);
+    highlightList(alns, ALN_COLOR, entering);
+    highlightList([myId], SELF_COLOR, entering);
 }
 
 
@@ -839,29 +858,32 @@ function stopAlign(obj) {
     highlight(obj);
 }
 
-function toggleArr(srcNum, tgtNum) {
+function toggleArr(srcId, tgtId) {
     for (i=0;i<w_aln.length;i++) {
-        if (w_aln[i][0] == srcNum && w_aln[i][1] == tgtNum) {
+        if (w_aln[i][0] == srcId && w_aln[i][1] == tgtId) {
             w_aln.splice(i, 1);
             return
         }
     }
-    w_aln.push([srcNum, tgtNum]);
+    w_aln.push([srcId, tgtId]);
 }
 
 function addAlign(obj) {
-    var clickedNum = wIdNum(obj);
-    var oNum = wIdNum(alignClicked);
+    var clickedId = cssId(obj);
+    var prevId = cssId(alignClicked);
+
+    function toLw(idStr) {return 'w' + idNum(idStr).toString();}
+    function toTw(idStr) {return 'tw'+ idNum(idStr).toString();}
 
     if (isTw(obj)) {
-        tgtNum = oNum;
-        srcNum = clickedNum;
+        tgtId = toLw(prevId);
+        srcId = toTw(clickedId); // Make sure to regularize
     } else {
-        tgtNum = clickedNum;
-        srcNum = oNum;
+        tgtId = toLw(clickedId);
+        srcId = toTw(prevId);
     }
 
-    toggleArr(srcNum, tgtNum);
+    toggleArr(srcId, tgtId);
 }
 
 /* All the stuff that needs fixing when the window is resized */
