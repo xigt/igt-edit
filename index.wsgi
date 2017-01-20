@@ -72,11 +72,11 @@ from intent.consts import CLEAN_ID, NORM_ID, all_punc_re_mult
 from intent.igt.igtutils import is_strict_columnar_alignment, rgp
 from intent.igt.create_tiers import lang_lines, gloss_line, trans_lines, \
     generate_lang_words, generate_gloss_words, generate_trans_words, lang, gloss, morphemes, glosses, trans, \
-    pos_tag_tier
+    pos_tag_tier, has_lang, has_morphemes, has_glosses, has_gloss, has_trans, gloss_tag_tier, trans_tag_tier
 from intent.igt.igt_functions import copy_xigt, delete_tier, heur_align_inst, classify_gloss_pos, \
     tag_trans_pos, project_gloss_pos_to_lang, add_gloss_lang_alignments, get_bilingual_alignment, \
     get_trans_lang_alignment, get_trans_gloss_alignment, get_trans_glosses_alignment, find_lang_word, find_gloss_word, \
-    x_contains_y
+    x_contains_y, get_glosses_morphs_alignment
 from intent.igt.references import raw_tier, cleaned_tier, normalized_tier, item_index
 from intent.igt.exceptions import NoNormLineException, NoGlossLineException, GlossLangAlignException, \
     NoLangLineException, NoTransLineException
@@ -427,80 +427,73 @@ def intentify(corp_id, igt_id):
 
     return json.dumps(response)
 
-def group_morphs_by_word(inst, morph_tier, word_tier):
+class MorphMap(object):
     """
-    :rtype: dict[Item, list]
+    Make passing the list of words and morphemes easier,
+    as well as finding which word a morpheme belongs to
     """
-    words_for_morphs = OrderedDict()
-    for w in word_tier:
-        morphs = []
+    def __init__(self, inst):
+        self.w_to_m = OrderedDict()
+        self.m_to_w = OrderedDict()
+        if has_gloss(inst): self._get_aln(inst, glosses(inst), gloss(inst))
+        if has_lang(inst): self._get_aln(inst, morphemes(inst), lang(inst))
+
+    def _get_aln(self, inst, morph_tier, word_tier):
         for m in morph_tier:
-            if x_contains_y(inst, w, m):
-                morphs.append(m)
-        words_for_morphs[w] = morphs
-    return words_for_morphs
+            self.m_to_w[m] = None
+            for w in word_tier:
+                if w not in self.w_to_m: self.w_to_m[w] = []
+                if x_contains_y(inst, w, m):
+                    self.w_to_m[w].append(m)
+                    self.m_to_w[m] = w
+                    # break # A morph can only be aligned with one word
+
+    def morphs(self, m_type='g'):
+        return [m for m in self.m_to_w.keys() if m.id.startswith(m_type)]
+    def words(self, w_type='w'):
+        return [w for w in self.w_to_m.keys() if w.id.startswith(w_type)]
+
+    def lws(self): return self.words('w')
+    def lms(self): return self.morphs('m')
+    def gws(self): return self.words('gw')
+    def gms(self): return self.morphs('g')
+    def get_ms(self, w): return self.w_to_m.get(w, [])
+    def get_mids(self, w): return [m.id for m in self.w_to_m.get(w)]
+    def get_w(self, m): return self.m_to_w.get(m, None)
+
 
 def display_group_2(inst):
     """
     This function is responsible for compiling all the elements of the "group 2"
     items for editing; e.g. POS tags and word alignment.
 
+    It assumes all enrichment has already been done, and does not
+    perform any modification.
+
     :type inst: Igt
     """
     return_html = ''
 
 
-    # --1) For the POS tag view, we're going to create a table that is 4 rows,
-    #      with as many columns as there are words.
+    # Obtain alignments between lang_w<->morphs, gloss_w<->glosses
+    mm = MorphMap(inst)
 
-    try:
-        lang_w = lang(inst)
-        lang_m = group_morphs_by_word(inst, morphemes(inst), lang_w)
-    except NoLangLineException as nlle:
-        lang_w = None
-        lang_m = None
-    try:
-        gloss_w = gloss(inst)
-        gloss_m = group_morphs_by_word(inst, glosses(inst), gloss_w)
-    except NoGlossLineException as ngle:
-        gloss_w = None
-        gloss_m = None
+    gloss_pos = gloss_tag_tier(inst)
 
-    try:
-        trans_w = trans(inst)
-        trans_pos = pos_tag_tier(inst, trans_w.id)
-    except NoTransLineException as ntle:
-        trans_w = None
-        trans_pos = []
+    trans_w = trans(inst) if has_trans(inst) else []
+    trans_pos = trans_tag_tier(inst)
 
-    def make_gloss_pos(): return [Item(id='gw-pos{}'.format(item_index(l))) for l in lang_w]
-
-    if gloss_w is not None:
-        gloss_pos = pos_tag_tier(inst, gloss_w.id)
-        if gloss_pos is None:
-            gloss_pos = make_gloss_pos()
-    elif gloss_w is None and lang_w is not None:
-        gloss_pos = make_gloss_pos()
-
-    if gloss_w is not None and trans_w is not None:
-        w_aln = get_trans_gloss_alignment(inst)
-        m_aln = get_trans_glosses_alignment(inst)
-    else:
-        w_aln = []
-        m_aln = []
-
+    tw_gm_aln = get_trans_glosses_alignment(inst)
+    gm_lm_aln = get_glosses_morphs_alignment(inst)
 
 
     return_html += render_template('group2/group_2.html',
-                                   lang_w=lang_w,
-                                   lang_m=lang_m,
-                                   gloss_w=gloss_w,
-                                   gloss_m=gloss_m,
+                                   morph_map=mm,
                                    trans_w=trans_w,
                                    gloss_pos=gloss_pos,
                                    trans_pos=trans_pos,
-                                   w_aln=[[x, y] for x, y in w_aln],
-                                   m_aln=[[x, y] for x, y in m_aln]
+                                   tw_gm_aln=tw_gm_aln,
+                                   gm_lm_aln=gm_lm_aln
                                    )
 
     return return_html

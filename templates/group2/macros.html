@@ -16,39 +16,43 @@
     {% endfor %}
 {% endmacro %}
 
+{% macro word(w, type, morph_map) %}
+    <TD id="{{ w.id }}" class="alignable-word"
+        {% if type != 't' %}
+            childMorphs="{{ morph_map.get_mids(w)|join(',') }}"
+        {% endif %}
+        onmouseenter="highlight(this);"
+        onmouseleave="unhighlight(this);"
+        onclick="startAlign(this);"
+        style="border:solid white"
+    >
+        {{ w.value() }}
+    </TD>
+{% endmacro %}
+
 {# Display the words for a words tier. #}
-{% macro words(word_tier) %}
+{% macro lg_words(morph_map, type) %}
+    {% set words = morph_map.lws() if type == 'l' else morph_map.gws() %}
+    {% for w in words %}
+        {{ word(w, type, morph_map) }}
+    {% endfor %}
+{% endmacro %}
+
+{% macro t_words(word_tier) %}
     {% for w in word_tier %}
-        <TD id="{{ w.id }}" class="alignable-word"
-            onmouseenter="highlight(this);"
-            onmouseleave="unhighlight(this);"
-            onclick="startAlign(this);"
-            style="border:solid white"
-        >
-            {{ w.value() }}
-        </TD>
+        {{ word(w, 't', None) }}
     {% endfor %}
 {% endmacro %}
 
-{% macro morph_dict_json(word_morph_dict) %}
-    {% set outer_comma = joiner(', ') %}
-    {% raw %} { {% endraw %}
-    {% for word in word_morph_dict.keys() %}
-        {% set inner_comma = joiner(',') %}
-        {{ outer_comma()}}"{{ word.id }}":[
-            {% for morph in word_morph_dict[word] %}
-                {{ inner_comma() }}"{{ morph.id }}"
-            {% endfor %} ]
-    {% endfor %}
-    {% raw %} } {% endraw %}
-{% endmacro %}
 
-{% macro morphs(word_morph_dict) %}
-    {% for word, morphs in word_morph_dict.items() %}
+{% macro show_morphs(morph_map, type) %}
+    {% set words = morph_map.lws() if type == 'l' else morph_map.gws() %}
+    {% for w in words %}
+        {% set morphs = morph_map.get_ms(w) %}
         <TD id="morphs-{{ word.id }}">
         <TABLE><TR>
         {% for morph in morphs %}
-            <TD id="{{ morph.id }}" parentWord="{{ word.id }}"
+            <TD id="{{ morph.id }}" parentWord="{{ w.id }}"
                 onmouseenter="highlight(this);"
                 onmouseleave="unhighlight(this);">
             {{ morph.value() }}
@@ -67,3 +71,4 @@
         {% endfor %}
     ]
 {% endmacro %}
+

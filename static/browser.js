@@ -703,12 +703,12 @@ function getAln(arr, myId, myIdx) {
     return retArr;
 }
 
-function getAlnW(myId, myIdx) {
-    return getAln(w_aln, myId, myIdx);
+function getTwGmAln(myId, myIdx) {
+    return getAln(tw_gm_aln, myId, myIdx);
 }
 
-function getAlnM(myId, myIdx) {
-    return getAln(m_aln, myId, myIdx);
+function getGmLmAln(myId, myIdx) {
+    return getAln(gm_lm_aln, myId, myIdx);
 }
 
 // -------------------------------------------
@@ -752,27 +752,19 @@ function highlight_helper(obj, entering) {
 
     if (isGw(obj)) {
         // SUB: gm, REL: m, ALN: w, tw
-        var myLw = 'w'+myNum.toString(); alns = alns.concat([myLw]);
-        var myTws = getAlnW(myLw, 1); alns = alns.concat(myTws);
-        var myGms = gw_to_gm[myId]; subs = subs.concat(myGms);
-        var myMs = lw_to_lm[myLw]; rels = rels.concat(myMs);
-    } else if (isTw(obj)) {
-        // ALN: Gw, Lw REL: Gm
-        var myLws = getAlnW(myId, 0); alns = alns.concat(myLws);
-        var myGws = myLws.map(function(x){return 'gw'+idNum(x)}); alns = alns.concat(myGws);
-        var myGms = getAlnM(myId, 0); alns=alns.concat(myGms);
-    } else if (isLw(obj)) {
-        var myMs = lw_to_lm[myId]; subs = subs.concat(myMs);
-        var myTws = getAlnW(myId, 1); alns = alns.concat(myTws);
-        var myGw = 'gw'+myNum.toString(); alns = alns.concat([myGw]);
-        var myGms = gw_to_gm[myGw]; rels = rels.concat(myGms);
-    } else if (isLm(obj)) {
-        var myLw = $(obj).attr('parentWord'); sups = sups.concat([myLw]);
-        var myGw = 'gw'+idNum(myLw).toString(); rels = rels.concat([myGw]);
+        var myGms = $(obj).attr('childMorphs').split(','); subs = subs.concat(myGms);
     } else if (isGm(obj)) {
         var myGw = $(obj).attr('parentWord'); sups = sups.concat([myGw]);
-        var myLw = 'w'+idNum(myGw).toString(); rels = rels.concat([myLw]);
-        var myTws = getAlnM(myId, 1); alns = alns.concat(myTws);
+        var myTws = getTwGmAln(myId, 1); alns = alns.concat(myTws);
+        var myLms = getGmLmAln(myId, 0); alns = alns.concat(myLms);
+    } else if (isTw(obj)) {
+        // ALN: Gw, Lw REL: Gm
+        var myGms = getTwGmAln(myId, 0); alns = alns.concat(myGms);
+    } else if (isLw(obj)) {
+        var myMs = $(obj).attr('childMorphs').split(','); subs = subs.concat(myMs);
+    } else if (isLm(obj)) {
+        var myLw = $(obj).attr('parentWord'); sups = sups.concat([myLw]);
+        var myGms = getGmLmAln(myId, 1); alns = alns.concat(myGms);
     }
 
     highlightList(rels, REL_COLOR, entering);

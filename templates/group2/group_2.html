@@ -6,41 +6,41 @@ part-of-speech tiers for an instance. #}
     </TD>
 {% endmacro %}
 
-{% from 'group2/macros.html' import pos_tier, words,
-    morphs, morph_dict_json, aln_json %}
+{% from 'group2/macros.html' import pos_tier, lg_words, t_words,
+    show_morphs, morph_dict_json, aln_json %}
 
 <H2>POS Tags and Word Alignment</H2>
 <SCRIPT>
-    var gw_to_gm={{ morph_dict_json(gloss_m) }};
-    var lw_to_lm={{ morph_dict_json(lang_m) }};
-    var w_aln={{ aln_json(w_aln, 'tw', 'w') }};
-    var m_aln={{ aln_json(m_aln, 'tw', 'g') }};
+    var gm_lm_aln={{ aln_json(gm_lm_aln, 'g', 'm') }};
+    var tw_gm_aln={{ aln_json(tw_gm_aln, 'tw', 'g') }};
     var alignClicked=false;
 </SCRIPT>
 <TABLE style="font-family:Courier">
-    {# Lang word row #}
-    {% if lang_w != None %}
-        <TR>{{first_col('L')}}{{ words(lang_w) }}</TR>
-        <TR>{{first_col(None)}}{{ morphs(lang_m) }}</TR>
-    {% endif %}
+    <TABLE>
+        {# Lang word row #}
+        {% if lang_w != None %}
+            <TR>{{first_col('L')}}{{ lg_words(morph_map, 'l') }}</TR>
+            <TR>{{first_col(None)}}{{ show_morphs(morph_map, 'l') }}</TR>
+        {% endif %}
 
-    {# Gloss word row #}
-    {% if gloss_w != None %}
-        <TR>{{first_col('G')}}{{ words(gloss_w) }}</TR>
-        <TR>{{first_col(None)}}{{ morphs(gloss_m) }}</TR>
-    {% endif %}
+        {# Gloss word row #}
+        {% if gloss_w != None %}
+            <TR>{{first_col('G')}}{{ lg_words(morph_map, 'g') }}</TR>
+            <TR>{{first_col(None)}}{{ show_morphs(morph_map, 'g') }}</TR>
+        {% endif %}
 
-    {# Lang POS row #}
-    <TR>{{first_col(None)}}{{ pos_tier(gloss_pos) }}</TR>
-
+        <TR>{{first_col(None)}}{{ pos_tier(gloss_pos) }}</TR>
+    </TABLE>
 
     {# Trans word row #}
-    {% if trans_w != None %}
-        <TR>{{first_col('T')}}{{ words(trans_w) }}</TR>
+    <TABLE>
+        {% if trans_w != None %}
+            <TR>{{first_col('T')}}{{ t_words(trans_w) }}</TR>
 
-        {# Trans pos row #}
-        <TR>{{first_col(None)}}{{ pos_tier(trans_pos) }}</TR>
-    {% endif %}
+            {# Trans pos row #}
+            <TR>{{first_col(None)}}{{ pos_tier(trans_pos) }}</TR>
+        {% endif %}
+    </TABLE>
 </TABLE>
 {{ pos_tier(trans) }}
 
