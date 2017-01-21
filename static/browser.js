@@ -752,19 +752,37 @@ function highlight_helper(obj, entering) {
 
     if (isGw(obj)) {
         // SUB: gm, REL: m, ALN: w, tw
-        var myGms = $(obj).attr('childMorphs').split(','); subs = subs.concat(myGms);
+        var myGms = childMorphs(myId); subs = subs.concat(myGms);
+        var alnHash = glossWordLookup(myId);
+        alns = alns.concat(alnHash["tw"]); // Add translation words
+        subs = subs.concat(alnHash["lm"]); // Add lang morphemes
+        alns = alns.concat(alnHash["lw"]); // Add lang words
     } else if (isGm(obj)) {
-        var myGw = $(obj).attr('parentWord'); sups = sups.concat([myGw]);
+        var myGw = parentWord(myId); sups = sups.concat([myGw]);
         var myTws = getTwGmAln(myId, 1); alns = alns.concat(myTws);
         var myLms = getGmLmAln(myId, 0); alns = alns.concat(myLms);
+        var myLws = parentWords(myLms); sups = sups.concat(myLws);
     } else if (isTw(obj)) {
         // ALN: Gw, Lw REL: Gm
         var myGms = getTwGmAln(myId, 0); alns = alns.concat(myGms);
+        var alnHash = transWordLookup(myId);
+        sups = sups.concat(alnHash["gw"]);
+        alns = alns.concat(alnHash["gm"]);
+        sups = sups.concat(alnHash["lw"]);
+        subs = subs.concat(alnHash["lm"]);
     } else if (isLw(obj)) {
-        var myMs = $(obj).attr('childMorphs').split(','); subs = subs.concat(myMs);
+        var alnHash = langWordLookup(myId);
+        subs.push(alnHash["lm"]);
+        subs = subs.concat(alnHash["lm"]);
+        alns = alns.concat(alnHash["gw"]);
+        subs = subs.concat(alnHash["gm"]);
+        alns = alns.concat(alnHash["tw"]);
     } else if (isLm(obj)) {
-        var myLw = $(obj).attr('parentWord'); sups = sups.concat([myLw]);
-        var myGms = getGmLmAln(myId, 1); alns = alns.concat(myGms);
+        var alnHash = langMorphLookup(myId);
+        sups = sups.concat(alnHash["lw"]);
+        alns = alns.concat(alnHash["gm"]);
+        sups = sups.concat(alnHash["gw"]);
+        alns = alns.concat(alnHash["tw"]);
     }
 
     highlightList(rels, REL_COLOR, entering);
@@ -774,6 +792,85 @@ function highlight_helper(obj, entering) {
     highlightList([myId], SELF_COLOR, entering);
 }
 
+
+function childMorphs(myId) {return $('#'+myId).attr('childMorphs').split(',');}
+function parentWord(mId) {return $('#'+mId).attr('parentWord');}
+function parentWords(mArr){return mArr.map(function(mId){return parentWord(mId)});}
+
+// Get the lang word(s) which are aligned
+// with
+function glossWordLookup(myId) {
+    var alnHash = {"lw":[], "lm":[], "tw":[]};
+    var gMArr = childMorphs(myId);
+    for (gmIdx=0; gmIdx<gMArr.length;gmIdx++) {
+        var gM = gMArr[gmIdx];
+        var tWArr = getTwGmAln(gM, 1);
+        alnHash["tw"] = tWArr;
+        var lMArr = getGmLmAln(gM, 0);
+        for (lmIdx = 0; lmIdx < lMArr.length; lmIdx++) {
+            var lMId = lMArr[lmIdx];
+            alnHash["lm"].push(lMId);
+            alnHash["lw"].push(parentWord(lMId));
+        }
+    }
+    return alnHash;
+}
+
+function langMorphLookup(myId) {
+    var alnHash={"lw":[], "gw":[], "gm":[], "tw":[]};
+    alnHash["lw"] = parentWord(myId);
+    var gmArr = getGmLmAln(myId, 1);
+    for (gmIdx=0; gmIdx<gmArr.length; gmIdx++){
+        var gM = gmArr[gmIdx];
+        alnHash["gm"].push(gM);
+        alnHash["gw"].push(parentWord(gM));
+        var twArr = getTwGmAln(gM, 1);
+        for (twIdx=0;twIdx<twArr.length;twIdx++) {
+            var tW = twArr[twIdx];
+            alnHash["tw"].push(tW);
+        }
+    }
+    return alnHash;
+}
+
+// Get the gloss words that dominate the gloss morphs
+// to which this translation word is aligned
+function transWordLookup(myId) {
+    alnHash = {"lw":[],"lm":[],"gw":[],"gm":[]};
+    var alnMorphArr = getTwGmAln(myId, 0);
+    for (mIdx=0;mIdx<alnMorphArr.length;mIdx++) {
+        var gMId = alnMorphArr[mIdx];
+        alnHash["gm"].push(gMId);
+        alnHash["gw"].push(parentWord(gMId));
+        var lMArr = getGmLmAln(gMId, 0);
+        for (lmIdx=0;lmIdx<lMArr.length;lmIdx++) {
+            var lMId = lMArr[lmIdx];
+            alnHash["lm"].push(lMId);
+            alnHash["lw"].push(parentWord(lMId));
+        }
+    }
+    return alnHash;
+}
+
+function langWordLookup(myId) {
+    var alnHash = {"tw":[], "lm":[], "gw":[], "gm":[]}
+    var lmArr = childMorphs(myId); alnHash["lm"] = lmArr;
+    for (lmIdx=0;lmIdx<lmArr.length;lmIdx++) {
+        var lM = lmArr[lmIdx];
+        var gmArr = getGmLmAln(lM, 1);
+        for (gmIdx=0;gmIdx<gmArr.length; gmIdx++) {
+            var gM = gmArr[gmIdx];
+            alnHash["gm"].push(gM);
+            alnHash["gw"].push(parentWord(gM));
+            var twArr = getTwGmAln(gM, 1);
+            for (twIdx=0; twIdx<twArr.length;twIdx++) {
+                var tW = twArr[twIdx];
+                alnHash["tw"].push(tW);
+            }
+        }
+    }
+    return alnHash;
+}
 
 // Tell whether or not the word types are the
 function similarType(me, other) {
