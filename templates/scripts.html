@@ -3,29 +3,29 @@
     <meta charset="UTF-8">
 
     {# Start off with the script imports... #}
-    <script type="text/javascript" src="{{ config['STATIC_URL'] }}libs/jquery.min.js"></script>
-    <script type="text/javascript" src="{{ config['STATIC_URL'] }}libs/easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='libs/jquery.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='libs/easyui/jquery.easyui.min.js') }}"></script>
 
     {# And the stylesheet.. #}
-    <link rel="stylesheet" type="text/css" href="{{ config['STATIC_URL'] }}libs/easyui/themes/default/easyui.css"/>
-    <link rel="stylesheet" type="text/css" href="{{ config['STATIC_URL'] }}default.css"/>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='libs/easyui/themes/default/easyui.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='default.css') }}"/>
 
     {# And our own scripts... #}
     <script>
-        var approot="{{ config['APPLICATION_ROOT'] }}";
-        var staticURL="{{ config['STATIC_URL'] }}";
+        var approot="{{ url_for('main') }}";
+        var staticURL="{{ url_for('static', filename='') }}";
     </script>
-    <script type="text/javascript" src="{{ config['STATIC_URL'] }}tooltips.js"></script>
-    <script type="text/javascript" src="{{ config['STATIC_URL'] }}browser.js"></script>
-    <script type="text/javascript" src="{{ config['STATIC_URL'] }}tiers.js"></script>
-    <script type="text/javascript" src="{{ config['STATIC_URL'] }}keypresses.js"></script>
-    <script type="text/javascript" src="{{ config['STATIC_URL'] }}group2.js"></script>
+
+    <script type="text/javascript" src="{{ url_for('static', filename='tooltips.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='browser.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='tiers.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='keypresses.js') }}"></script>
 
     {# XIGTVIZ STUFF #}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
-    <script src="{{ config['XIGTVIZ_URL'] }}/xigtviz.js" charset="utf-8"></script>
+    <script src="{{ url_for('static', filename='xigtviz/xigtviz.js') }}" charset="utf-8"></script>
     <script>var settings = {{config['xvs']|tojson|safe}};</script>
-    <link rel="stylesheet" type="text/css" href="{{ config['XIGTVIZ_URL'] }}/xigtviz.css"/>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='xigtviz/xigtviz.css') }}"/>
 
     {# GOOGLE ANALYTICS #}
     <script>

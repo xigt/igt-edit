@@ -43,9 +43,9 @@
         <TD class="short-col buttons">
             {# Add buttons if editable... #}
             {% if editable %}
-                <img class="hovericon undo" src="{{ config['STATIC_URL'] }}/images/undo.png" onclick="restoreItem('{{ item_id }}')"/>
-                <img class="hovericon delete" src="{{ config['STATIC_URL'] }}images/delete.png" onclick="deleteItem(this, '{{ item_id }}')"/>
-                <img class="hovericon add" src="{{ config['STATIC_URL'] }}images/add.png" onclick="addItem('{{ id_prefix }}', $(this).closest('tr'), '{{ table_type }}row')" />
+                <img class="hovericon undo" src="{{ url_for('static', filename='/images/undo.png') }}" onclick="restoreItem('{{ item_id }}')"/>
+                <img class="hovericon delete" src="{{ url_for('static', filename='images/delete.png') }}" onclick="deleteItem(this, '{{ item_id }}')"/>
+                <img class="hovericon add" src="{{ url_for('static', filename='images/add.png') }}" onclick="addItem('{{ id_prefix }}', $(this).closest('tr'), '{{ table_type }}row')" />
             {% endif %}
         </TD>
 
