@@ -47,6 +47,11 @@ LINE_TAGS = ['L','G','T','M','B']
 LINE_ATTRS = ['AC', 'AL', 'CN', 'CR', 'DB', 'EX', 'LN', 'LT', 'SY']
 
 # -------------------------------------------
+# List of POS tags to use for the POS tag dropdowns
+# -------------------------------------------
+POS_TAGS = sorted(['NOUN', 'ADV', 'VERB', 'PRON', 'DET', 'ADP', 'PUNC', 'X', 'NUM', 'PROPN'])
+
+# -------------------------------------------
 # Reasons
 # -------------------------------------------
 BAD_REASONS = {'noisy':"This is too noisy to recover.",
