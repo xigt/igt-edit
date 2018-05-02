@@ -6,27 +6,28 @@ import os
 # -------------------------------------------
 from urllib.parse import urljoin
 
+APPLICATION_ROOT = '/editor/'
 PROJ_ROOT    = os.path.dirname(os.path.dirname(__file__))
 STATIC       = os.path.join(PROJ_ROOT, 'static')
-STATIC_URL   = '/static/'
+STATIC_URL   = os.path.join(APPLICATION_ROOT, 'static/')
 # -------------------------------------------
 
-XIGT_DIR = '/Users/rgeorgi/Dropbox/riples/data/xigt_data/XAML'
+XIGT_DIR = '../XAML'
 
 # Debug mode?
 DEBUG = True
 
 # INTENT
-INTENT_LIB = '/opt/intent'
+INTENT_LIB = '../intent'
 
 # XIGT
-XIGT_LIB = '/opt/xigt'
+XIGT_LIB = '../xigt'
 
 # SLEIPNIR
-SLEIPNIR_LIB = '/opt/sleipnir'
+SLEIPNIR_LIB = '../sleipnir'
 
 # ODIN_UTILS_DIR
-ODIN_UTILS   = '/opt/odin-utils'
+ODIN_UTILS   = '../odin-utils'
 
 # XIGTVIZ DIR
 XIGTVIZ      = os.path.join(STATIC, 'xigtviz')
@@ -37,13 +38,18 @@ PDF_DIR = '/odin_pdfs'
 
 # -------------------------------------------
 # Users DB
-USER_DB = '/var/www/yggdrasil-users/users.js'
+USER_DB = './users.js'
 
 # -------------------------------------------
 # Values for line
 # -------------------------------------------
 LINE_TAGS = ['L','G','T','M','B']
 LINE_ATTRS = ['AC', 'AL', 'CN', 'CR', 'DB', 'EX', 'LN', 'LT', 'SY']
+
+# -------------------------------------------
+# List of POS tags to use for the POS tag dropdowns
+# -------------------------------------------
+POS_TAGS = sorted(['NOUN', 'ADV', 'VERB', 'PRON', 'DET', 'ADP', 'PUNC', 'X', 'NUM', 'PROPN'])
 
 # -------------------------------------------
 # Reasons

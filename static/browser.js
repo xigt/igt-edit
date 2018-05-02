@@ -1,6 +1,11 @@
 /* Constant Strings */
-var AJAX_LOADER_BIG = '<IMG src="/static/images/ajax-loader.gif"/>';
-var AJAX_LOADER_SMALL = '<IMG src="/static/images/ajax-loader-small.gif"/>';
+function ajax_loader_big() {
+    return '<IMG src="'+staticURL+'images/ajax-loader.gif"/>';
+}
+
+function ajax_loader_small() {
+    return '<IMG src="'+staticURL+'images/ajax-loader-small.gif"/>';
+}
 
 /* QUALITY CONSTANTS */
 const HIDDEN = 4;
@@ -30,8 +35,11 @@ const CURRENT_ROW     = "current-row";
 /* Login the User */
 function login() {
     var userid = $('#userid').val();
-    console.log(userid);
-    window.location.href = '/user/'+userid;
+    window.location.href = appRoot()+'/user/'+userid;
+}
+
+function appRoot() {
+    return approot;
 }
 
 /* Populate the IGT pane */
@@ -40,11 +48,10 @@ function populateIGTs(corpId, async) {
     if (typeof async === 'undefined') {async = false;}
 
     data = {userID : userID()};
-    console.log(data);
 
-    $('#fine-list').html('<div style="text-align:center;top:40px;position:relative;">'+AJAX_LOADER_SMALL+'</div>');
+    $('#fine-list').html('<div style="text-align:center;top:40px;position:relative;">'+ajax_loader_small()+'</div>');
     $.ajax({
-        url:'/populate/'+corpId,
+        url:appRoot()+'/populate/'+corpId,
         type: 'POST',
         data: JSON.stringify(data),
         error: populateError,
@@ -69,13 +76,13 @@ function populateError() {
 
 /* Download the corpus in XML if requested */
 function downloadCorpus(corpId){
-    location.href='/download/'+corpId;
+    location.href=appRoot()+'/download/'+corpId;
 }
 
 /* display a single IGT instance */
 function displayIGT(corp_id, igt_id) {
-    $('#editor-panel').html(AJAX_LOADER_BIG);
-    url = '/display/'+corp_id+'/'+igt_id+'?user='+userID();
+    $('#editor-panel').html(ajax_loader_big());
+    url = appRoot()+'/display/'+corp_id+'/'+igt_id+'?user='+userID();
     $.ajax({
         url: url,
         success: displaySuccess,
@@ -221,7 +228,7 @@ function cleanIGT(corp_id, igt_id, alreadyGenerated) {
 
 
         $.ajax({
-            url: '/clean/' + corp_id + '/' + igt_id,
+            url: appRoot()+'/clean/' + corp_id + '/' + igt_id,
             type: 'GET',
             dataType: 'html',
             success: cleanSuccess,
@@ -269,7 +276,7 @@ function normalizeIGT(corp_id, igt_id, alreadyGenerated) {
         cleanData = {lines: get_clean_lines()};
 
         $.ajax({
-            url: '/normalize/' + corp_id + '/' + igt_id,
+            url: appRoot()+'/normalize/' + corp_id + '/' + igt_id,
             type: 'POST',
             dataType: 'json',
             data: JSON.stringify(cleanData),
@@ -342,7 +349,7 @@ function generateFromNormalized(corp_id, igt_id) {
     analyzeUnmark('col');
 
     $.ajax({
-        url: '/intentify/'+corp_id+'/'+igt_id,
+        url: appRoot()+'/intentify/'+corp_id+'/'+igt_id,
         type: 'POST',
         dataType: 'json',
         data: JSON.stringify(data),
@@ -378,8 +385,10 @@ function intentifySuccess(r, stat, jqXHR) {
     analysisNotifier(r, 'glm');
     analysisNotifier(r, 'tag');
     analysisNotifier(r, 'col');
-    $('#group-2-content').html('');
-    igtLayout('#group-2-content', r['igt']);
+    // $('#group-2-content').html('');
+    // igtLayout('#group-2-content', r['igt']);
+    $('#analysis').css('display','block');
+    $('#group-2-content').html(r['group2']);
 }
 
 function intentifyError() {
@@ -522,7 +531,7 @@ function saveIGT() {
 
 
         $.ajax({
-            url: '/save/' + corpId() + '/' + igtId(),
+            url: appRoot()+'/save/' + corpId() + '/' + igtId(),
             type: 'PUT',
             data: JSON.stringify(data),
             success: saveSuccess,
@@ -550,7 +559,7 @@ function splitIGT(corpId, IgtId) {
         };
 
         $.ajax({
-            url: '/split/' + corpId + '/' + igtId(),
+            url: appRoot()+'/split/' + corpId + '/' + igtId(),
             type: 'POST',
             success: splitSuccess,
             data: JSON.stringify(data),
@@ -621,7 +630,7 @@ function deleteIGT() {
 
         $.ajax(
             {
-                url: '/delete/' + corpId() + '/' + igtId(),
+                url: appRoot()+'/delete/' + corpId() + '/' + igtId(),
                 type: "POST",
                 data: JSON.stringify(data),
                 contentType: 'application/json',
@@ -646,33 +655,7 @@ function deleteError(r) {
     alert(r.toString());
 }
 
-/* Highlighting for Word Display */
-function modIdlist(idlist, classes, highlight) {
-    cs = classes.split(',');
-    for (j=0; j<cs.length; j++) {
-        c = cs[j];
 
-        ids = idlist.split(',');
-        for (i=0; i < ids.length; i++) {
-            s = '.'+c+'-' + ids[i];
-            if (highlight == true) {
-                $(s).css('background-color', 'red');
-            } else {
-                $(s).css('background-color', 'white');
-            }
-        }
-    }
-}
-
-function highlightSrcs(obj, idlist, classes) {
-    $(obj).css('background-color','cyan');
-    modIdlist(idlist, 'gw,lw', true);
-}
-
-function unhighlightSrcs(obj, idlist) {
-    $(obj).css('background-color', 'white');
-    modIdlist(idlist, 'gw,lw', false);
-}
 
 /* All the stuff that needs fixing when the window is resized */
 

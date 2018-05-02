@@ -3,23 +3,41 @@
     <meta charset="UTF-8">
 
     {# Start off with the script imports... #}
-    <script type="text/javascript" src="/static/libs/jquery.min.js"></script>
-    <script type="text/javascript" src="/static/libs/easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='libs/jquery.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='libs/easyui/jquery.easyui.min.js') }}"></script>
 
     {# And the stylesheet.. #}
-    <link rel="stylesheet" type="text/css" href="/static/libs/easyui/themes/default/easyui.css"/>
-    <link rel="stylesheet" type="text/css" href="/static/default.css"/>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='libs/easyui/themes/default/easyui.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='default.css') }}"/>
 
     {# And our own scripts... #}
-    <script type="text/javascript" src="/static/tooltips.js"></script>
-    <script type="text/javascript" src="/static/browser.js"></script>
-    <script type="text/javascript" src="/static/tiers.js"></script>
-    <script type="text/javascript" src="/static/keypresses.js"></script>
+    <script>
+        var approot="{{ url_for('main') }}";
+        var staticURL="{{ url_for('static', filename='') }}";
+    </script>
+
+    <script type="text/javascript" src="{{ url_for('static', filename='tooltips.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='browser.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='tiers.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='keypresses.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='group2.js') }}"></script>
 
     {# XIGTVIZ STUFF #}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
-    <script src="{{ config['XIGTVIZ_URL'] }}/xigtviz.js" charset="utf-8"></script>
+    <script src="{{ url_for('static', filename='xigtviz/xigtviz.js') }}" charset="utf-8"></script>
     <script>var settings = {{config['xvs']|tojson|safe}};</script>
-    <link rel="stylesheet" type="text/css" href="{{ config['XIGTVIZ_URL'] }}/xigtviz.css"/>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='xigtviz/xigtviz.css') }}"/>
+
+    {# GOOGLE ANALYTICS #}
+    <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+          ga('create', 'UA-60659909-5', 'auto');
+          ga('send', 'pageview');
+
+    </script>
 
 {% endmacro %}

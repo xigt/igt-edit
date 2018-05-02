@@ -1,0 +1,74 @@
+{# This template file will be used to display a POS tag tier, with
+   editable dropdowns. #}
+{% macro pos_tier(tier) %}
+    {% for item in tier %}
+        <TD>
+        <SELECT id="{{ item.id }}">
+            {% for tag in config['POS_TAGS'] %}
+                <option value="{{ tag }}"
+                        {% if tag == item.value() %}
+                            selected
+                        {% endif %}
+                >{{ tag }}</option>
+            {% endfor %}
+        </SELECT>
+        </TD>
+    {% endfor %}
+{% endmacro %}
+
+{% macro word(w, type, morph_map) %}
+    <TD id="{{ w.id }}" class="alignable-word"
+        {% if type != 't' %}
+            childMorphs="{{ morph_map.get_mids(w)|join(',') }}"
+        {% endif %}
+        onmouseenter="highlight(this);"
+        onmouseleave="unhighlight(this);"
+        onclick="startAlign(this);"
+        style="border:solid white"
+    >
+        {{ w.value() }}
+    </TD>
+{% endmacro %}
+
+{# Display the words for a words tier. #}
+{% macro lg_words(morph_map, type) %}
+    {% set words = morph_map.lws() if type == 'l' else morph_map.gws() %}
+    {% for w in words %}
+        {{ word(w, type, morph_map) }}
+    {% endfor %}
+{% endmacro %}
+
+{% macro t_words(word_tier) %}
+    {% for w in word_tier %}
+        {{ word(w, 't', None) }}
+    {% endfor %}
+{% endmacro %}
+
+
+{% macro show_morphs(morph_map, type) %}
+    {% set words = morph_map.lws() if type == 'l' else morph_map.gws() %}
+    {% for w in words %}
+        {% set morphs = morph_map.get_ms(w) %}
+        <TD id="morphs-{{ word.id }}">
+        <TABLE><TR>
+        {% for morph in morphs %}
+            <TD id="{{ morph.id }}" parentWord="{{ w.id }}"
+                onmouseenter="highlight(this);"
+                onmouseleave="unhighlight(this);">
+            {{ morph.value() }}
+            </TD>
+        {% endfor %}
+        </TR></TABLE>
+        </TD>
+    {% endfor %}
+{% endmacro %}
+
+{% macro aln_json(aln_pairs, src_prefix, tgt_prefix) %}
+    {% set comma = joiner(',') %}
+    [
+        {% for src, tgt in aln_pairs %}
+            {{ comma() }}["{{ src_prefix }}{{ src }}","{{ tgt_prefix }}{{ tgt }}"]
+        {% endfor %}
+    ]
+{% endmacro %}
+

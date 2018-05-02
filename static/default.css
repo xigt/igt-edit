@@ -136,7 +136,7 @@ td.labels {
     padding: 3px;
     border: thin solid black;
     border-radius: 3px;
-    float:right;
+    float:left;
     margin-right:5px;
 }
 

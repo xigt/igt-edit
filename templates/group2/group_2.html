@@ -1,0 +1,46 @@
+{# This template is for rendering all the elements of the
+part-of-speech tiers for an instance. #}
+{% macro first_col(letter) %}
+    <TD style="width:30px">
+        {% if letter %}{{ letter }}{% endif %}
+    </TD>
+{% endmacro %}
+
+{% from 'group2/macros.html' import pos_tier, lg_words, t_words,
+    show_morphs, morph_dict_json, aln_json %}
+
+<H2>POS Tags and Word Alignment</H2>
+<SCRIPT>
+    var gm_lm_aln={{ aln_json(gm_lm_aln, 'g', 'm') }};
+    var tw_gm_aln={{ aln_json(tw_gm_aln, 'tw', 'g') }};
+    var alignClicked=false;
+</SCRIPT>
+<TABLE style="font-family:Courier">
+    <TABLE>
+        {# Lang word row #}
+        {% if lang_w != None %}
+            <TR>{{first_col('L')}}{{ lg_words(morph_map, 'l') }}</TR>
+            <TR>{{first_col(None)}}{{ show_morphs(morph_map, 'l') }}</TR>
+        {% endif %}
+
+        {# Gloss word row #}
+        {% if gloss_w != None %}
+            <TR>{{first_col('G')}}{{ lg_words(morph_map, 'g') }}</TR>
+            <TR>{{first_col(None)}}{{ show_morphs(morph_map, 'g') }}</TR>
+        {% endif %}
+
+        <TR>{{first_col(None)}}{{ pos_tier(gloss_pos) }}</TR>
+    </TABLE>
+
+    {# Trans word row #}
+    <TABLE>
+        {% if trans_w != None %}
+            <TR>{{first_col('T')}}{{ t_words(trans_w) }}</TR>
+
+            {# Trans pos row #}
+            <TR>{{first_col(None)}}{{ pos_tier(trans_pos) }}</TR>
+        {% endif %}
+    </TABLE>
+</TABLE>
+{{ pos_tier(trans) }}
+

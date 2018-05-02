@@ -16,6 +16,8 @@
     </script>
 
     <script id="userID" type="text/plain">{{ user_id }}</script>
+    <script id="appRoot" type="text/plain">{{ config['APPLICATION_ROOT'] }}</script>
+    <script id="staticURL" type="text/plain">{{ url_for('static', filename='') }}</script>
 </HEAD>
 
 <BODY>
@@ -43,7 +45,7 @@
                         <div class="corpdown igtrow"
                              style="width:20px;float:left;text-align: center"
                              onclick="downloadCorpus('{{ corpus.get('id') }}')">
-                            <img height=13  src="/static/images/download.svg"/>
+                            <img height=13  src="{{ url_for('static', filename='/images/download.svg') }}"/>
                         </div>
                         <div style="clear:both"></div>
                     </div>

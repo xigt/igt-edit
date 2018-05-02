@@ -1,4 +1,8 @@
-#!/usr/bin/env python3.4
+#!/usr/bin/env python3
+import sys
+import yggdrasil.config
+for path_elt in yggdrasil.config.PYTHONPATH.split(':'):
+    sys.path.insert(0, path_elt)
 from yggdrasil.users import *
 
 def enum_users():
