@@ -81,6 +81,7 @@ app.debug = True
 # -------------------------------------------
 # Set up logging.
 # -------------------------------------------
+logging.basicConfig(level=logging.DEBUG)
 YGG_LOG = logging.getLogger('YGG')
 
 # -------------------------------------------
@@ -104,22 +105,24 @@ def main():
 # -------------------------------------------
 @app.route('/user/<userid>')
 def get_user(userid):
+    """
+    This is the equivalent of the login function.
+    """
     user_corpora = get_user_corpora(userid)
-    YGG_LOG.critical(list_users())
-    YGG_LOG.critical(userid)
-    YGG_LOG.critical(user_corpora)
-    YGG_LOG.critical(dbi.list_corpora())
+
+    # DEBUG Output
+    YGG_LOG.debug('Attempting to log in user "{}"'.format(userid))
+    YGG_LOG.debug('Corpora available to user "{}": {}'.format(userid,
+                                                              user_corpora))
+
     if user_corpora is not None:
-        all_corpora  = dbi.list_corpora()
-
+        all_corpora = dbi.list_corpora()
         filtered_corpora = [c for c in all_corpora if c.get('id') in user_corpora]
-
         sorted_corpora = sorted(filtered_corpora,
                                 key=lambda x: x.get('name'))
-
-
         return render_template('browser.html', corpora=sorted_corpora, user_id=userid)
     else:
+        YGG_LOG.error('User "{}" has no available corpora.'.format(userid))
         return render_template('login_screen.html', try_again=True)
 
 # -------------------------------------------

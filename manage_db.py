@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 from argparse import ArgumentParser
+import sys
 import yggdrasil.config
+for path_elt in yggdrasil.config.PYTHONPATH.split(':'):
+    sys.path.insert(0, path_elt)
+
 from sleipnir import dbi
 
 def prompt_corpora():
