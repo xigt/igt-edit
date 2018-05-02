@@ -21,6 +21,7 @@ def load_db():
     :rtype: dict
     """
     if not os.path.exists(USER_DB):
+        DB_LOG.error('No users file found at path "{}"'.format(USER_DB))
         return {"users":{}}
     else:
         f = open(USER_DB, 'r')
