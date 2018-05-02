@@ -6,7 +6,7 @@ import urllib
 from io import StringIO
 from tempfile import NamedTemporaryFile
 from flask import Flask, render_template, url_for, request, Response
-
+import traceback
 
 
 sys.path.insert(0, os.path.dirname(__file__))
@@ -92,6 +92,7 @@ def process_file():
     except Exception as e:
         r.headers['Exit-Code'] = 1
         root.error(e)
+        root.error(traceback.format_exc())
     else:
         r.headers['Exit-Code'] = 0
         f = open(out_temp.name, 'r', encoding='utf-8')
@@ -119,6 +120,7 @@ def convert_text():
     except Exception as e:
         r.headers['Exit-Code'] = 1
         root.error(e)
+
     else:
         r.headers['Exit-Code'] = 0
         r.data = rgencode(xc)
