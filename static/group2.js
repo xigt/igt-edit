@@ -245,6 +245,8 @@ function startAlign(obj) {
         var myWT = itemType(obj);
         var oWT = itemType(alignClicked);
 
+        console.log('Last click: ' + myWT + ' - Previous click: '+ oWT);
+
         // Logic for selecting a match:
         // 1) LWs can link to GWs or GMs
         // 2) LMs can link to GWs or GMs
@@ -254,7 +256,9 @@ function startAlign(obj) {
         // *) When selecting GW/LW, should act as if all GMs/LMs dominated by
         //    that word are selected.
 
-        if (similarType(obj, alignClicked)) {stopAlign(obj);}
+
+        if (similarType(obj, alignClicked))
+            {stopAlign(obj);}
 
         // Otherwise, we should handle the request
         // for adding or removing alignment.
@@ -305,28 +309,42 @@ function stopAlign(obj) {
 }
 
 function toggleArr(srcId, tgtId) {
-    for (i=0;i<w_aln.length;i++) {
-        if (w_aln[i][0] == srcId && w_aln[i][1] == tgtId) {
-            w_aln.splice(i, 1);
+    // This should be regularized such that
+    // "src" is always trans_word
+    // and "tgt" is always a gloss morph
+
+    for (i=0;i<tw_gm_aln.length;i++) {
+        // Remove an alignment that is already stored,
+        // and exit
+        if (tw_gm_aln[i][0] == srcId && tw_gm_aln[i][1] == tgtId) {
+            tw_gm_aln.splice(i, 1);
+            console.log("Removing " + srcId + "," + tgtId + " from tw_gm alignments");
             return
         }
     }
-    w_aln.push([srcId, tgtId]);
+    // Otherwise, if the alignment wasn't already there,
+    // add it.
+    console.log("Adding " + srcId + "," + tgtId + " to tw_gm alignments");
+    tw_gm_aln.push([srcId, tgtId]);
 }
 
-function addAlign(obj) {
-    var clickedId = cssId(obj);
-    var prevId = cssId(alignClicked);
+function addAlign(lastClickedObj) {
+    var lastClickedObjId = cssId(lastClickedObj);
+    var firstClickedObjId = cssId(alignClicked);
 
-    function toLw(idStr) {return 'w' + idNum(idStr).toString();}
-    function toTw(idStr) {return 'tw'+ idNum(idStr).toString();}
+    // function toLw(idStr) {return 'w' + idNum(idStr).toString();}
+    // function toTw(idStr) {return 'tw'+ idNum(idStr).toString();}
+    //
 
-    if (isTw(obj)) {
-        tgtId = toLw(prevId);
-        srcId = toTw(clickedId); // Make sure to regularize
+    console.log('Attempting to align "'+lastClickedObjId+'" to "'+firstClickedObjId+'"');
+    // return
+
+    if (isTw(lastClickedObj)) {
+        tgtId = firstClickedObjId;
+        srcId = lastClickedObjId; // Make sure to regularize
     } else {
-        tgtId = toLw(clickedId);
-        srcId = toTw(prevId);
+        tgtId = lastClickedObjId;
+        srcId = firstClickedObjId;
     }
 
     toggleArr(srcId, tgtId);

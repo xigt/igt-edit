@@ -162,6 +162,7 @@ def igt_id_sort(igt):
 # -------------------------------------------
 @app.route('/populate/<corp_id>', methods=['POST'])
 def populate(corp_id):
+    YGG_LOG.debug('Attempting to fetch corpus id "{}"'.format(corp_id))
     xc = dbi.get_corpus(corp_id)
     xc.sort(key=igt_id_sort)
 
