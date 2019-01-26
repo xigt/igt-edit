@@ -526,7 +526,10 @@ function saveIGT() {
             reason: reason_str,
             raw: get_raw_lines(),
             userID: userID(),
-            comment: $("#freeform-comment").val()
+            comment: $("#freeform-comment").val(),
+            tw_gm_aln: tw_gm_aln,
+            gw_pos: get_pos_tags('gw'),
+            tw_pos: get_pos_tags('tw')
         };
 
 

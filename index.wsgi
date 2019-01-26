@@ -529,7 +529,10 @@ def save(corp_id, igt_id):
     else:
         set_state(user_id, corp_id, igt_id, RAW_STATE)
 
-
+    tw_gm_aln = data.get('tw_gm_aln')
+    if tw_gm_aln:
+        YGG_LOG.debug("Edited alignment data present")
+        YGG_LOG.debug(tw_gm_aln)
 
 
 

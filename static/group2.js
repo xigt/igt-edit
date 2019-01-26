@@ -328,6 +328,18 @@ function toggleArr(srcId, tgtId) {
     tw_gm_aln.push([srcId, tgtId]);
 }
 
+function get_pos_tags(prefix) {
+    var retArray = [];
+    var tags = $('.'+prefix+'-pos');
+    for (i=0;i<tags.length;i++) {
+        tag = $(tags[i]);
+        retArray.push([tag.attr('id'), tag.val()]);
+    }
+
+    console.log(retArray);
+    return retArray;
+}
+
 function addAlign(lastClickedObj) {
     var lastClickedObjId = cssId(lastClickedObj);
     var firstClickedObjId = cssId(alignClicked);

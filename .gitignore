@@ -2,3 +2,4 @@ dbdir
 users.js
 *.pyc
 config.py
+venv
