@@ -12,7 +12,7 @@
 
     {# And our own scripts... #}
     <script>
-        var approot="{{ url_for('main') }}";
+        var approot="{{ url_for('main', _external=True) }}";
         var staticURL="{{ url_for('static', filename='') }}";
     </script>
 
