@@ -11,6 +11,8 @@ from collections import OrderedDict
 
 from flask import Flask, render_template, url_for, request, make_response, Response, abort
 
+from typing import List, Tuple
+
 app = Flask(__name__)
 application = app
 
@@ -52,7 +54,7 @@ import odinclean, odinnormalize
 # -------------------------------------------
 # XIGT Imports
 # -------------------------------------------
-from xigt import Igt, Item
+from xigt import Igt, Item, Tier, XigtCorpus
 from xigt.codecs import xigtjson, xigtxml
 import xigt.xigtpath
 
@@ -69,18 +71,19 @@ from sleipnir import dbi
 # -------------------------------------------
 
 from intent.consts import CLEAN_ID, NORM_ID, all_punc_re_mult
-from intent.igt.igtutils import is_strict_columnar_alignment, rgp
+from intent.igt.igtutils import is_strict_columnar_alignment, rgp, rgencode
 from intent.igt.create_tiers import lang_lines, gloss_line, trans_lines, \
     generate_lang_words, generate_gloss_words, generate_trans_words, lang, gloss, morphemes, glosses, trans, \
     pos_tag_tier, has_lang, has_morphemes, has_glosses, has_gloss, has_trans, gloss_tag_tier, trans_tag_tier
 from intent.igt.igt_functions import copy_xigt, delete_tier, heur_align_inst, classify_gloss_pos, \
     tag_trans_pos, project_gloss_pos_to_lang, add_gloss_lang_alignments, get_bilingual_alignment, \
     get_trans_lang_alignment, get_trans_gloss_alignment, get_trans_glosses_alignment, find_lang_word, find_gloss_word, \
-    x_contains_y, get_glosses_morphs_alignment
-from intent.igt.references import raw_tier, cleaned_tier, normalized_tier, item_index
+    x_contains_y, get_glosses_morphs_alignment, add_pos_tags, set_bilingual_alignment
+from intent.igt.references import raw_tier, cleaned_tier, normalized_tier, item_index, xigt_find
 from intent.igt.exceptions import NoNormLineException, NoGlossLineException, GlossLangAlignException, \
     NoLangLineException, NoTransLineException
 from intent.utils.listutils import flatten_list
+from intent.igt.metadata import get_intent_method
 
 app.debug = True
 
@@ -136,9 +139,10 @@ def get_user(userid):
 # -------------------------------------------
 @app.route('/download/<corp_id>')
 def download_corp(corp_id):
-    xc = dbi.get_corpus(corp_id)
+    xc = dbi.get_corpus(corp_id) #
+    # type: XigtCorpus
     xc.sort(key=igt_id_sort)
-    r = Response(xigtxml.dumps(xc), mimetype='text/xml', )
+    r = Response(xigtxml.dumps(xc), mimetype='text/xml')
     r.headers['Content-Disposition'] = "attachment; filename={}.xml".format(dbi._get_name(corp_id))
     return r
 
@@ -202,8 +206,7 @@ def display(corp_id, igt_id):
     # -------------------------------------------
     # Start by getting the IGT instance.
     # -------------------------------------------
-    inst = dbi.get_igt(corp_id, igt_id)
-    assert isinstance(inst, Igt)
+    inst = dbi.get_igt(corp_id, igt_id) # type: Igt
 
     # -------------------------------------------
     # Get the state from the user file.
@@ -236,9 +239,17 @@ def display(corp_id, igt_id):
     content = render_template('element.html', state=state, rt=rt, ct=ct, nt_content=nt_content,
                               igt=inst, igt_id=igt_id, corp_id=corp_id,
                               comment=get_comment(inst), rating=get_rating(inst), reason=get_reason(inst),
-                              pdflink=pdflink, lang=xigt.xigtpath.find(inst, './/dc:subject').text)
+                              pdflink=pdflink,
+                              lang=xigt.xigtpath.find(inst, './/dc:subject').text)
+    response_data = {'content':content}
+    # -------------------------------------------
+    # If the instance already has group2 info,
+    # -------------------------------------------
+    gw_pos = xigt_find(inst, id='gw-pos')
+    if gw_pos and get_intent_method(gw_pos) == 'editor':
+        response_data['group2'] = display_group_2(inst)
 
-    return json.dumps({"content":content})
+    return json.dumps(response_data)
 
 def pdfpath(docid):
     path = os.path.join(PDF_DIR, '{}.pdf'.format(docid))
@@ -324,6 +335,40 @@ def clean(corp_id, igt_id):
                            label_options=LINE_ATTRS,
                            tagfunc=tagfunc)
 
+def get_lines(inst: Igt):
+    try:
+        ll = lang_lines(inst)[0]
+    except NoNormLineException:
+        ll = None
+
+    try:
+        gl = gloss_line(inst)
+    except (NoNormLineException, NoGlossLineException):
+        gl = None
+
+    try:
+        tl = trans_lines(inst)[0]
+    except NoNormLineException:
+        tl = None
+
+    return ll, gl, tl
+
+def clean_tokenization(inst: Igt):
+
+    for tier in [xigt_find(inst, id=id_) for id_ in ['tw', 'gw', 'g', 'm', 'w', 't']]:
+        if tier is not None:
+            inst.remove(tier)
+
+
+def tokenize(inst: Igt):
+    ll, gl, tl = get_lines(inst)
+
+    # Start by creating words:
+    if tl is not None: generate_trans_words(inst)
+    if ll is not None: generate_lang_words(inst)
+    if gl is not None:
+        generate_gloss_words(inst)
+        glosses(inst)
 
 # -------------------------------------------
 # After the user has corrected the normalized tiers,
@@ -339,20 +384,7 @@ def intentify(corp_id, igt_id):
     add_clean_tier(inst, data.get('clean'))
     add_normal_tier(inst, data.get('normal'))
 
-    try:
-        ll = lang_lines(inst)[0]
-    except NoNormLineException:
-        ll = None
-
-    try:
-        gl = gloss_line(inst)
-    except (NoNormLineException, NoGlossLineException):
-        gl = None
-
-    try:
-        tl = trans_lines(inst)[0]
-    except NoNormLineException:
-        tl = None
+    ll, gl, tl = get_lines(inst)
 
     response = {}
 
@@ -398,13 +430,8 @@ def intentify(corp_id, igt_id):
     # DO ENRICHMENT
     # -------------------------------------------
 
-    # Start by creating words:
-    if tl is not None: generate_trans_words(inst)
-    if ll is not None: generate_lang_words(inst)
-    if gl is not None:
-        generate_gloss_words(inst)
-        glosses(inst)
-
+    # Start by creating words/morphs
+    tokenize(inst)
 
     # Add POS tags as necessary
     if tl is not None: tag_trans_pos(inst)
@@ -488,6 +515,8 @@ def display_group_2(inst):
     trans_pos = trans_tag_tier(inst)
 
     tw_gm_aln = get_trans_glosses_alignment(inst)
+    if not tw_gm_aln:
+        tw_gm_aln = []
     gm_lm_aln = get_glosses_morphs_alignment(inst)
 
 
@@ -501,6 +530,7 @@ def display_group_2(inst):
                                    )
 
     return return_html
+
 
 # -------------------------------------------
 # Save a file after changes
@@ -518,7 +548,7 @@ def save(corp_id, igt_id):
 
     # Get the other data
     rating = data.get('rating')
-    reason = data.get('reason')
+    reason = data.get('reason', '')
     comment = data.get('comment', '')
 
     # Set the rating...
@@ -529,23 +559,61 @@ def save(corp_id, igt_id):
     else:
         set_state(user_id, corp_id, igt_id, RAW_STATE)
 
-    tw_gm_aln = data.get('tw_gm_aln')
-    if tw_gm_aln:
-        YGG_LOG.debug("Edited alignment data present")
-        YGG_LOG.debug(tw_gm_aln)
+
 
 
 
     # Retrieve the IGT instance, and swap in the
     # new cleaned and normalized tiers.
-    igt = dbi.get_igt(corp_id, igt_id)
+    igt = dbi.get_igt(corp_id, igt_id) # type: Igt
     igt = replace_lines(igt, clean, norm)
     set_rating(igt, user_id, rating, reason)
+
+
+    # -------------------------------------------
+    # Now, the group 2 stuff.
+    #
+    # If no POS tags are present, skip tokenizing
+    # add adding the other stuff.
+    # -------------------------------------------
+    gw_pos = data.get('gw_pos')
+    tw_pos = data.get('tw_pos')
+
+    clean_tokenization(igt)  # Clean previous tokenization
+
+    if gw_pos or tw_pos:
+        # Ensure that glosses, morphs, words, etc
+        # are present (generated from the norm tier)
+        tokenize(igt)
+
+        # Save alignments
+        tw_gm_aln = data.get('tw_gm_aln')
+        if tw_gm_aln:
+            YGG_LOG.debug("Edited alignment data present")
+            YGG_LOG.debug(tw_gm_aln)
+            tw_tier = xigt_find(igt, id='tw') # type: Tier
+            g_tier = xigt_find(igt, id='g') # type: Tier
+
+            aln_indices = []
+            for tw_id, g_id in tw_gm_aln:
+                tw_index = item_index(xigt_find(tw_tier, id=tw_id))
+                gm_index = item_index(xigt_find(g_tier, id=g_id))
+                aln_indices.append((tw_index, gm_index))
+
+            set_bilingual_alignment(igt, tw_tier, g_tier, aln_indices, 'editor')
+
+        add_pos_tags(igt, 'gw', [pos for w_id, pos in gw_pos], tag_method='editor')
+        add_pos_tags(igt, 'tw', [pos for w_id, pos in tw_pos], tag_method='editor')
+
+
+
+    # -------------------------------------------
+    # Finally, add comments and metadata
+    # -------------------------------------------
 
     # Only add the comment if it is contentful.
     if comment.strip():
         set_comment(igt, user_id, comment)
-
 
     # Add the data provenance to the tier.
     add_editor_metadata(igt)

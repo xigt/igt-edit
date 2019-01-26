@@ -1,0 +1,6 @@
+xigt
+flask
+nltk
+pdfminer.six
+lxml
+nose

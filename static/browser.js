@@ -110,6 +110,12 @@ function displaySuccess(r, stat, jqXHR) {
     stashCleanLines();
     $('.igtrow').removeClass(CURRENT_ROW);
     $('#igtrow-'+igtId()).addClass(CURRENT_ROW);
+
+    // Also display the group2 data right off the
+    // bat if provided
+    if (data['group2']) {
+        intentifySuccess(data);
+    }
 }
 
 /* COMBO FUNCTIONS */
@@ -392,8 +398,8 @@ function intentifySuccess(r, stat, jqXHR) {
 }
 
 function intentifyError() {
-    $('#group-2-content').html('')
-    $('#group-2-content').text("An error occurred producing the remaining tiers.")
+    $('#group-2-content').html('');
+    $('#group-2-content').text("An error occurred producing the remaining tiers.");
 }
 
 /* Edit/Delete Scripts */
@@ -507,7 +513,7 @@ function saveIGT() {
         reason_select = $('#ok-reasons');
     }
 
-    reason_str = null;
+    reason_str = '';
     if (!(reason_select === null)) {
         reason_str = reason_select.find('option:selected').val();
     }
@@ -518,6 +524,10 @@ function saveIGT() {
     if (!(reason_select === null) && !(reason_str)) {
         alert('Please choose a reason for the rating.');
         } else {
+
+        if (typeof(tw_gm_aln) == 'undefined') {
+            tw_gm_aln = [];
+        }
 
         var data = {
             rating: rating,
