@@ -77,60 +77,7 @@
 
         </div>
 
-        {# BEGIN RATING BUTTONS #}
-        <div id="rating-container">
 
-            <div id="buttons-and-reasons">
-
-                {# Buttons #}
-                <div id="rating-buttons">
-                    {{ rating_button('red', True, 'BAD_QUALITY', rating == 3) }}
-                    {{ rating_button('yellow', nt_content, 'OK_QUALITY', rating == 2) }}
-                    {{ rating_button('green', nt_content, 'GOOD_QUALITY', rating == 1) }}
-                </div>
-
-
-
-                {# Rating Reasons #}
-                <div id="rating-reasons">
-                    <select id="bad-reasons" class="rating-reasons" {% if rating != 3 %}style="display:none"{% endif %}>
-                        <option></option>
-                        {% for key in config.BAD_REASONS.keys() %}
-                            <option value="{{ key }}" {% if key == reason %}selected="selected"{% endif %}>{{ config.BAD_REASONS[key] }}</option>
-                        {% endfor %}
-                    </select>
-
-
-                    <select id="ok-reasons" class="rating-reasons" {% if rating != 2 %}style="display:none"{% endif %}>
-                        <option></option>
-                        {% for key in config.OK_REASONS.keys() %}
-                            <option value="{{ key }}" {% if key == reason %}selected="selected"{% endif %}>{{ config.OK_REASONS[key] }}</option>
-                        {% endfor %}
-                    </select>
-
-                    {# Additional Comments #}
-                    <div id="comment-container" {% if rating is none %}style="display:none"{% endif %}>
-                        <input type="button"
-                               id="comment-toggle"
-                               value={% if comment %}"Hide Comment Box"{% else %}"Add Additional Comment"{% endif %}
-                               onclick="toggleCommentBox()"
-                        />
-
-                        <div id="comments" {% if comment is none %}style="display:none"{% endif %}>
-                            <textarea id="freeform-comment">{% if comment is not none %}{{ comment }}{% endif %}</textarea>
-                        </div>
-                    </div>
-
-                </div>
-
-                <input id="submit-instance"
-                       {% if rating is none %}style="display:none"{% endif %}
-                       type="button"
-                       value="Submit Instance"
-                       onclick="saveIGT()"
-                />
-            </div>
-        </div>
 
         <div id="analysis" style="display:none">
             <span id="glw" class="feedback">GLW</span>
@@ -140,9 +87,62 @@
         </div>
         <div style="clear:both"/>
 
-        <div id="group-2-content">
+        <div id="group-2-content"></div>
+         {# BEGIN RATING BUTTONS #}
+            <div id="rating-container">
 
-    </div>
+                <div id="buttons-and-reasons">
+
+                    {# Buttons #}
+                    <div id="rating-buttons">
+                        {{ rating_button('red', True, 'BAD_QUALITY', rating == 3) }}
+                        {{ rating_button('yellow', nt_content, 'OK_QUALITY', rating == 2) }}
+                        {{ rating_button('green', nt_content, 'GOOD_QUALITY', rating == 1) }}
+                    </div>
+
+
+
+                    {# Rating Reasons #}
+                    <div id="rating-reasons">
+                        <select id="bad-reasons" class="rating-reasons" {% if rating != 3 %}style="display:none"{% endif %}>
+                            <option></option>
+                            {% for key in config.BAD_REASONS.keys() %}
+                                <option value="{{ key }}" {% if key == reason %}selected="selected"{% endif %}>{{ config.BAD_REASONS[key] }}</option>
+                            {% endfor %}
+                        </select>
+
+
+                        <select id="ok-reasons" class="rating-reasons" {% if rating != 2 %}style="display:none"{% endif %}>
+                            <option></option>
+                            {% for key in config.OK_REASONS.keys() %}
+                                <option value="{{ key }}" {% if key == reason %}selected="selected"{% endif %}>{{ config.OK_REASONS[key] }}</option>
+                            {% endfor %}
+                        </select>
+
+                        {# Additional Comments #}
+                        <div id="comment-container" {% if rating is none %}style="display:none"{% endif %}>
+                            <input type="button"
+                                   id="comment-toggle"
+                                   value={% if comment %}"Hide Comment Box"{% else %}"Add Additional Comment"{% endif %}
+                                   onclick="toggleCommentBox()"
+                            />
+
+                            <div id="comments" {% if comment is none %}style="display:none"{% endif %}>
+                                <textarea id="freeform-comment">{% if comment is not none %}{{ comment }}{% endif %}</textarea>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <input id="submit-instance"
+                           {% if rating is none %}style="display:none"{% endif %}
+                           type="button"
+                           value="Submit Instance"
+                           onclick="saveIGT()"
+                    />
+                </div>
+            </div>
+
 
     </div>
 
