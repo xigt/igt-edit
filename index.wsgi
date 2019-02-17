@@ -355,7 +355,7 @@ def get_lines(inst: Igt):
 
 def clean_tokenization(inst: Igt):
 
-    for tier in [xigt_find(inst, id=id_) for id_ in ['tw', 'gw', 'g', 'm', 'w', 't']]:
+    for tier in [xigt_find(inst, id=id_) for id_ in ['tw', 'gw', 'g', 'm', 'w', 't', 'p']]:
         if tier is not None:
             inst.remove(tier)
 
